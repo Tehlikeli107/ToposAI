@@ -69,6 +69,8 @@ def run_sparse_simplicial_experiment():
         required_ram_tb = (N**3 * 4) / (1024**4)
         print(f"Gereken Teorik RAM: {required_ram_tb:,.2f} Terabayt! (Dünyada böyle bir bilgisayar yok).")
         print(f"🚨 [TEORİK ÇÖKÜŞ SİMÜLASYONU]: İşlem donanım sınırlarını aştığı için reddedildi (OOM).\n")
+    except Exception as e:
+        print(f"Hata Yakalandı: {e}")
 
     # 2. TOPOS AI (SPARSE SIMPLEX) DENEMESİ
     print("--- 2. TOPOS AI (SPARSE TENSOR) DENEMESİ ---")
