@@ -1,58 +1,66 @@
-# ToposAI: Neuro-Symbolic Reasoning Engine 🧠✨
+# ToposAI: Experimental Explorations in Neuro-Symbolic AI & Category Theory
 
-ToposAI is a next-generation **"Reasoning Framework"** that overcomes the chronic bottlenecks of modern Deep Learning models—such as **Hallucination**, **Context Window Limits (OOM)**, and **Rote Memorization (Dot-Product statistics)**—by leveraging the power of **Category Theory** and **Formal Logic (Lukasiewicz MV-Algebra)**.
+[![ToposAI CI](https://github.com/Tehlikeli107/ToposAI/actions/workflows/ci.yml/badge.svg)](https://github.com/Tehlikeli107/ToposAI/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## 🚀 The Vision
-Standard LLMs (like GPT or LLaMA) average probabilities and hallucinate when faced with contradictions. Instead, ToposAI:
-1. **Isolates probabilities into contradictory universes (Local Topoi)**
-2. **Fuses intersecting truths safely (Sheaf Gluing)**
-3. **Transfers cross-disciplinary solutions for zero-shot inventions (Adjoint Functors)**
-4. **Eliminates vector embeddings (Zero-Embedding via Yoneda Lemma)**
-5. **Expands its own dimensionality during logical deadlocks (Self-Modifying / 2-Category Theory)**
-6. **Processes infinite-context logical chains with O(1) VRAM overhead (FlashTopos Triton Kernel)**
+**ToposAI** is an experimental open-source research framework aiming to bridge the gap between Continuous Deep Learning (PyTorch) and Formal Category Theory (Topos, Lukasiewicz Logic, Yoneda Lemma).
 
-## 🛠️ Repository Contents
-This repository contains 11 independent, highly experimental (Proof of Concept) Python scripts demonstrating category theory in AI, alongside the installable **ToposAI Framework**:
+While modern LLMs operate purely on statistical dot-products (frequently suffering from hallucination in long-horizon reasoning), this project investigates whether **Logical Truth Values** and **Morphism Computations** can be successfully embedded into neural architectures.
 
-1. **`topos_llm.py`**: Lukasiewicz Logical Attention (Replaces Dot-Product).
-2. **`topos_syllogism.py`**: Formal Logical Transitivity / Syllogism Proof.
-3. **`topos_multi_universe.py`**: The Hallucination Firewall isolating contradictory universes.
-4. **`topos_sheaf_gluing.py`**: Detective Engine / Consensus via Sheaf Condition.
-5. **`topos_functor_analogy.py`**: Zero-word Analogy Engine using Structural Isomorphism.
-6. **`yoneda_lemma_model.py`**: Zero-Vector / Zero-Embedding Language Model.
-7. **`self_modifying_ai.py`**: AI that expands its ontology during paradoxes (Invention via Natural Transformations).
-8. **`topos_smart_contract_auditor.py`**: Formal Verification Auditor finding reentrancy loops topologically.
-9. **`flash_topos_fixed.py`**: Hardware-level C++/Triton MUTA Kernel smashing PyTorch's OOM limits.
-10. **`topos_transformer.py`**: The world's first end-to-end trainable Multi-Universe Topos Transformer.
-11. **`adjoint_functor_invention.py`**: Cross-Domain Invention Engine (Biology & Cybersecurity).
-12. **`topos_ai/`**: The packaged, pip-installable Professional Python Framework combining all above.
+---
+
+## 🎯 Research Scope and Key Implementations
+
+This repository serves as both a pip-installable framework (`topos_ai`) and a collection of 15+ proof-of-concept scripts validating category theory theorems on tensor operations:
+
+1. **Logical Attention via Lukasiewicz MV-Algebra (`topos_ai.math`)**
+   Replaces $Q \cdot K^T$ with differentiable implication: $\min(1, 1 - Q + K)$.
+2. **O(1) VRAM Logical Scaling (`topos_ai.kernels.flash_topos`)**
+   A custom C++/Triton kernel (`flash_topos_fixed.py`) performing $O(N^2)$ Lukasiewicz composition directly in SRAM, bypassing PyTorch's $O(N^2 \cdot D)$ memory explosion for long-context reasoning.
+3. **Zero-Embedding Language Modeling (`topos_ai.nn.YonedaEmbedding`)**
+   Eliminating traditional `nn.Embedding(vocab_size, dim)`. The meaning of a token is dynamically computed strictly via its morphisms to the rest of the vocabulary ($X \cong \text{Hom}(-, X)$).
+4. **Sheaf Gluing Consensus (`topos_multi_agent_swarm.py`)**
+   Mathematical resolution of conflicting local truths (Multi-Agent Swarm) without statistical averaging.
+
+## ⚠️ Limitations & Honest Positioning
+
+As an early-stage research repository, ToposAI has notable limitations that must be acknowledged:
+
+*   **Accuracy Drops in Dense Retrieval (`benchmark_sota.py`):** In large-scale vector similarity tests ($N=1M$), ToposAI’s "Hard Routing" tree search achieves significantly lower recall (~10-25%) compared to SOTA FAISS/HNSW models. Future implementation of Soft/Beam-Search tree routing is required to make this competitive.
+*   **Autoregressive Syllogism Failures (`topos_syllogism_test.py`):** When acting as a pure next-token predictor, the model still falls victim to training distribution memorization (e.g., predicting 'aslan' instead of structurally inferred 'vahşi'). True zero-shot formal verification requires topological path finding (`calculate_transitive_closure`) rather than autoregressive generation.
+*   **Thought Experiments vs. Production Code:** Scripts such as `godel_incompleteness_engine.py` and `hofstadter_topoi_sentience.py` are heavily narrative-driven *simulations* rather than production-ready AI layers. They serve to mathematically demonstrate concepts like Limit Cycles and Self-Reference but are not integrated into the main `ToposTransformer` yet.
 
 ## ⚙️ Installation
+
+ToposAI is fully compatible with standard PyTorch workflows.
+
 ```bash
+pip install pytest networkx matplotlib triton
 pip install -e .
 ```
 
 ## 🔬 Quick Start
+
 ```python
 import torch
 import topos_ai
 
-# Use the world's most advanced GPU Topos Kernel (FlashTopos):
+# Use the SRAM-optimized FlashTopos Kernel:
 Q = torch.rand(1, 4096, 64).cuda()
 K = torch.rand(1, 4096, 64).cuda()
 
-# O(1) Memory logical composition in milliseconds
+# Exact logical composition in milliseconds
 attention_matrix = topos_ai.kernels.flash_topos_attention(Q, K)
 
-# Consensus engine using Sheaf Gluing
+# Consensus engine using Sheaf Condition
 is_compatible, global_truth = topos_ai.math.sheaf_gluing(Universe_A, Universe_B)
+
+# Using Zero-Embedding ToposTransformer
+model = topos_ai.models.ToposTransformer(vocab_size=50000)
 ```
 
-## 🌌 The Ultimate Horizon: Towards AGI & Automated Theorem Proving
-ToposAI is not just a text generator; it is the foundational architecture for a **Neuro-Symbolic Artificial General Intelligence (AGI)**. Our ongoing and future research directions include:
+## 🌌 Future Work (The Ultimate Horizon)
+*   **Integration with Lean 4:** Leveraging the *Curry-Howard-Lambek correspondence* to train ToposAI as a formal Automated Theorem Prover on `Mathlib4`.
+*   **$\infty$-Topoi and Homotopy Type Theory (HoTT):** Extending the concept bender (`hott_concept_bender.py`) from discrete logits to continuous geometric manifolds for scientific discovery (e.g., Quantum Chemistry).
 
-*   **Integration with Lean 4 (Automated Theorem Proving):** Based on the *Curry-Howard-Lambek correspondence*, ToposAI's logical composition (`lukasiewicz_composition`) naturally aligns with formal proof states. We aim to train ToposAI on Lean 4 `Mathlib4` to create an AI that doesn't just guess tactics, but mathematically *proves* them with zero hallucinations.
-*   **Higher-Order Categories (n-Categories & HoTT):** Moving beyond 2-Categories (where the AI modifies its own dimensions), we are exploring 3-Categories (where the AI dynamically rewrites its own Loss Function and learning paradigm) and Homotopy Type Theory ($\infty$-Topoi) to understand the continuous geometric deformations between concepts.
-*   **Grothendieck Topoi for Scientific Discovery:** Applying topological sheaf gluing to continuous spaces like Quantum Chemistry and Protein Folding (AlphaFold alternatives) based purely on geometric consensus.
-
-**Note:** This project is a highly experimental architecture pushing the boundaries of AI research. Contributions, mathematical critiques, and engineering PRs are warmly welcomed.
+*Contributions, mathematical critiques, and pull requests are highly welcomed. The path to AGI requires rigorous, formal logic.*
