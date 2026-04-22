@@ -80,6 +80,8 @@ class ToposTransformer(nn.Module):
         cosine_sim = torch.matmul(x_normalized, vocab_normalized) 
         
         # Topolojik Ulaşılabilirlik (Reachability) Skoru: [0.0, 1.0]
+        # Floating point hataları yüzünden -0.00001 veya 1.000001 olmasını engelle (BCELoss CUDA Assert)
         reachability_logits = (cosine_sim + 1.0) / 2.0
+        reachability_logits = torch.clamp(reachability_logits, min=1e-6, max=1.0 - 1e-6)
         
         return reachability_logits, new_kv_caches

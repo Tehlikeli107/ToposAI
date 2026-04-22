@@ -91,12 +91,13 @@ def train():
 
     optimizer = optim.AdamW(model.parameters(), lr=5e-4, weight_decay=0.01)
 
-    # [CROSS ENTROPY WITH TOPOS REACHABILITY]
-    # Kategori Teorisi ulaştığı olasılıkları [0, 1] arasında verir.
-    # Modelin kelime dağarcığı üzerinden gerçek bir olasılık dağılımı (Distribution) 
-    # öğrenebilmesi için, bu reachability skorlarını bir sıcaklık (Temperature) ile 
-    # çarpıp CrossEntropyLoss'a veriyoruz. Aksi halde MSELoss modeli "her şeye 0 de" tuzağına iter.
-    criterion = nn.CrossEntropyLoss()
+    # [PURE TOPOLOGICAL LOSS (NO ZERO-SUM GAMES)]
+    # Klasik CrossEntropyLoss, "Kral" kelimesini doğru sayıp "Adam" kelimesini
+    # zorla sıfırlar (Softmax yüzünden olasılıklar toplamı 1.0 olmak zorundadır).
+    # ToposAI'da (Kategori Teorisinde) her varlığa ulaşılabilirlik BAĞIMSIZDIR [0, 1].
+    # Bu yüzden sistemi BCELoss (Binary Cross Entropy) ile eğitiyoruz. 
+    # Hiçbir kelimenin olasılığı diğerini ezmez, 15.0 gibi hileli çarpanlar (Scale) kullanılmaz.
+    criterion = nn.BCELoss()
 
     # 4. EĞİTİM (PRETRAINING) DÖNGÜSÜ
     max_iters = 1000 # Makinenin dili temel düzeyde kavraması için yeterli
@@ -108,13 +109,13 @@ def train():
     for iter_num in range(1, max_iters + 1):
         X, Y = next(batch_iter)
         
-        reachability_logits, _ = model(X) # [B, SeqLen, vocab_size]
+        reachability_logits, _ = model(X) # [B, SeqLen, vocab_size] (Saf [0, 1] arası Topos skorları)
         
-        # Reachability skorlarını Logits (Ham Skor) seviyesine çek
-        # (Çünkü CrossEntropyLoss softmax'i kendisi yapar)
-        scaled_logits = reachability_logits * 15.0 
+        # Hedefi (Y) "One-Hot" forma çevir ki [B, SeqLen, vocab_size] olsun.
+        Y_one_hot = torch.nn.functional.one_hot(Y, num_classes=vocab_size).float()
         
-        loss = criterion(scaled_logits.view(-1, vocab_size), Y.view(-1))
+        # Her kelimenin kendi [0, 1] ulaşılabilirliğini bağımsız olarak cezalandır.
+        loss = criterion(reachability_logits.view(-1, vocab_size), Y_one_hot.view(-1, vocab_size))
         
         optimizer.zero_grad()
         loss.backward()
