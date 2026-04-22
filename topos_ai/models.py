@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .nn import MultiUniverseToposAttention, YonedaEmbedding, TopologicalFFN, TopologicalNorm, precompute_freqs_cis
+from .nn import MultiUniverseToposAttention, YonedaEmbedding, TopologicalLinear, TopologicalFFN, TopologicalNorm, precompute_freqs_cis
 
 class ToposTransformerBlock(nn.Module):
     def __init__(self, d_model, num_universes):
@@ -35,7 +35,7 @@ class ToposTransformer(nn.Module):
     def __init__(self, vocab_size, d_model=64, num_universes=4, num_layers=2, max_seq_len=2048):
         super().__init__()
         self.yoneda_emb = YonedaEmbedding(vocab_size)
-        self.yoneda_proj = nn.Linear(vocab_size, d_model, bias=False)
+        self.yoneda_proj = TopologicalLinear(vocab_size, d_model, bias=False)
         
         self.freqs_cis = precompute_freqs_cis(d_model // num_universes, max_seq_len * 2)
         
@@ -51,8 +51,11 @@ class ToposTransformer(nn.Module):
         freqs_cis = self.freqs_cis[:SeqLen].to(x.device)
         
         if SeqLen > 1:
+            # [PURE TOPOLOGICAL TIME ARROW (Asymmetric Monoid)]
+            # Klasik maskeleme geleceği '-inf' ile doldurur ve softmax ile ezer.
+            # Kategori Teorisinde ok ya vardır (1.0) ya yoktur (0.0).
             mask = torch.tril(torch.ones(SeqLen, SeqLen, device=idx.device)).view(1, 1, SeqLen, SeqLen)
-            mask = torch.where(mask == 0, float('-inf'), 0.0) 
+            # 0.0 olan yerler gelecektir. Çarpım anında (truth_matrix * mask) sıfırlanırlar.
         else:
             mask = None
             
@@ -65,12 +68,9 @@ class ToposTransformer(nn.Module):
         x_norm = self.norm(x) # [B, SeqLen, d_model]
         
         # [PURE TOPOLOGICAL PROJECTION]
-        # Klasik bir nn.Linear (fc_out) yerine, modelin geldiği son nokta (x_norm) ile
-        # tüm kelimelerin (vocab) Kategori Uzayındaki (Yoneda_Proj) yönlerini kıyaslarız.
-        # Cosine Similarity: -1 ile 1 arasındadır. Biz bunu (x + 1)/2 ile [0, 1] arasına (Topos) çekeriz.
-        
-        # Kelimelerin projeksiyon matrisindeki yerleri: [vocab_size, d_model]
-        vocab_embeddings = self.yoneda_proj.weight # [d_model, vocab_size]
+        # Kosinüs benzerliği için, projeksiyonun arkasındaki o saf (0 ile 1 arasına sıkıştırılmış)
+        # ağırlıkları çekmemiz gerekiyor. TopologicalLinear'ın asıl pozitif ağırlıkları:
+        vocab_embeddings = torch.sigmoid(self.yoneda_proj.weight_raw) # [d_model, vocab_size]
         
         # L2 Normalize
         x_normalized = F.normalize(x_norm, p=2, dim=-1) # [B, SeqLen, d_model]
