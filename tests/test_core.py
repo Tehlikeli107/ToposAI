@@ -21,16 +21,16 @@ def test_flash_topos_attention_matches_pytorch_baseline():
     out_triton = flash_topos_attention(Q, K)
     
     # 2. PyTorch Baseline (Lukasiewicz Mantığı) Çıktısı
-    Q_exp = Q.unsqueeze(3) # [B, M, K_dim, 1]
-    K_exp = K.unsqueeze(2) # [B, 1, K_dim, N]
+    Q_exp = Q.unsqueeze(2) # [B, M, 1, K_dim]
+    K_exp = K.unsqueeze(1) # [B, 1, N, K_dim]
     
     # min(1, 1 - Q + K) (Lukasiewicz Implication)
     impl = torch.clamp(1.0 - Q_exp + K_exp, max=1.0)
     
-    # Boyut üzerinden ortalama al (Conjunction)
-    out_torch = impl.mean(dim=2) # [B, M, N]
+    # Boyut (K_dim) üzerinden ortalama al (Conjunction)
+    out_torch = impl.mean(dim=-1) # [B, M, N]
     
-    # 3. Kıyaslama (Tolerance < 1e-4)
+    # 3. Kıyaslama (Tolerance < 1e-3)
     # Triton'un SRAM'de yaptığı hesapla, PyTorch'un VRAM'de yaptığı hesap eşleşmeli
     torch.testing.assert_close(out_triton, out_torch, rtol=1e-3, atol=1e-3)
 
