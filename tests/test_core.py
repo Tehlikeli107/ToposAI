@@ -14,25 +14,35 @@ def test_flash_topos_attention_matches_pytorch_baseline():
     B, M, K_dim, N = 2, 64, 32, 64
     
     # Kuantize (0-1 arası) mantıksal girdiler
-    Q = torch.rand(B, M, K_dim, device='cuda')
-    K = torch.rand(B, N, K_dim, device='cuda')
+    Q = torch.rand(B, M, K_dim, device='cuda', requires_grad=True)
+    K = torch.rand(B, N, K_dim, device='cuda', requires_grad=True)
+    
+    Q_ref = Q.clone().detach().requires_grad_(True)
+    K_ref = K.clone().detach().requires_grad_(True)
     
     # 1. Triton Kernel Çıktısı
     out_triton = flash_topos_attention(Q, K)
+    loss_triton = out_triton.sum()
+    loss_triton.backward()
     
     # 2. PyTorch Baseline (Lukasiewicz Mantığı) Çıktısı
-    Q_exp = Q.unsqueeze(2) # [B, M, 1, K_dim]
-    K_exp = K.unsqueeze(1) # [B, 1, N, K_dim]
+    Q_exp = Q_ref.unsqueeze(2) # [B, M, 1, K_dim]
+    K_exp = K_ref.unsqueeze(1) # [B, 1, N, K_dim]
     
     # min(1, 1 - Q + K) (Lukasiewicz Implication)
-    impl = torch.clamp(1.0 - Q_exp + K_exp, max=1.0)
+    impl = torch.clamp(1.0 - Q_exp + K_exp, min=0.0, max=1.0)
     
     # Boyut (K_dim) üzerinden ortalama al (Conjunction)
     out_torch = impl.mean(dim=-1) # [B, M, N]
+    loss_torch = out_torch.sum()
+    loss_torch.backward()
     
     # 3. Kıyaslama (Tolerance < 1e-3)
-    # Triton'un SRAM'de yaptığı hesapla, PyTorch'un VRAM'de yaptığı hesap eşleşmeli
     torch.testing.assert_close(out_triton, out_torch, rtol=1e-3, atol=1e-3)
+    
+    # 4. Backward Pass Kıyaslaması (OOM-free Gradient check)
+    torch.testing.assert_close(Q.grad, Q_ref.grad, rtol=1e-2, atol=1e-2)
+    torch.testing.assert_close(K.grad, K_ref.grad, rtol=1e-2, atol=1e-2)
 
 def test_sheaf_gluing_consistency():
     """Sheaf (Demet) birleştirme kuralının mantıksal sınırlarını test eder."""
