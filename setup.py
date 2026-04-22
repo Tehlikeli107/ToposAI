@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="topos_ai",
-    version="0.1.4",
+    version="1.0.0",
     description="Kategori Teorisi ve Topos Mantığı Tabanlı Neuro-Symbolic Yapay Zeka Framework'ü",
     author="Topos AI Architect",
     packages=find_packages(),

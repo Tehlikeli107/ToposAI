@@ -1,4 +1,4 @@
-__version__ = "0.2.0"
+__version__ = "1.0.0"
 __author__ = "Topos AI Architect"
 
 import logging
@@ -12,3 +12,5 @@ from . import generation
 from . import topology
 from . import reasoning
 from . import verification
+from . import tokenization
+from . import distributed
