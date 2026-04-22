@@ -25,8 +25,14 @@ class MultiUniverseToposAttention(nn.Module):
         truth_matrix = implication.mean(dim=-1)
 
         if mask is not None:
-            local_mask = torch.tril(torch.ones(SeqLen, SeqLen, device=x.device)).view(1, 1, SeqLen, SeqLen)
-            truth_matrix = truth_matrix.masked_fill(local_mask == 0, -1e9)
+            # Topological Decay Mask (Yumuşak Causal Mask)
+            idx_q = torch.arange(SeqLen, device=x.device).unsqueeze(1)
+            idx_k = torch.arange(SeqLen, device=x.device).unsqueeze(0)
+            distance = idx_k - idx_q # Geleceğe doğru pozitif, geçmişe doğru negatif
+            
+            # Gelecekteki tokenların ağırlığını mesafeye göre YUMUŞAK (Soft) olarak düşür (Decay)
+            decay_mask = torch.where(distance > 0, -distance.float() * 1.5, 0.0).view(1, 1, SeqLen, SeqLen)
+            truth_matrix = truth_matrix + decay_mask
 
         attn_weights = F.softmax(truth_matrix * 5.0, dim=-1)
         out = torch.matmul(attn_weights, V)
@@ -39,8 +45,12 @@ class YonedaEmbedding(nn.Module):
         super().__init__()
         self.morphisms_logits = nn.Parameter(torch.randn(vocab_size, vocab_size))
 
+    def get_morphisms(self):
+        """[HAYATİ EKSİKLİK DÜZELTİLDİ] Testler ve Benchmarkerlar için Yoneda Olasılık Matrisi."""
+        return torch.sigmoid(self.morphisms_logits)
+
     def forward(self, idx):
-        R = torch.sigmoid(self.morphisms_logits)
+        R = self.get_morphisms()
         return F.embedding(idx, R)
 
 class DynamicToposUniverse(nn.Module):

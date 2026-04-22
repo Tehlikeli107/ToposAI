@@ -126,7 +126,7 @@ def run_scale_experiment():
     print(" BİLİMSEL KANIT 5: MASSIVE SCALE REAL-WORLD ONTOLOGY (BIG DATA) ")
     print(" İddia: ToposAI, 16.000 kelimelik devasa bir gerçek dünya haritasını")
     print(" (17 Terabayt RAM gerektiren işlemi) 'Tropical Semiring' kerneli ile")
-    print(" GPU üzerinde sıfır çökme ile milisaniyeler içinde çözer.")
+    print(" GPU üzerinde sıfır çökme ile (O(1) VRAM) dakikalar içinde çözer.")
     print("=========================================================================\n")
     
     if not torch.cuda.is_available():

@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from .nn import MultiUniverseToposAttention
+from .nn import MultiUniverseToposAttention, YonedaEmbedding
 
 class ToposTransformerBlock(nn.Module):
     def __init__(self, d_model, num_universes):
@@ -18,10 +18,15 @@ class ToposTransformerBlock(nn.Module):
         return x
 
 class ToposTransformer(nn.Module):
-    """Uçtan uca eğitilebilir, Dot-Product içermeyen tam donanımlı Topos Dil Modeli."""
+    """
+    Uçtan uca eğitilebilir, Dot-Product içermeyen tam donanımlı Topos Dil Modeli.
+    (Sabit Embedding yerine Yoneda Morphisms kullanır).
+    """
     def __init__(self, vocab_size, d_model=64, num_universes=4, num_layers=2):
         super().__init__()
-        self.token_emb = nn.Embedding(vocab_size, d_model)
+        self.yoneda_emb = YonedaEmbedding(vocab_size)
+        self.yoneda_proj = nn.Linear(vocab_size, d_model)
+        
         self.pos_emb = nn.Embedding(512, d_model)
         self.blocks = nn.ModuleList([ToposTransformerBlock(d_model, num_universes) for _ in range(num_layers)])
         self.norm = nn.LayerNorm(d_model)
@@ -30,7 +35,9 @@ class ToposTransformer(nn.Module):
     def forward(self, idx):
         B, SeqLen = idx.shape
         pos = torch.arange(0, SeqLen, device=idx.device).unsqueeze(0)
-        x = self.token_emb(idx) + self.pos_emb(pos)
+        
+        yoneda_repr = self.yoneda_emb(idx)
+        x = self.yoneda_proj(yoneda_repr) + self.pos_emb(pos)
         
         # Geleceği Görme Engeli
         mask = torch.tril(torch.ones(SeqLen, SeqLen, device=idx.device)).view(1, 1, SeqLen, SeqLen)

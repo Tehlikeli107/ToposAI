@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import torch
 import yfinance as yf
 import pandas as pd
@@ -8,7 +11,7 @@ import numpy as np
 # Evren: GERÇEK Amerikan Borsası (S&P 500) Son 1 Yıllık Kapanış Verileri.
 # Yapay Zeka, şirketlerin fiyat hareketlerinden bir "Risk Topolojisi" kurar.
 # Transitive Closure ile, bir şirkette başlayan şokun (Krizin) dalga dalga 
-# hangi sektörlere sıçrayacağını matematiksel olarak (%100 Kanıtlı) hesaplar.
+# hangi sektörlere sıçrayacağını Topolojik Risk Skoru ile hesaplar.
 # =====================================================================
 
 def lukasiewicz_composition(R1, R2):

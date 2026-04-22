@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import torch
 import requests
 import time
@@ -70,7 +73,7 @@ def run_wikidata_knowledge_discovery():
     print(" BİLİMSEL KANIT 4: WIKIDATA ÜZERİNDE MULTI-HOP KNOWLEDGE DISCOVERY")
     print(" Klasik YZ, internette 'A ilacı C semptomuna iyi gelir' cümlesini arar.")
     print(" ToposAI ise dağınık verileri birleştirerek 'A -> B' ve 'B -> C' üzerinden")
-    print(" A'nın C'ye iyi geldiğini Matematiksel olarak KENDİ KENDİNE İCAT EDER.")
+    print(" A'nın C'ye iyi geldiğini Matematiksel olarak Topolojik Bir Sentez (Heuristic) şeklinde İCAT EDER.")
     print("=========================================================================\n")
 
     fetched_data = fetch_wikidata_medical_knowledge()
