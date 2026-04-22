@@ -139,9 +139,9 @@ def evaluate_models_on_real_data():
     
     print("=========================================================================")
     print(" NLTK WORDNET (GERÇEK DÜNYA) BENCHMARK: YONEDA VS DOT-PRODUCT")
-    print(" İddia: Sentetik oyuncak veri kullanmıyoruz. Princeton WordNet üzerindeki")
-    print(" binlerce saatlik insan emeğiyle çıkarılmış dil ağacında,")
-    print(" Topos (Yoneda) mantığının Klasik YZ'yi nasıl ezeceğini kanıtlıyoruz.")
+    print(" Araştırma Sorusu: Princeton WordNet üzerindeki gerçek hiyerarşik")
+    print(" dil ağacında, Topos (Yoneda) mantığının geçişlilik (Transitivity) ve")
+    print(" yön (Asymmetry) konusunda Dot-Product'a kıyasla avantajları nelerdir?")
     print("=========================================================================\n")
     
     models_to_test = {

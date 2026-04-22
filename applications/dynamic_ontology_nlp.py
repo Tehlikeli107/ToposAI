@@ -55,7 +55,7 @@ def test_dynamic_ontology():
         R[e_idx[subj], e_idx[obj]] = 1.0 # Metinden okunan bilgi "Kesin Doğru" kabul edilir
         
     # 4. TRANSTIVE CLOSURE (Metinde yazmayan mantıksal zincirleri bul)
-    R_inf = calculate_transitive_closure(R)
+    R_inf = transitive_closure(R)
     
     print("\n--- SIFIR-EZBER ÇIKARIM TESTİ (RAG VS TOPOS) ---")
     print("Normal LLM 'Alice veriyi çaldı mı?' sorusunu ezberden veya Cosine Similarity ile arar.")

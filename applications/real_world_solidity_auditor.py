@@ -67,7 +67,7 @@ def analyze_contract(contract_name, solidity_code):
         
     # 2. TRANSITIVE CLOSURE (KODUN SONSUZ OLASILIK HARİTASI)
     # Kod sonsuza kadar çalışırsa hangi satır hangi satırı tetikleyebilir?
-    R_inf = calculate_transitive_closure(R, max_steps=N)
+    R_inf = transitive_closure(R, max_steps=N)
     
     # 3. GÜVENLİK AÇIĞI KANITI (FORMAL VERIFICATION)
     print("\n[TOPOSAI MATEMATİKSEL DENETİM]:")

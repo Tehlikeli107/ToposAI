@@ -6,7 +6,8 @@ import os
 # ToposAI Modüllerini İçeri Aktar
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from real_world_medical_fact_checker import MedicalToposEngine
-from real_world_solidity_auditor import SolidityToToposParser, calculate_transitive_closure
+from real_world_solidity_auditor import SolidityToToposParser
+from topos_ai.math import transitive_closure
 
 # =====================================================================
 # TOPOS AI: NEURO-SYMBOLIC REASONING DASHBOARD (UI)
