@@ -48,4 +48,11 @@ attention_matrix = topos_ai.kernels.flash_topos_attention(Q, K)
 is_compatible, global_truth = topos_ai.math.sheaf_gluing(Universe_A, Universe_B)
 ```
 
-**Note:** This project is a highly experimental architecture pushing the boundaries of AI research towards System-2 Reasoning and Neuro-Symbolic AGI.
+## 🌌 The Ultimate Horizon: Towards AGI & Automated Theorem Proving
+ToposAI is not just a text generator; it is the foundational architecture for a **Neuro-Symbolic Artificial General Intelligence (AGI)**. Our ongoing and future research directions include:
+
+*   **Integration with Lean 4 (Automated Theorem Proving):** Based on the *Curry-Howard-Lambek correspondence*, ToposAI's logical composition (`lukasiewicz_composition`) naturally aligns with formal proof states. We aim to train ToposAI on Lean 4 `Mathlib4` to create an AI that doesn't just guess tactics, but mathematically *proves* them with zero hallucinations.
+*   **Higher-Order Categories (n-Categories & HoTT):** Moving beyond 2-Categories (where the AI modifies its own dimensions), we are exploring 3-Categories (where the AI dynamically rewrites its own Loss Function and learning paradigm) and Homotopy Type Theory ($\infty$-Topoi) to understand the continuous geometric deformations between concepts.
+*   **Grothendieck Topoi for Scientific Discovery:** Applying topological sheaf gluing to continuous spaces like Quantum Chemistry and Protein Folding (AlphaFold alternatives) based purely on geometric consensus.
+
+**Note:** This project is a highly experimental architecture pushing the boundaries of AI research. Contributions, mathematical critiques, and engineering PRs are warmly welcomed.
