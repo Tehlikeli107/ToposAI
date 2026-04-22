@@ -72,33 +72,37 @@ def run_hf_integration_experiment():
     
     print(f"\n[PROMPT]: '{prompt}'")
     
+    # Modelin attention_mask beklentisini susturmak için maskeyi elle üretiyoruz
+    attention_mask = torch.ones(input_ids.shape, dtype=torch.long)
+    
     # 1. STANDART GPT-2 (TOPOİSİZ / KLASİK LLM)
     print("\n==== 1. STANDART LLM (GPT-2) ÜRETİMİ ====")
     # Rastgeleliğe izin vermeden (Greedy Search) modelin en çok "İstediği" şeyi görelim.
-    outputs = model.generate(input_ids, max_new_tokens=1, do_sample=False, pad_token_id=tokenizer.eos_token_id)
+    outputs = model.generate(
+        input_ids, 
+        attention_mask=attention_mask,
+        max_new_tokens=1, 
+        do_sample=False, 
+        pad_token_id=tokenizer.eos_token_id
+    )
     raw_prediction = tokenizer.decode(outputs[0][-1])
     print(f"  Modelin (İstatistiksel) Tahmini: '{raw_prediction}'")
     
-    # GPT-2 genelde "water" vb diyebilir. Doktor Aspirin verdi, asla SU içme diyecek kadar halüsinasyon görebilir!
-    
     # 2. TOPOS ADAPTER (KATEGORİ TEORİSİ İLE SINIRLANDIRILMIŞ GPT-2)
     print("\n==== 2. TOPOS-CONSTRAINED LLM (NEURO-SYMBOLIC) ====")
-    print("Topos Ontolojisi Diyor ki: 'drink' kelimesinden sonra Aspirin evreninde 'water' YASAKTIR (0.0).")
-    print("Ancak 'alcohol' (alkol) kelimesine izin verilir (Tehlike uyarısı yapmak için).")
+    print("Topos Ontolojisi Diyor ki: 'drink' kelimesinden sonra Aspirin evreninde 'water', 'it', 'anything' YASAKTIR (0.0).")
+    print("Ancak 'alcohol' (alkol) kelimesine veya zararlı diğer şeylere uyarı amacıyla izin verilir.")
     
-    # Kategori Matrisindeki Yasaklı (Morfizması 0.0 olan) Oklar
-    # Eğer son kelime " drink" ise, bir sonraki kelime " water", " it" vb. OLAMAZ.
     banned_topos_rules = {
-        " drink": [" water", " milk", " juice", " coffee", " it", " anything", " too"] # Su, Süt, vs yasak.
+        " drink": [" water", " milk", " juice", " coffee", " it", " anything", " too"] # Yasaklı mantıksız/tehlikeli tamamlamalar
     }
     
-    # Topos Filteresini LLM'e Tak (Monkey-Patch / Logits Processor)
     topos_processor = ToposLogitsProcessor(tokenizer, banned_topos_rules)
     logits_processors = LogitsProcessorList([topos_processor])
     
-    # Modeli Topos Filtresiyle Birlikte Çalıştır
     outputs_topos = model.generate(
         input_ids, 
+        attention_mask=attention_mask,
         max_new_tokens=1, 
         do_sample=False, 
         logits_processor=logits_processors,
@@ -110,11 +114,10 @@ def run_hf_integration_experiment():
     
     print("[BİLİMSEL SONUÇ: KANITLANDI]")
     print(f"Standart LLM, internetteki kelime frekanslarına güvenerek (Cosine Similarity)")
-    print(f"cümleyi '{raw_prediction}' ile tamamlamaya çalıştı (Tıbbi Halüsinasyon).")
-    print(f"Ancak bizim ToposAI HuggingFace Adaptörümüz, o kelimelerin Kategori Evrenindeki")
-    print(f"matrisini (Reachability) kontrol etti. '{raw_prediction}' kelimesinin yasaklı (0.0)")
-    print(f"olduğunu gördü ve logitini -Sonsuza çekti. Model, matematiksel olarak")
-    print(f"en mantıklı ve güvenli seçenek olan '{topos_prediction}' kelimesine yönlendirildi.")
+    print(f"cümleyi '{raw_prediction}' ile tamamlamaya çalıştı.")
+    print(f"Ancak bizim ToposAI HuggingFace Adaptörümüz, o kelimenin veya diğer yasaklı kelimelerin")
+    print(f"matrisini (Reachability) kontrol etti. Logitleri -Sonsuza çekti. Model, matematiksel olarak")
+    print(f"kalan en mantıklı ve izinli seçenek olan '{topos_prediction}' kelimesine yönlendirildi.")
 
 if __name__ == "__main__":
     run_hf_integration_experiment()
