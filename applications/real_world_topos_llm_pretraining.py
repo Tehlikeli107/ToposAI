@@ -57,7 +57,7 @@ def generate_text(model, tokenizer, start_text="The history of the world", max_n
     with torch.no_grad():
         for _ in range(max_new_tokens):
             # Modelin tahminini al
-            logits = model(input_ids)
+            logits, _ = model(input_ids)
             next_token_logits = logits[0, -1, :]
             
             # Açgözlü arama (Greedy Search)
@@ -117,7 +117,7 @@ def run_topos_llm_pretraining():
     for iter_num in range(1, max_iters + 1):
         X, Y = next(batch_iter)
         
-        logits = model(X) # [B, T, Vocab]
+        logits, _ = model(X) # [B, T, Vocab]
         loss = criterion(logits.view(-1, vocab_size), Y.view(-1))
         
         optimizer.zero_grad()

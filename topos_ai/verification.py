@@ -27,7 +27,6 @@ class Lean4VerificationBridge:
         
         # 1. Değişken Tanımları (Varlıklar)
         vars_str = " ".join([self.entities[i] for i in chain])
-        lean_code.append(f"variable ({vars_str} : Prop)")
         
         # 2. Hipotezler (Zincirin Halka Bağlantıları)
         hypotheses = []
@@ -35,8 +34,9 @@ class Lean4VerificationBridge:
             h_name = f"h{idx+1}"
             u = self.entities[chain[idx]]
             v = self.entities[chain[idx+1]]
-            lean_code.append(f"variable ({h_name} : {u} → {v})")
-            hypotheses.append(h_name)
+            hypotheses.append(f"({h_name} : {u} → {v})")
+            
+        hypotheses_str = " ".join(hypotheses)
             
         # 3. Teoremin Kendisi (A -> Sonuç)
         start_node = self.entities[chain[0]]
@@ -44,17 +44,15 @@ class Lean4VerificationBridge:
         theorem_name = f"topos_proof_{start_node}_to_{end_node}"
         
         lean_code.append(f"\n-- ToposAI'nin iddia ettiği nihai sonuç:")
-        lean_code.append(f"theorem {theorem_name} : {start_node} → {end_node} := by")
         
-        # 4. İspatın (Proof) İnşası (Curry-Howard-Lambek Yazılımı)
-        lean_code.append("  -- Curry-Howard correspondence via functional composition")
-        lean_code.append(f"  intro x")
+        # Lean 4 için temiz syntax (Değişkenler ve hipotezler teorem argümanı olarak verilir)
+        lean_code.append(f"theorem {theorem_name} ({vars_str} : Prop) {hypotheses_str} : {start_node} → {end_node} := by")
+        lean_code.append("  intro x")
         
-        proof_call = "x"
-        for h in hypotheses:
-            proof_call = f"({h} {proof_call})"
-            
-        lean_code.append(f"  exact {proof_call}")
+        # Backward apply taktikleri (Sondan başa doğru apply h3, apply h2, exact x)
+        for h_name in reversed([f"h{idx+1}" for idx in range(len(chain) - 1)]):
+            lean_code.append(f"  apply {h_name}")
+        lean_code.append("  exact x")
 
         return "\n".join(lean_code)
 

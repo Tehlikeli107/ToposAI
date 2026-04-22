@@ -108,29 +108,23 @@ if HAS_TRITON:
         dout_val = tl.load(dout_ptrs, mask=mask_m[:, None] & mask_n[None, :], other=0.0)
 
         # Gradient Accumulators (SRAM içinde O(1) hafıza ile toplanır)
-        dq_acc = tl.zeros((BLOCK_M, BLOCK_D), dtype=tl.float32)
-        dk_acc = tl.zeros((BLOCK_N, BLOCK_D), dtype=tl.float32)
-
-        # Lukasiewicz Türevi
-        # impl = 1.0 - q + k. (Eğer clamp arasında değilse gradyan sıfırdır)
-        # dq = -dout / D
-        # dk = +dout / D
-        for d in range(D):
-            q_d = tl.load(q_base + offs_m * stride_qm + d * stride_qd, mask=mask_m, other=0.0)
-            k_d = tl.load(k_base + offs_n * stride_kn + d * stride_kd, mask=mask_n, other=0.0)
-            
-            impl = 1.0 - q_d[:, None] + k_d[None, :]
-            valid_mask = (impl > 0.0) & (impl < 1.0)
-            
-            # Maskelenmiş gradyanları hesapla
-            grad_q = -dout_val * valid_mask / D
-            grad_k = dout_val * valid_mask / D
-            
-            # SRAM'de atomik olarak topla (Reduce)
-            if d < BLOCK_D:
-                dq_acc[:, d] = tl.sum(grad_q, axis=1) # Satır toplamı
-                dk_acc[:, d] = tl.sum(grad_k, axis=0) # Sütun toplamı
-                
+        # Bütün D boyutunu tek blokta (BLOCK_D >= D) yüklediğimiz için `for d` döngüsüne gerek kalmaz, 
+        # tam vektörize operasyon yaparız!
+        
+        # 1.0 - q + k
+        impl = 1.0 - q_val[:, None, :] + k_val[None, :, :]  # [BLOCK_M, BLOCK_N, BLOCK_D]
+        valid_mask = (impl > 0.0) & (impl < 1.0)
+        
+        dout_expanded = dout_val[:, :, None] # [BLOCK_M, BLOCK_N, 1]
+        
+        # Maskelenmiş gradyanları hesapla
+        grad_q_3d = -dout_expanded * valid_mask / D  # [BLOCK_M, BLOCK_N, BLOCK_D]
+        grad_k_3d = dout_expanded * valid_mask / D   # [BLOCK_M, BLOCK_N, BLOCK_D]
+        
+        # SRAM'de Reduce (Toplama)
+        dq_acc = tl.sum(grad_q_3d, axis=1) # [BLOCK_M, BLOCK_D]
+        dk_acc = tl.sum(grad_k_3d, axis=0) # [BLOCK_N, BLOCK_D]
+        
         # Gradientleri Global Belleğe (HBM) Geri Yaz
         tl.atomic_add(dq_ptrs, dq_acc, mask=mask_m[:, None] & mask_d[None, :])
         tl.atomic_add(dk_ptrs, dk_acc, mask=mask_n[:, None] & mask_d[None, :])
