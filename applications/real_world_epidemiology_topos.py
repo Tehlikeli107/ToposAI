@@ -152,10 +152,12 @@ def run_epidemiology_experiment():
     print("\n--- DURUM 2: TOPOS-AI OPTİMUM KARANTİNA (MAX 1 UÇUŞ İPTALİ) ---")
     print("YZ'den Dünyadaki ticareti durdurmadan virüsü izole etmesi isteniyor...")
     
-    best_cut, new_global_risk, R_cut = epidemiologist.find_optimal_quarantine("Wuhan")
+    best_cut, new_global_risk, R_cut = epidemiologist.find_optimal_quarantine("Wuhan", max_cuts=1)
     
-    print(f"\n🎯 [YZ KARARI (VERDICT)]: '{best_cut[0]} <-> {best_cut[1]}' uçuşlarını DERHAL İPTAL EDİN!")
-    
+    print(f"\n🎯 [YZ KARARI (VERDICT)]: Aşağıdaki uçuşları DERHAL İPTAL EDİN!")
+    for u, v in best_cut:
+        print(f"    - '{u} <-> {v}'")
+        
     # YZ'nin kararından sonra dünyanın son durumu
     risks_after_cut = epidemiologist.simulate_pandemic("Wuhan", flight_matrix=R_cut)
     saved_cities = [cities[i] for i in range(len(cities)) if risks_after_cut[i] < 0.5]
