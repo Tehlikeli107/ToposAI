@@ -21,13 +21,14 @@ This repository serves as both a pip-installable framework (`topos_ai`) and a co
    Eliminating traditional `nn.Embedding(vocab_size, dim)`. The meaning of a token is dynamically computed strictly via its morphisms to the rest of the vocabulary ($X \cong \text{Hom}(-, X)$).
 4. **Sheaf Gluing Consensus (`topos_multi_agent_swarm.py`)**
    Mathematical resolution of conflicting local truths (Multi-Agent Swarm) without statistical averaging.
+5. **Topological Constrained Decoding (`topos_ai.generation`)**
+   Eliminating autoregressive hallucination by filtering next-token probabilities through the Topological Reachability Matrix. If an LLM statistically favors a token (e.g. memorization) but it lacks a formal morphism path, its logit is masked to $-\infty$.
 
 ## ⚠️ Limitations & Honest Positioning
 
 As an early-stage research repository, ToposAI has notable limitations that must be acknowledged:
 
 *   **Accuracy Drops in Dense Retrieval (`benchmark_sota.py`):** In large-scale vector similarity tests ($N=1M$), ToposAI’s "Hard Routing" tree search achieves significantly lower recall (~10-25%) compared to SOTA FAISS/HNSW models. Future implementation of Soft/Beam-Search tree routing is required to make this competitive.
-*   **Autoregressive Syllogism Failures (`topos_syllogism_test.py`):** When acting as a pure next-token predictor, the model still falls victim to training distribution memorization (e.g., predicting 'aslan' instead of structurally inferred 'vahşi'). True zero-shot formal verification requires topological path finding (`calculate_transitive_closure`) rather than autoregressive generation.
 *   **Thought Experiments vs. Production Code:** Scripts such as `godel_incompleteness_engine.py` and `hofstadter_topoi_sentience.py` are heavily narrative-driven *simulations* rather than production-ready AI layers. They serve to mathematically demonstrate concepts like Limit Cycles and Self-Reference but are not integrated into the main `ToposTransformer` yet.
 
 ## ⚙️ Installation
