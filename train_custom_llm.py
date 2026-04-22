@@ -90,6 +90,12 @@ def train():
     print(f"  > VRAM Dostu Low-Rank Yoneda Embedding Aktif.")
 
     optimizer = optim.AdamW(model.parameters(), lr=5e-4, weight_decay=0.01)
+
+    # [CROSS ENTROPY WITH TOPOS REACHABILITY]
+    # Kategori Teorisi ulaştığı olasılıkları [0, 1] arasında verir.
+    # Modelin kelime dağarcığı üzerinden gerçek bir olasılık dağılımı (Distribution) 
+    # öğrenebilmesi için, bu reachability skorlarını bir sıcaklık (Temperature) ile 
+    # çarpıp CrossEntropyLoss'a veriyoruz. Aksi halde MSELoss modeli "her şeye 0 de" tuzağına iter.
     criterion = nn.CrossEntropyLoss()
 
     # 4. EĞİTİM (PRETRAINING) DÖNGÜSÜ
@@ -102,8 +108,13 @@ def train():
     for iter_num in range(1, max_iters + 1):
         X, Y = next(batch_iter)
         
-        logits, _ = model(X)
-        loss = criterion(logits.view(-1, vocab_size), Y.view(-1))
+        reachability_logits, _ = model(X) # [B, SeqLen, vocab_size]
+        
+        # Reachability skorlarını Logits (Ham Skor) seviyesine çek
+        # (Çünkü CrossEntropyLoss softmax'i kendisi yapar)
+        scaled_logits = reachability_logits * 15.0 
+        
+        loss = criterion(scaled_logits.view(-1, vocab_size), Y.view(-1))
         
         optimizer.zero_grad()
         loss.backward()
