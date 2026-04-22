@@ -1,5 +1,14 @@
 import torch
 import torch.nn as nn
+import sys
+
+# Windows konsolunda emoji çökmesini engelle (P3 Fix)
+if sys.stdout.encoding.lower() != 'utf-8':
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
+
+# Framework'ten import et (Kopya kodları sildik - DRY Principle)
+from topos_ai.math import transitive_closure
 
 # =====================================================================
 # DİNAMİK ONTOLOJİ (METİNDEN TOPOS MATRİSİ ÜRETİMİ)
@@ -7,20 +16,6 @@ import torch.nn as nn
 # (Varlıklar ve Oklar) sıfırdan inşa eder. RAG (Retrieval-Augmented Gen) sistemlerinin
 # "Vektör Veritabanı" yerine "Mantıksal Graph" kullanan versiyonudur.
 # =====================================================================
-
-def lukasiewicz_composition(R1, R2):
-    R1_exp = R1.unsqueeze(2) 
-    R2_exp = R2.unsqueeze(0) 
-    t_norm = torch.clamp(R1_exp + R2_exp - 1.0, min=0.0) 
-    composition, _ = torch.max(t_norm, dim=1) 
-    return composition
-
-def calculate_transitive_closure(R, max_steps=5):
-    R_closure = R.clone()
-    for _ in range(max_steps):
-        new_R = lukasiewicz_composition(R_closure, R)
-        R_closure = torch.max(R_closure, new_R)
-    return R_closure
 
 def test_dynamic_ontology():
     print("--- DİNAMİK ONTOLOJİ (METİNDEN TOPOS'A) ---")

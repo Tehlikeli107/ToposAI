@@ -51,3 +51,28 @@ def test_sheaf_gluing_consistency():
     
     can_glue, global_truth = sheaf_gluing(C, D, threshold=0.1)
     assert can_glue is False, "Çelişen evrenlerin (Sheaf Violation) yapıştırılması reddedilmelidir."
+
+def test_core_math_logic_cpu():
+    """
+    GPU/Triton olmayan CI ortamlarında (Örn: Github Actions) ToposAI'ın çekirdek
+    mantığının (Geçişlilik ve Syllogism) kırılıp kırılmadığını test eder.
+    """
+    from topos_ai.math import lukasiewicz_composition, transitive_closure
+    
+    # 3x3 bir Evren: 0->1 ve 1->2 okları (Morfizmaları) mevcut.
+    R = torch.zeros((3, 3))
+    R[0, 1] = 1.0
+    R[1, 2] = 1.0
+    
+    # Doğrudan Lukasiewicz Composition Testi (R * R = R^2)
+    # A->B ve B->C ise, R^2'de A->C = 1.0 olmalıdır.
+    R_comp = lukasiewicz_composition(R, R)
+    assert R_comp[0, 2].item() == 1.0, "Lukasiewicz T-Norm geçişliliği (A->C) sağlamalıdır."
+    assert R_comp[0, 1].item() == 0.0, "Geçişlilik matrisi R^2, sadece 2. derece okları göstermelidir."
+    
+    # Transitive Closure (Sonsuz Geçişlilik) Testi
+    # R_inf, hem doğrudan okları (R) hem de zincirleme okları (R^2, R^3) içermelidir.
+    R_inf = transitive_closure(R, max_steps=2)
+    assert R_inf[0, 1].item() == 1.0, "Transitive Closure orijinal R'yi (A->B) korumalıdır."
+    assert R_inf[1, 2].item() == 1.0, "Transitive Closure orijinal R'yi (B->C) korumalıdır."
+    assert R_inf[0, 2].item() == 1.0, "Transitive Closure türetilmiş oku (A->C) içermelidir."
