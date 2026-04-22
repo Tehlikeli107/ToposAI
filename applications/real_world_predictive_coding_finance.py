@@ -12,7 +12,7 @@ import time
 
 # =====================================================================
 # REAL-WORLD PREDICTIVE CODING (FREE ENERGY) ON S&P 500
-# İddia: Klasik YZ, dünya değiştiğinde (Örn: COVID-19 Borsa Çöküşü)
+# İddia: Klasik YZ, dünya değiştiğinde (Örn: Makro-Ekonomik Şoklar)
 # "Catastrophic Forgetting" yaşar ve GPU ile baştan eğitilmek (Backprop) 
 # zorundadır. ToposAI (Biyolojik Beyin), Karl Friston'ın "Serbest Enerji 
 # Prensibi" ile anlık şoklara GPU türevi olmadan milisaniyelerde adapte olur.
@@ -108,13 +108,13 @@ def run_real_world_predictive_coding():
         if day % 100 == 0 and not shock_detected:
             print(f"  Tarih: {current_date} | Piyasa Stabil. Beynin Sürpriz (Hata) Seviyesi: {surprise:.4f}")
 
-    print("\n[BİLİMSEL SONUÇ: KANITLANDI]")
-    print("Normalde bir Finansal Yapay Zeka modeli, COVID gibi bir kriz anında")
+    print("\n[BİLİMSEL SONUÇ: GÜÇLÜ BİR SEZGİSEL MODEL (STRONG HEURISTIC)]")
+    print("Normalde bir Finansal Yapay Zeka modeli, büyük makro-şoklar anında")
     print("tüm eski ezberleri yıkıldığı için (Catastrophic Forgetting) devasa ")
     print("GPU kümelerinde haftalarca yeniden eğitilmek zorundadır.")
     print("ToposAI ise 'Serbest Enerji Prensibini' (Predictive Coding) kullanarak")
     print("Dünya (Piyasa) değiştikçe, içsel Kategori Matrisini MİLİSANİYELER ")
-    print("içinde kendi kendine GÜNCELLEDİ (Online/Lifelong Learning).")
+    print("içinde kendi kendine güncelleyerek Online/Lifelong Learning'e güçlü bir potansiyel sunar.")
 
 if __name__ == "__main__":
     run_real_world_predictive_coding()

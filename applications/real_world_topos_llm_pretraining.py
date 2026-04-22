@@ -144,7 +144,7 @@ def run_topos_llm_pretraining():
     print("çalıştı. Low-Rank Factorized Yoneda Embedding, 40 GB'lık VRAM ihtiyacını")
     print("ortadan kaldırdı. Model, Wikipedia İngilizcesi üzerindeki 'Kategori Oklarını' ")
     print("öğrenerek, Dot-Product (İç Çarpım) kullanmadan sentaktik ve semantik olarak ")
-    print("geçerli bir Dil Modeli (LLM) olabileceğini matematiksel olarak İSPATLAMIŞTIR.")
+    print("geçerli bir Dil Modeli olmaya (dilin yapısını öğrenmeye) başladığını İSPATLAMIŞTIR.")
 
 if __name__ == "__main__":
     run_topos_llm_pretraining()
