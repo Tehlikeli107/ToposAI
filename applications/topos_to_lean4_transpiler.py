@@ -1,6 +1,8 @@
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 
 # =====================================================================
 # TOPOS TO LEAN 4 TRANSPILER (FORMAL VERIFICATION BRIDGE)
@@ -87,8 +89,8 @@ def run_lean4_transpilation_experiment():
     lean_script = transpiler.transpile_chain(discovered_chain, confidence)
 
     print(">>> TOPOS-AI TARAFINDAN YAZILAN 'LEAN 4' KANIT KODU <<<")
-    print("Aşağıdaki kod doğrudan Lean 4 (Mathlib) derleyicisine kopyalanıp ")
-    print("çalıştırıldığında 'Teorem Doğrulandı' (Goals Accomplished) diyecektir.\n")
+    print("Aşağıdaki kod Lean 4 (Mathlib) derleyicisine kopyalandığında, Nöral modelin")
+    print("bulduğu çıkarımların doğrulanabilecek (verify edilebilir) bir taslağını oluşturur.\n")
     print(lean_script)
     
     print("\n[DEĞERLENDİRME]")

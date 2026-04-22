@@ -1,6 +1,8 @@
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 
 import torch
 import time
@@ -65,10 +67,8 @@ def run_sparse_simplicial_experiment():
         # Bilgisayarın saniyesinde çökmemesi için bu satırı bilerek try/catch ile yakalıyoruz
         # (Yaratmayı denerse Windows kilitlenir, o yüzden teorik limit kontrolü yapıyoruz)
         required_ram_tb = (N**3 * 4) / (1024**4)
-        print(f"Gereken RAM: {required_ram_tb:,.2f} Terabayt! (Dünyada böyle bir bilgisayar yok).")
-        raise MemoryError("Dense Allocation Failed")
-    except Exception as e:
-        print(f"🚨 [BEKLENEN ÇÖKÜŞ]: İşlem imkansız olduğu için reddedildi.\n")
+        print(f"Gereken Teorik RAM: {required_ram_tb:,.2f} Terabayt! (Dünyada böyle bir bilgisayar yok).")
+        print(f"🚨 [TEORİK ÇÖKÜŞ SİMÜLASYONU]: İşlem donanım sınırlarını aştığı için reddedildi (OOM).\n")
 
     # 2. TOPOS AI (SPARSE SIMPLEX) DENEMESİ
     print("--- 2. TOPOS AI (SPARSE TENSOR) DENEMESİ ---")

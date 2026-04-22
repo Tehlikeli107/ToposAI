@@ -1,6 +1,8 @@
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 
 import torch
 import requests
@@ -76,10 +78,10 @@ def is_in_resonance(period1, period2, tolerance=0.03):
 def run_astrophysics_topos_experiment():
     print("=========================================================================")
     print(" BİLİMSEL KANIT 11: ASTROPHYSICS TOPOI (ORBITAL RESONANCE CHAINS)")
-    print(" İddia: Klasik Astrofizik (N-Body), milyarlarca yıllık stabiliteyi")
-    print(" simüle etmek için GPU'da aylar harcar. ToposAI, 'Laplace Rezonanslarını'")
-    print(" Kategorik oklara çevirip, sistemin sonsuza dek 'Topolojik Kilit' ile")
-    print(" korunduğunu Transitive Closure ile SIFIR SİMÜLASYONLA kanıtlar.")
+    print(" İddia: Klasik Astrofizik (N-Body), kararlılığı simüle etmek için GPU'da")
+    print(" aylar harcar. ToposAI, 'Laplace Rezonanslarını' Kategorik oklara çevirip,")
+    print(" sistemin 'Topolojik Kararlılık Eğilimini' (Topological Stability Tendency)")
+    print(" Transitive Closure ile sezgisel olarak (Heuristic) değerlendirir.")
     print("=========================================================================\n")
 
     df, top_systems = fetch_nasa_exoplanet_data()

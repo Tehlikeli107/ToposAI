@@ -25,8 +25,14 @@ class MultiUniverseToposAttention(nn.Module):
         truth_matrix = implication.mean(dim=-1)
 
         if mask is not None:
-            local_mask = torch.tril(torch.ones(SeqLen, SeqLen, device=x.device)).view(1, 1, SeqLen, SeqLen)
-            truth_matrix = truth_matrix.masked_fill(local_mask == 0, -1e9)
+            # Topological Decay Mask (Yumuşak Causal Mask)
+            idx_q = torch.arange(SeqLen, device=x.device).unsqueeze(1)
+            idx_k = torch.arange(SeqLen, device=x.device).unsqueeze(0)
+            distance = idx_k - idx_q # Geleceğe doğru pozitif, geçmişe doğru negatif
+            
+            # Gelecekteki tokenların ağırlığını mesafeye göre YUMUŞAK (Soft) olarak düşür (Decay)
+            decay_mask = torch.where(distance > 0, -distance.float() * 1.5, 0.0).view(1, 1, SeqLen, SeqLen)
+            truth_matrix = truth_matrix + decay_mask
 
         attn_weights = F.softmax(truth_matrix * 5.0, dim=-1)
         out = torch.matmul(attn_weights, V)
@@ -34,14 +40,31 @@ class MultiUniverseToposAttention(nn.Module):
         return self.out_proj(out)
 
 class YonedaEmbedding(nn.Module):
-    """Sabit vektör (nn.Embedding) kullanmaz. Anlamı, diğer kelimelerle olan oklar(morphism) üzerinden hesaplar."""
-    def __init__(self, vocab_size):
+    """
+    [LOW-RANK FACTORIZED YONEDA]
+    Sabit vektör (nn.Embedding) kullanmaz. Anlamı, kelimelerin birbirleriyle olan okları 
+    (morphism) üzerinden hesaplar. O(V^2) hafıza patlamasını engellemek için devasa 
+    V x V matrisini, V x r ve r x V (Low-Rank) olarak iki alt uzaya sıkıştırır.
+    """
+    def __init__(self, vocab_size, rank=128):
         super().__init__()
-        self.morphisms_logits = nn.Parameter(torch.randn(vocab_size, vocab_size))
+        self.vocab_size = vocab_size
+        self.rank = rank
+        
+        # O(V^2) yerine O(V * r) hafıza kullanımı
+        self.U = nn.Parameter(torch.randn(vocab_size, rank) * (1.0 / rank**0.5))
+        self.W = nn.Parameter(torch.randn(rank, vocab_size) * (1.0 / rank**0.5))
+
+    def get_morphisms(self):
+        """Testler ve Benchmarkerlar için Yoneda Olasılık Matrisi"""
+        logits = torch.matmul(self.U, self.W)
+        return torch.sigmoid(logits)
 
     def forward(self, idx):
-        R = torch.sigmoid(self.morphisms_logits)
-        return F.embedding(idx, R)
+        # Memory Efficient Routing
+        selected_U = F.embedding(idx, self.U)
+        logits = torch.matmul(selected_U, self.W)
+        return torch.sigmoid(logits)
 
 class DynamicToposUniverse(nn.Module):
     """Paradoks anında kendi boyutunu genişleten (Self-Modifying) Kategori Matrisi."""

@@ -1,6 +1,8 @@
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 
 import torch
 import yfinance as yf
@@ -42,7 +44,7 @@ class BiologicalToposBrain:
 
 def fetch_historical_stock_data():
     print("\n[VERİ İNDİRİLİYOR] Yahoo Finance üzerinden 2019-2022 verileri çekiliyor...")
-    print("Bu dönem, tarihin en keskin 'Concept Drift'lerinden biri olan COVID-19 çöküşünü içerir.")
+    print("Bu dönem, finansal piyasaların en keskin 'Rolling Correlation Anomaly' (Sürpriz Eşiği) dönemlerinden birini (COVID) içerir.")
     
     tickers = ["AAPL", "MSFT", "AMZN", "JPM", "BAC", "XOM", "CVX", "JNJ", "PFE", "WMT"]
     # 2019 başından 2021 ortasına kadar (Kriz öncesi, Kriz anı, Kriz sonrası)
