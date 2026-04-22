@@ -18,6 +18,8 @@ from topos_ai.math import lukasiewicz_composition
 # Kararını" matematiksel olarak ispatlar.
 # =====================================================================
 
+import itertools
+
 class TopologicalEpidemiologist:
     def __init__(self, cities):
         self.cities = cities
@@ -54,11 +56,11 @@ class TopologicalEpidemiologist:
     def find_optimal_quarantine(self, start_city, max_cuts=1):
         """
         AI POLICY MAKER: 
-        Sadece 'max_cuts' kadar uçuşu (kenarı) iptal etme hakkımız var.
-        Hangi uçuşları iptal edersek, virüsün ulaşabileceği ŞEHİR SAYISI
-        (Veya toplam enfeksiyon riski) en aza iner?
+        'max_cuts' kadar uçuşu (kenarı) iptal etme hakkımız var.
+        Hangi uçuş Kombinasyonlarını iptal edersek, virüsün ulaşabileceği ŞEHİR SAYISI
+        (Veya toplam enfeksiyon riski) en aza iner? (True Minimum Cut approximation)
         """
-        best_cut = None
+        best_cut_combination = None
         min_global_infection = float('inf')
         best_matrix = None
         
@@ -69,17 +71,25 @@ class TopologicalEpidemiologist:
                 if self.R[i, j] > 0:
                     edges.append((i, j))
                     
-        print(f"[YZ ANALİZİ] Toplam {len(edges)} uluslararası uçuş rotası taranıyor...")
-        
-        # Her bir uçuşu TEK TEK kesip (Simüle edip) sonucu ölçüyoruz
-        for edge in edges:
-            u, v = edge
-            # Kesilmiş Matris (Uçuş İptali)
-            R_cut = self.R.clone()
-            R_cut[u, v] = 0.0
-            R_cut[v, u] = 0.0
+        # İzin verilen maksimum kesik sayısına kadar tüm kombinasyonları dene (Brute-force optimization)
+        # Prodüksiyon ortamında (10.000 uçuş) bu işlem için Max-Flow Min-Cut veya GNN kullanılır.
+        # Bu bir Proof-of-Concept (PoC) politika arama motorudur.
+        combinations_to_test = []
+        for c in range(1, max_cuts + 1):
+            combinations_to_test.extend(list(itertools.combinations(edges, c)))
             
-            # Bu karantinanın sonucunda dünyadaki bulaş durumu ne olur?
+        print(f"[YZ ANALİZİ] Toplam {len(combinations_to_test)} farklı Karantina Kombinasyonu (Policy) taranıyor...")
+        
+        # Her bir karantina politikasını (Kesik grubunu) simüle edip sonucu ölçüyoruz
+        for cut_combo in combinations_to_test:
+            R_cut = self.R.clone()
+            
+            # Seçilen uçuşları İPTAL ET
+            for u, v in cut_combo:
+                R_cut[u, v] = 0.0
+                R_cut[v, u] = 0.0
+            
+            # Bu politikanın sonucunda dünyadaki bulaş durumu ne olur?
             risks = self.simulate_pandemic(start_city, flight_matrix=R_cut)
             
             # Toplam küresel risk (Ne kadar düşükse o kadar iyi)
@@ -87,10 +97,11 @@ class TopologicalEpidemiologist:
             
             if global_risk < min_global_infection:
                 min_global_infection = global_risk
-                best_cut = (self.cities[u], self.cities[v])
+                # Şehir isimlerini al
+                best_cut_combination = [(self.cities[u], self.cities[v]) for u, v in cut_combo]
                 best_matrix = R_cut
                 
-        return best_cut, min_global_infection, best_matrix
+        return best_cut_combination, min_global_infection, best_matrix
 
 def run_epidemiology_experiment():
     print("=========================================================================")
