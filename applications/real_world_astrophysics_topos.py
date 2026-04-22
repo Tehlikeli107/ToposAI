@@ -139,12 +139,13 @@ def run_astrophysics_topos_experiment():
             print(f"  Bu gezegenler birbirinden bağımsızdır, ileride yörüngesel kaos (çarpışma/fırlama) yaşanabilir.")
         print("-" * 70)
         
-    print("\n[DEĞERLENDİRME]")
+    print("\n[DEĞERLENDİRME (Topological Stability Heuristic)]")
     print("Astrofizikte 'Laplace Resonance' (Jüpiter'in uydularındaki 1:2:4 oranı) ")
     print("sistemin çarpışmasını engelleyen ilahi bir saat gibidir.")
     print("ToposAI, NASA verilerini okuyarak bu saat dişlilerini 'Kategori Oklarına' ")
-    print("çevirdi ve Transitive Closure işlemiyle, Güneş sistemlerinden ışık yılı ")
-    print("uzaktaki yıldızların MİLYARLARCA YILLIK kaderini SIFIR simülasyonla çözdü.")
+    print("çevirdi ve Transitive Closure işlemiyle, bu sistemlerin uzun dönemli")
+    print("Topolojik Kararlılık Eğilimlerini (Stability Tendency) haritalandırdı.")
+    print("Bu yaklaşım, pahalı N-Body simülasyonlarına güçlü bir 'Öncü Veri (Prior)' sunar.")
 
 if __name__ == "__main__":
     run_astrophysics_topos_experiment()
