@@ -99,13 +99,13 @@ def run_tda_experiment():
             print("    🚨 [DİKKAT]: Bilgi ağının tam ortasında matematiksel bir BOŞLUK (Hole) tespit edildi!")
         print("-" * 50)
 
-    print("\n[BİLİMSEL SONUÇ]")
+    print("\n[BİLİMSEL SONUÇ (PoC TDA Heuristic)]")
     print("Eşik 0.5'e ulaştığında, 4 kavram birbiriyle 'Kare' şeklinde birleşti ancak")
     print("ortadaki çapraz bağlar (Kuantum Kütleçekimi formülü) kayıp olduğu için sistem")
-    print("bunu 'β1 = 1 (1 Boyutlu Delik)' olarak teşhis etti.")
-    print("Klasik bir LLM (ChatGPT) olsaydı bu 4 kelimeyi kullanarak mantıksız bir yalan ")
-    print("(Halüsinasyon) uydururdu. ToposAI ise: 'Ortada bir delik var, bu konuyu bilmiyorum'")
-    print("diyebilen Sokratik (Self-Aware) bir matematik makinesidir.")
+    print("bunu 'β1 = 1 (1 Boyutlu Delik)' olarak, basitleştirilmiş Euler çizge (Graph) sezgiseli üzerinden teşhis etti.")
+    print("Bu Proof-of-Concept, gelişmiş Vietoris-Rips Kompleksleri kullanıldığında ToposAI'ın:")
+    print("'Ortada bir delik var, bu konuyu tam bilmiyorum' diyebilen Sokratik (Self-Aware)")
+    print("bir matematik makinesine dönüşebileceğinin donanımsal kanıtıdır.")
 
 if __name__ == "__main__":
     run_tda_experiment()

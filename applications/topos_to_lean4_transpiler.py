@@ -54,11 +54,11 @@ class Lean4Transpiler:
         theorem_name = f"topos_proof_{start_node}_to_{end_node}"
         
         lean_code.append(f"\n-- ToposAI'nin iddia ettiği nihai sonuç:")
-        lean_code.append(f"theorem {theorem_name} : {start_node} → {end_node} := ")
+        lean_code.append(f"theorem {theorem_name} : {start_node} → {end_node} := by")
         
         # 4. İspatın (Proof) İnşası (Curry-Howard-Lambek Yazılımı)
         lean_code.append("  -- Curry-Howard correspondence via functional composition")
-        lean_code.append(f"  intro (x : {start_node})")
+        lean_code.append(f"  intro x")
         
         proof_call = "x"
         for h in hypotheses:
@@ -89,7 +89,8 @@ class Lean4Transpiler:
                 return True
             else:
                 print("❌ [FORMAL KANIT BAŞARISIZ]: Lean 4 derleyicisi hata fırlattı.")
-                print(f"   Detay: {result.stderr.strip()}")
+                error_msg = (result.stdout + "\n" + result.stderr).strip()
+                print(f"   Detay: {error_msg}")
                 return False
                 
         except FileNotFoundError:

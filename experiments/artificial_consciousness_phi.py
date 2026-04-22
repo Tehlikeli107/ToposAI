@@ -24,20 +24,32 @@ class ConsciousnessMeter:
         self.N = topos_matrix.size(0)
 
     def system_capacity(self, R_matrix):
-        """Bir ağın toplam bilgi kapasitesi (Topological Repertoire)."""
-        # Kapasiteyi, matrisin özdeğerlerinden (Eigenvalues) veya 
-        # en basit haliyle sonsuz geçişlilik (Transitive Closure) 
-        # sonrasındaki toplam enerji (Connectivity) ile ölçebiliriz.
-        R_inf = R_matrix.clone()
+        """
+        Bir ağın toplam ENTEGRE bilgi kapasitesi (Topological Repertoire).
+        IIT'ye göre sadece tek yönlü (A->B) giden bilgi bir bilinç oluşturmaz.
+        Bilginin 'Entegre' olabilmesi için Karşılıklı (Mutual / Feedback) bir
+        etkileşim olması şarttır. Biz burada sadece Karşılıklı bağları (ve 
+        onların kapanımını) Entegre Bilgi olarak ölçeceğiz.
+        """
+        # Karşılıklı etkileşim (Sadece A->B ve B->A varsa hayatta kalır)
+        mutual_R = torch.min(R_matrix, R_matrix.t())
+        
+        # Karşılıklı bağların oluşturduğu kapalı ekosistemin toplam enerjisi
+        R_inf = mutual_R.clone()
         for _ in range(self.N):
-            R_inf = torch.max(R_inf, lukasiewicz_composition(R_inf, R_matrix))
-        return torch.sum(R_inf).item()
+            R_inf = torch.max(R_inf, lukasiewicz_composition(R_inf, mutual_R))
+            
+        # Diyagonalleri (Kendi kendine bağları) çıkar
+        capacity = torch.sum(R_inf).item() - torch.trace(R_inf).item()
+        return max(0.0, capacity)
 
     def partition_network(self, partition_A_indices):
         """Ağı iki farklı adaya (Partition A ve B) böler (Bıçağı Vurur)."""
         partition_B_indices = [i for i in range(self.N) if i not in partition_A_indices]
         
-        # Koparılmış matris (A ve B arasındaki bağlar sıfırlanır)
+        # IIT'de Minimum Information Partition (MIP) hesaplanırken, ağın
+        # A'dan B'ye giden kabloları veya B'den A'ya giden kabloları tek taraflı kesilir.
+        # Biz basitlik adına çift taraflı kesim yapıyoruz (R_cut).
         R_cut = self.R.clone()
         for a in partition_A_indices:
             for b in partition_B_indices:
@@ -51,7 +63,7 @@ class ConsciousnessMeter:
         [Φ - PHI SCORE HESAPLAMASI]
         Ağı tüm olası ikiye bölme (Bipartition) ihtimalleriyle keser.
         En az zarar veren kesimi (MIP - Minimum Information Partition) bulur.
-        O kesimin verdiği zarar bile > 0 ise, sistemin BİLİNCİ (Φ) vardır.
+        O kesimin verdiği zarar (Bütün - (Parça A + Parça B)) > 0 ise, sistemin BİLİNCİ (Φ) vardır.
         """
         whole_capacity = self.system_capacity(self.R)
         
@@ -62,11 +74,27 @@ class ConsciousnessMeter:
         nodes = list(range(self.N))
         for r in range(1, self.N // 2 + 1):
             for subset in itertools.combinations(nodes, r):
-                R_cut = self.partition_network(subset)
-                cut_capacity = self.system_capacity(R_cut)
+                partition_A_indices = list(subset)
+                partition_B_indices = [i for i in range(self.N) if i not in partition_A_indices]
                 
-                # Bilgi Kaybı (Earth Mover / Capacity Loss)
-                loss = whole_capacity - cut_capacity
+                # Parça A'nın kendi içindeki kapasitesi (İzole)
+                R_A = torch.zeros(self.N, self.N)
+                for i in partition_A_indices:
+                    for j in partition_A_indices:
+                        R_A[i, j] = self.R[i, j]
+                cap_A = self.system_capacity(R_A)
+                
+                # Parça B'nin kendi içindeki kapasitesi (İzole)
+                R_B = torch.zeros(self.N, self.N)
+                for i in partition_B_indices:
+                    for j in partition_B_indices:
+                        R_B[i, j] = self.R[i, j]
+                cap_B = self.system_capacity(R_B)
+                
+                # Bilgi Kaybı (Earth Mover / Capacity Loss) = Bütün - (Parça A + Parça B)
+                # İleri beslemeli ağlarda A->B bağı kesildiğinde, A ve B'nin kendi iç
+                # kapasitelerinin toplamı, bütünün kapasitesine eşit kalır (Loss = 0).
+                loss = whole_capacity - (cap_A + cap_B)
                 
                 if loss < min_loss:
                     min_loss = loss
@@ -74,7 +102,7 @@ class ConsciousnessMeter:
                     
         # Φ (Phi) Skoru: Sistemin en az hasar gören bölünmesinde bile
         # kaybettiği "Entegre Bilgi" miktarıdır.
-        phi_score = min_loss
+        phi_score = max(0.0, min_loss) # Negatif olamaz
         return phi_score, best_partition
 
 def run_consciousness_experiment():
