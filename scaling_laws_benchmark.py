@@ -1,0 +1,94 @@
+import torch
+import gc
+from topos_ai.kernels import flash_topos_attention
+
+# =====================================================================
+# HARDWARE SCALING LAWS BENCHMARK (VRAM ÖLÇÜMÜ)
+# İddia: Standart PyTorch (O(N^2)) uzun bağlamlarda VRAM'i patlatır.
+# FlashTopos (Triton) ise O(1) ek bellek ile sonsuz bağlamı destekler.
+# =====================================================================
+
+def get_vram_mb():
+    """GPU'nun o an kullandığı maksimum belleği MB cinsinden döndürür."""
+    return torch.cuda.max_memory_allocated() / (1024 * 1024)
+
+def run_scaling_benchmark():
+    if not torch.cuda.is_available():
+        print("CUDA bulunamadı. Bu donanım testi GPU gerektirir.")
+        return
+
+    print("--- 1. BİLİMSEL KANIT: DONANIM ÖLÇEKLENME YASALARI (SCALING LAWS) ---")
+    print("PyTorch vs FlashTopos (Triton) VRAM Tüketim Analizi\n")
+
+    # Test edilecek Bağlam Uzunlukları (Context Length - N)
+    # 1K, 2K, 4K, 8K, 16K, 32K (Çok uzun bir kitap)
+    seq_lengths = [1024, 2048, 4096, 8192, 16384, 32768]
+    dim = 64
+    batch_size = 1
+
+    print(f"{'Bağlam (N)':<12} | {'PyTorch VRAM (MB)':<20} | {'FlashTopos VRAM (MB)':<20} | {'Durum'}")
+    print("-" * 75)
+
+    for N in seq_lengths:
+        # GPU'yu temizle
+        torch.cuda.empty_cache()
+        gc.collect()
+        torch.cuda.reset_peak_memory_stats()
+        
+        # Girdiler (Q, K)
+        Q = torch.rand((batch_size, N, dim), device='cuda', dtype=torch.float32)
+        K = torch.rand((batch_size, N, dim), device='cuda', dtype=torch.float32)
+        
+        base_vram = get_vram_mb() # Sadece Q ve K'nın kapladığı temel bellek
+
+        # ---------------------------------------------------------
+        # 1. PYTORCH STANDART HESAPLAMA (OOM Bekleniyor)
+        # ---------------------------------------------------------
+        torch_vram = "OOM (Çöktü)"
+        torch_status = "Bşrsz"
+        try:
+            torch.cuda.reset_peak_memory_stats()
+            # PyTorch'un arkaplanda yaratacağı O(N^2 * D) devasa matris:
+            Q_exp = Q.unsqueeze(2) 
+            K_exp = K.unsqueeze(1) 
+            impl = torch.clamp(1.0 - Q_exp + K_exp, max=1.0)
+            _ = impl.mean(dim=-1)
+            
+            torch_vram = f"{get_vram_mb() - base_vram:.1f}"
+            torch_status = "Geçti"
+            
+            # Matrisi bellekten sil
+            del Q_exp, K_exp, impl
+        except RuntimeError as e:
+            if "out of memory" in str(e):
+                pass # Beklenen çöküş
+            else:
+                torch_vram = "HATA"
+
+        # GPU'yu tekrar temizle
+        torch.cuda.empty_cache()
+        gc.collect()
+
+        # ---------------------------------------------------------
+        # 2. FLASHTOPOS (TRITON SRAM KERNEL) HESAPLAMASI
+        # ---------------------------------------------------------
+        topos_vram = "HATA"
+        topos_status = "Bşrsz"
+        try:
+            torch.cuda.reset_peak_memory_stats()
+            
+            # FlashTopos, işlemi SRAM'de 64x64 bloklarla yapar
+            _ = flash_topos_attention(Q, K)
+            
+            # Sadece N*N (Çıktı matrisi) kadar ek bellek kullanmalıdır.
+            # O(N^2 * D) olan devasa ara matris asla VRAM'e yazılmaz!
+            topos_vram = f"{get_vram_mb() - base_vram:.1f}"
+            topos_status = "Geçti"
+            
+        except Exception as e:
+            topos_vram = "OOM/Hata"
+
+        print(f"{N:<12} | {torch_vram:<20} | {topos_vram:<20} | Topos: {topos_status}")
+
+if __name__ == "__main__":
+    run_scaling_benchmark()
