@@ -11,45 +11,31 @@ While modern LLMs operate purely on statistical dot-products (frequently sufferi
 
 ## 🎯 Research Scope and Key Implementations
 
-This repository serves as both a pip-installable framework (`topos_ai`) and a collection of 15+ proof-of-concept scripts validating category theory theorems on tensor operations:
+This repository serves as both a pip-installable framework (`topos_ai`) and a collection of 15+ proof-of-concept scripts validating category theory theorems on tensor operations, organized cleanly into modules:
 
-1. **Logical Attention via Lukasiewicz MV-Algebra (`topos_ai.math`)**
-   Replaces $Q \cdot K^T$ with differentiable implication: $\min(1, 1 - Q + K)$.
-2. **O(1) VRAM Logical Scaling (`topos_ai.kernels.flash_topos`)**
-   A custom C++/Triton kernel (`flash_topos_fixed.py`) performing $O(N^2)$ Lukasiewicz composition directly in SRAM, bypassing PyTorch's $O(N^2 \cdot D)$ memory explosion for long-context reasoning.
-3. **Zero-Embedding Language Modeling (`topos_ai.nn.YonedaEmbedding`)**
-   Eliminating traditional `nn.Embedding(vocab_size, dim)`. The meaning of a token is dynamically computed strictly via its morphisms to the rest of the vocabulary ($X \cong \text{Hom}(-, X)$).
-4. **Sheaf Gluing Consensus (`topos_multi_agent_swarm.py`)**
-   Mathematical resolution of conflicting local truths (Multi-Agent Swarm) without statistical averaging.
-5. **Topological Constrained Decoding (`topos_ai.generation`)**
-   Eliminating autoregressive hallucination by filtering next-token probabilities through the Topological Reachability Matrix. If an LLM statistically favors a token (e.g. memorization) but it lacks a formal morphism path, its logit is masked to $-\infty$.
+### 🔬 Benchmarks (`benchmarks/`)
+*   **`benchmark_sota.py`**: Hardware scale tree search vs Dense Attention.
+*   **`scaling_laws_benchmark.py`**: VRAM measurement proving O(1) limits.
+*   **`babi_logic_benchmark.py`**: Meta bAbI Task 15 evaluation.
+*   **`real_world_ontology_benchmark.py`**: Asymmetry tests on NLTK WordNet vs Dot-Product.
 
-## 📊 Empirical Proofs & Benchmarks
+### 🚀 Applications (`applications/`)
+*   **`app.py`**: Gradio Web Dashboard for interactive Neuro-Symbolic reasoning.
+*   **`real_world_medical_fact_checker.py`**: RAG-killer resolving Adverse Drug Reactions.
+*   **`real_world_solidity_auditor.py`**: Topological formal verification for Smart Contracts (Reentrancy).
+*   **`real_world_finance_topos.py`**: Systemic risk contagion using live S&P500 `yfinance` data.
+*   **`real_world_seismic_topos.py`**: Spatiotemporal causal discovery using USGS earthquake data.
+*   **`dynamic_ontology_nlp.py`**: Text-to-Topos builder and reasoner.
 
-ToposAI is not just a theoretical framework; it has been rigorously tested against industry standards:
-
-### 1. Hardware Scaling Laws (VRAM Efficiency)
-Standard PyTorch Attention $O(N^2)$ crashes on consumer GPUs for long contexts. Our custom **FlashTopos Triton Kernel** processes infinite logic chains in SRAM, achieving $O(1)$ extra memory overhead.
-
-| Context Length (N) | PyTorch VRAM (MB) | FlashTopos VRAM (MB) | Status |
-| :--- | :--- | :--- | :--- |
-| **4,096** | 8,191 MB | **111 MB** | Passed |
-| **8,192** | OOM (Crashed) | **255 MB** | Passed |
-| **32,768** | OOM (Crashed) | **4,088 MB** | Passed |
-
-*Result: FlashTopos processes 32K logic chains purely in SRAM, preventing the inevitable OOM crash of standard ML frameworks.*
-
-### 2. Meta bAbI Task 15 (Zero-Shot Formal Logic)
-LLMs typically struggle with multi-hop deductive reasoning (e.g., A->B->C), often hallucinating due to statistical noise.
-*   **Test:** 400 synthetic queries (Out-of-Distribution entities to prevent memorization).
-*   **Result:** ToposAI achieved **100.00% Zero-Shot Accuracy** (0 Hallucinations). It mathematically refused to validate any query lacking a continuous morphism path (e.g., reversed arrows).
+### 🧪 Experiments (`experiments/`)
+*   Contains deeply theoretical simulations like **Homotopy Type Theory (`hott_concept_bender.py`)**, **Temporal Topoi (`temporal_topos_retrocausality.py`)**, **Gödel Incompleteness Engine**, and **Recursive Self-Improvement (Singularity)**.
 
 ## ⚠️ Limitations & Honest Positioning
 
 As an early-stage research repository, ToposAI has notable limitations that must be acknowledged:
 
-*   **Trade-offs in Dense Retrieval Routing (`benchmark_sota.py`):** In large-scale vector similarity tests ($N=1M$), ToposAI abandons computationally expensive $O(N)$ dot-products for $O(\\log N)$ hierarchical tree search. Utilizing a Top-K Beam Search (`beam_width=10`), the model maintains a $\\sim 4.7$x inference speedup over classical dense attention while preserving strong recall (achieving $\\sim 72.7\\%$ to $89.1\\%$ accuracy depending on capacity). Further tuning of the branching factor and beam width is necessary to reach true 100% equivalence, reflecting the classic speed vs. accuracy trade-off.
-*   **Thought Experiments vs. Production Code:** Scripts such as `godel_incompleteness_engine.py` and `hofstadter_topoi_sentience.py` are heavily narrative-driven *simulations* rather than production-ready AI layers. They serve to mathematically demonstrate concepts like Limit Cycles and Self-Reference but are not integrated into the main `ToposTransformer` yet.
+*   **Trade-offs in Dense Retrieval Routing (`benchmarks/benchmark_sota.py`):** In large-scale vector similarity tests ($N=1M$), ToposAI abandons computationally expensive $O(N)$ dot-products for $O(\\log N)$ hierarchical tree search. Utilizing a Top-K Beam Search (`beam_width=10`), the model maintains a $\\sim 4.7$x inference speedup over classical dense attention while preserving strong recall (achieving $\\sim 72.7\\%$ to $89.1\\%$ accuracy depending on capacity). Further tuning of the branching factor and beam width is necessary to reach true 100% equivalence, reflecting the classic speed vs. accuracy trade-off.
+*   **Thought Experiments vs. Production Code:** Scripts within the `experiments/` directory are heavily narrative-driven *simulations* rather than production-ready AI layers. They serve to mathematically demonstrate concepts like Limit Cycles and Self-Reference but are not integrated into the main `ToposTransformer` yet.
 
 ## ⚙️ Installation
 

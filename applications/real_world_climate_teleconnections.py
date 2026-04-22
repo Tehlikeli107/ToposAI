@@ -105,7 +105,7 @@ def run_climate_teleconnection_experiment():
     print(" ToposAI ise, gezegenin sıcaklık verilerini 7-günlük Zaman-Gecikmeli")
     print(" (Time-Lagged) bir Kategoriye çevirir. Ve Transitive Closure ile")
     print(" Okyanustaki bir ısınmanın dünyayı nasıl dolaşıp Kutupları erittiğini")
-    print(" (Küresel Kelebek Etkisi) matematiksel olarak şeffafça İSPATLAR.")
+    print(" (Küresel Kelebek Etkisi) için matematiksel olarak güçlü bir sezgisel (heuristic) hipotez sunar.")
     print("=========================================================================\n")
 
     df, region_names = fetch_global_climate_data()

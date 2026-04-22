@@ -57,7 +57,7 @@ def fetch_historical_stock_data():
 def run_real_world_predictive_coding():
     print("=========================================================================")
     print(" BİLİMSEL KANIT 8: REAL-WORLD BIOLOGICAL AI (ZERO-GRADIENT ADAPTATION)")
-    print(" S&P 500 Piyasası, COVID-19 çöküşünde aniden karakter değiştirecek.")
+    print(" S&P 500 Piyasası çeşitli makro şoklarda (Ticaret savaşları, COVID vs.) karakter değiştirecek.")
     print(" ToposAI beyni, sıfır geriyayılım (No Backprop) ile bu 'Sürprizi' (Şoku)")
     print(" emecek ve anında yeni dünya düzenine uyum sağlayacaktır.")
     print("=========================================================================\n")

@@ -119,10 +119,9 @@ def run_astrophysics_topos_experiment():
         print(f"  > Kategori Kapanımı (N-Hop): {int(locked_pairs)} zincirleme bağlantı kanıtlandı.")
         
         if stability_score > 0.5:
-            print(f"  [KUSURSUZ KARARLILIK KANITLANDI]: Bu sistem %{stability_score*100:.1f} oranında Topolojik")
-            print(f"  bir 'Rezonans Zincirine' (Laplace Resonance Chain) kilitlenmiştir.")
-            print(f"  N-Body Simülasyonuna gerek yoktur; gezegenler birbirini matematiksel olarak")
-            print(f"  yörüngede tutmaktadır (Sonsuz Stabilite).")
+            print(f"  [GÜÇLÜ STABİLİTE HİPOTEZİ]: Bu sistem %{stability_score*100:.1f} oranında Topolojik")
+            print(f"  bir 'Rezonans Zincirine' (Laplace Resonance Chain) kilitlenme potansiyeline sahip.")
+            print(f"  Bu durum, N-Body simülasyonları için çok güçlü bir stabilite öncülü (prior) sağlar.")
             
             # Kilitli Zinciri Yazdır
             print("  [Kilitli Gezegen Ağı]:")

@@ -101,7 +101,7 @@ def run_seismic_causality_experiment():
     print(" BİLİMSEL KANIT 6: SPATIOTEMPORAL CAUSAL DISCOVERY (JEOFİZİK) ")
     print(" İddia: ToposAI, devasa ve kaotik gerçek dünya olaylarını (Depremler)")
     print(" Uzay-Zaman topolojisine çevirip, 'Kelebek Etkisini' (Hangi olayın")
-    print(" küresel bir zincirleme reaksiyon başlattığını) matematiksel kanıtlar.")
+    print(" küresel bir zincirleme reaksiyon başlattığını) matematiksel bir sezgisel (Spatiotemporal Heuristic) ile haritalandırır.")
     print("=========================================================================\n")
 
     # 1. GERÇEK DÜNYA VERİSİNİ İNDİR (Son 30 Gün, Mag > 4.0 depremler)

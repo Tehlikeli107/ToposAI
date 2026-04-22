@@ -5,6 +5,10 @@ import torch
 import time
 import math
 
+# [P3 FIX] Tekrarlanabilirlik (Reproducibility) için sabit rastgelelik çekirdeği
+torch.manual_seed(42)
+torch.cuda.manual_seed_all(42)
+
 def build_tree_deltas(branching_factor, depth, dim, device):
     """Ağaç yapısının ağırlıklarını GPU üzerinde oluşturur."""
     tree_deltas = []
@@ -88,6 +92,11 @@ def ultrametric_hierarchical_search(queries, tree_deltas, branching_factor, dept
     return best_final_indices
 
 def benchmark():
+    # [P3 FIX] Tekrarlanabilirlik (Reproducibility) için sabit rastgelelik çekirdeği
+    torch.manual_seed(42)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(42)
+        
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Çalışma Ortamı: {device.type.upper()}\n")
     
@@ -105,6 +114,8 @@ def benchmark():
     print("-" * 105)
     
     for depth in depths:
+        # [P3 FIX] Her döngü başında seed'i resetleyerek tam determinizm sağlıyoruz.
+        torch.manual_seed(42)
         num_leaves = branching_factor ** depth
         
         # 1. Modelleri Hazırla

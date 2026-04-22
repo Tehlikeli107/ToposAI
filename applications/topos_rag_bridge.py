@@ -68,10 +68,11 @@ class ToposRAGBridge:
         print(f"Reddedilen  : {len(rejected_chunks)} (Yanlış/Çelişkili bilgi, AI'a verilmekten engellendi).")
         
         if len(rejected_chunks) == 0:
-            print("\n✅ RAG Sistemi tamamen güvenlidir. Veriler dil modeline gönderilebilir.")
+            print("\n✅ [PROOF-OF-CONCEPT] Simüle edilen RAG verileri Topolojik olarak birleşebilir durumdadır.")
         else:
             print("\n🚨 DİKKAT: RAG Sistemi çelişkili belgeler getirdi! Klasik bir LLM bu belgeleri")
             print("okuyup halüsinasyon (Zehirli Sentez) görebilirdi. ToposAI şüpheli belgeleri eledi.")
+            print("(Not: Bu modül tam bir üretim RAG'ı değil, kavram kanıtıdır - Proof of Concept).")
             
         return global_truth, accepted_chunks, rejected_chunks
 
@@ -83,6 +84,8 @@ def run_rag_bridge_experiment():
     print(" getirir, belgelerin birbiriyle çelişip çelişmediğini bilmezler.")
     print(" ToposAI, dönen belgeleri okuyarak Şizofrenik RAG çıktılarını engeller.")
     print("=========================================================================\n")
+    print(" [NOT: Bu bir Proof-of-Concept simülasyonudur. Gerçek bir vektör veritabanına")
+    print(" bağlanmak yerine 'hardcoded' makale dizileri ile chunk->matrix dönüşümü simüle edilmiştir.]\n")
 
     # Kavramlar: 0: Kredi, 1: Faiz, 2: Onay, 3: Risk
     vocab_size = 10
