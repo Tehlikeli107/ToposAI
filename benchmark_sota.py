@@ -30,30 +30,59 @@ def dense_attention_search(queries, all_leaves):
     best_indices = torch.argmax(scores, dim=-1)
     return best_indices
 
-def ultrametric_hierarchical_search(queries, tree_deltas, branching_factor, depth):
-    """BİZİM MİMARİ: O(log N) Hiyerarşik Ağaç Taraması."""
+def ultrametric_hierarchical_search(queries, tree_deltas, branching_factor, depth, beam_width=10):
+    """BİZİM MİMARİ: O(log N) Hiyerarşik Ağaç Taraması (Beam Search ile Yüksek Doğruluk)."""
     batch_size = queries.size(0)
     device = queries.device
     dim = queries.size(-1)
     
-    current_indices = torch.zeros(batch_size, dtype=torch.long, device=device)
-    current_state = tree_deltas[0].repeat(batch_size, 1)
+    # Beam Search için başlangıç (Kök)
+    # current_indices: [batch_size, beam_width]
+    current_indices = torch.zeros(batch_size, 1, dtype=torch.long, device=device)
+    current_state = tree_deltas[0].repeat(batch_size, 1, 1) # [batch, beam, dim]
     
     for d in range(1, depth + 1):
+        current_beam_size = current_indices.size(1)
+        
+        # Her beam için çocukları genişlet
+        # child_start_idx: [batch, beam]
         child_start_idx = current_indices * branching_factor
-        offsets = torch.arange(branching_factor, device=device).unsqueeze(0).repeat(batch_size, 1)
-        child_indices = child_start_idx.unsqueeze(1) + offsets
         
-        child_deltas = tree_deltas[d][child_indices] # (batch, branch, dim)
-        child_states = current_state.unsqueeze(1) + child_deltas # (batch, branch, dim)
+        # offsets: [batch, beam, branch]
+        offsets = torch.arange(branching_factor, device=device).view(1, 1, branching_factor).expand(batch_size, current_beam_size, branching_factor)
+        child_indices = child_start_idx.unsqueeze(2) + offsets # [batch, beam, branch]
         
-        scores = torch.sum(queries.unsqueeze(1) * child_states, dim=-1) # (batch, branch)
-        best_child = torch.argmax(scores, dim=-1)
+        # child_deltas: [batch, beam, branch, dim]
+        # tree_deltas[d] tensorünü düzleştirip indekslerle çekiyoruz
+        layer_deltas = tree_deltas[d]
+        child_deltas = layer_deltas[child_indices.view(-1)].view(batch_size, current_beam_size, branching_factor, dim)
         
-        current_indices = child_start_idx + best_child
-        current_state = child_states[torch.arange(batch_size, device=device), best_child]
+        child_states = current_state.unsqueeze(2) + child_deltas # [batch, beam, branch, dim]
         
-    return current_indices
+        # Skorları hesapla (Cosine similarity benzeri Dot Product)
+        # queries: [batch, 1, 1, dim]
+        scores = torch.sum(queries.view(batch_size, 1, 1, dim) * child_states, dim=-1) # [batch, beam, branch]
+        
+        # Beam ve Branch boyutlarını birleştirip en iyi 'beam_width' kadarını seç
+        scores_flat = scores.view(batch_size, -1) # [batch, beam * branch]
+        child_indices_flat = child_indices.view(batch_size, -1) # [batch, beam * branch]
+        child_states_flat = child_states.view(batch_size, -1, dim) # [batch, beam * branch, dim]
+        
+        # Sınır kontrolü (İlk adımlarda beam * branch sayısı beam_width'ten küçük olabilir)
+        k = min(beam_width, scores_flat.size(1))
+        
+        topk_scores, topk_local_indices = torch.topk(scores_flat, k, dim=-1) # [batch, k]
+        
+        # Seçilen en iyi K indeksi ve state'i güncelle
+        current_indices = torch.gather(child_indices_flat, 1, topk_local_indices)
+        
+        # State'leri güncellemek için gather işlemi
+        topk_local_indices_expanded = topk_local_indices.unsqueeze(-1).expand(-1, -1, dim)
+        current_state = torch.gather(child_states_flat, 1, topk_local_indices_expanded)
+        
+    # En son derinlikte, top K içindeki EN İYİ (1. sıradaki) indeksi döndür
+    best_final_indices = current_indices[:, 0]
+    return best_final_indices
 
 def benchmark():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

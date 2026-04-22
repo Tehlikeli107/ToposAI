@@ -28,7 +28,7 @@ def test_dynamic_ontology():
 
     # 1. DÜZ METİN (Hukuki/Siber bir senaryo)
     # Kural: "Özne Nesne Yüklem" formatında basit, ek almamış (stem) cümleler
-    text = "alice hacker dır . hacker sunucu saldırır . sunucu gizli_veriyi tutar . bob polis tir . polis hacker yakalar ."
+    text = "alice hacker dır . hacker sunucu saldırır . sunucu gizli_veriyi tutar . bob polis tir . polis hacker yakalar . charlie masum dur . charlie kedi sever ."
     
     print(f"Okunan Metin: '{text}'\n")
 
@@ -39,8 +39,6 @@ def test_dynamic_ontology():
     relations = []
     
     # Basitleştirilmiş SOV (Subject Object Verb) Parser
-    # Örn: "alice hacker dır" -> Subj: alice, Obj: hacker
-    # Örn: "hacker sunucu saldırır" -> Subj: hacker, Obj: sunucu
     for sentence in sentences:
         words = sentence.split()
         if len(words) >= 3:
@@ -62,7 +60,6 @@ def test_dynamic_ontology():
         R[e_idx[subj], e_idx[obj]] = 1.0 # Metinden okunan bilgi "Kesin Doğru" kabul edilir
         
     # 4. TRANSTIVE CLOSURE (Metinde yazmayan mantıksal zincirleri bul)
-    # Metin "Alice -> Gizli_Veri" demiyor. Ama Alice -> Hacker -> Sunucu -> Gizli_Veri zinciri var!
     R_inf = calculate_transitive_closure(R)
     
     print("\n--- SIFIR-EZBER ÇIKARIM TESTİ (RAG VS TOPOS) ---")
@@ -70,9 +67,10 @@ def test_dynamic_ontology():
     print("Topos AI ise kurduğu matriste A->D yolunu matematiksel olarak KANITLAR.")
     
     queries = [
-        ("alice", "gizli_veriyi"), # Beklenen: 1.0 (Zincirleme)
-        ("bob", "hacker"),         # Beklenen: 1.0 (Doğrudan)
-        ("bob", "gizli_veriyi"),   # Beklenen: 0.0 (Bob'un veriye erişim zinciri yok)
+        ("alice", "gizli_veriyi"), # Beklenen: 1.0 (Zincirleme bağlantı)
+        ("bob", "hacker"),         # Beklenen: 1.0 (Doğrudan bağlantı)
+        ("bob", "gizli_veriyi"),   # Beklenen: 1.0 (Bob -> Polis -> Hacker -> Sunucu -> Veri zinciri mevcut!)
+        ("charlie", "gizli_veriyi")# Beklenen: 0.0 (Charlie'nin hiçbir şekilde sisteme bağı yok)
     ]
     
     for subj, obj in queries:

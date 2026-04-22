@@ -102,11 +102,12 @@ def test_self_modifying_ai():
             # 1-KATEGORİ: MEVCUT EVREN KURALLARI (Tıkanıklık)
             loss += (R[0, 1] - 0.0)**2 # Şövalye -> Ejderha (İmkansız/Ölüm)
             loss += (R[1, 2] - 1.0)**2 # Ejderha -> Prenses (Esaret/Bağlantı var)
+            loss += (R[0, 2] - 0.0)**2 # Şövalye -> Prenses (Doğrudan uçamaz, YASAK!)
             
             # HEDEF: Şövalyenin Prensese ulaşması (A->C)
             # R'nin kendisiyle olan geçişliliği (Composition) A->C'yi üretmeli
             R_comp = lukasiewicz_composition(R, R)
-            loss += (R_comp[0, 2] - 1.0)**2 # Hedef: A->C = 1.0 Olmalı!
+            loss += (R_comp[0, 2] - 1.0)**2 # Hedef: A->C geçişliliği 1.0 Olmalı!
         else:
             # 2-KATEGORİ: PARADİGMA KAYMASI (Yeni 'X' Boyutu İcat Edildi!)
             # Model artık 4x4 oldu. 0: Şövalye, 1: Ejderha, 2: Prenses, 3: İcat Edilen 'X'
@@ -114,10 +115,11 @@ def test_self_modifying_ai():
             # Eski kurallar hala geçerli (Fizik kuralları değişmez)
             loss += (R[0, 1] - 0.0)**2 
             loss += (R[1, 2] - 1.0)**2 
+            loss += (R[0, 2] - 0.0)**2 # Doğrudan gidiş hala YASAK!
             
             # Model, hedefine (0->2) ulaşmak için YENİ bir yol (Composition) inşa etmeye çalışır
             R_comp = lukasiewicz_composition(R, R)
-            loss += (R_comp[0, 2] - 1.0)**2 # Hedef: A->C = 1.0 Olmalı!
+            loss += (R_comp[0, 2] - 1.0)**2 # Hedef: A->C geçişliliği 1.0 Olmalı!
             
             # Model, icat ettiği 3 numaralı 'X' boyutunu kullanmaya teşvik edilir
             # İnsan icadı olan 'X' (Örn: Büyülü Kılıç veya Pazarlık)
