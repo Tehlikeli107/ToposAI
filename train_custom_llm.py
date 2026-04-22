@@ -13,11 +13,12 @@ import urllib.request
 import time
 
 from topos_ai.models import ToposTransformer
+from topos_ai.tokenization import TopologicalTokenizer
 
 # =====================================================================
 # TOPOS-LLM CUSTOM TRAINING ENGINE
 # Amacı: OpenAI'ın Dot-Product mimarisi yerine, ToposAI'nin Kategori 
-# Teorisi (Yoneda & MUTA) mimarisini kullanarak sıfırdan bir Dil Modeli 
+# Teorisi (Yoneda, MoE, RoPE) mimarisini kullanarak sıfırdan bir Dil Modeli 
 # eğitmek. Model, "Tiny Shakespeare" veri setini okuyarak İngilizceyi
 # kendi kendine sentezleyecek ve ağırlıklarını kaydedecek.
 # =====================================================================
@@ -50,13 +51,20 @@ def train():
         print(f"Veri indirme hatası: {e}")
         return
 
-    print("[TOKENIZER] GPT-2 BPE Tokenizer Yükleniyor...")
-    tokenizer = AutoTokenizer.from_pretrained("gpt2")
-    vocab_size = tokenizer.vocab_size
+    # [KENDİ TOKENIZER'IMIZ]
+    print("\n[TOKENIZER] Kendi icadımız olan 'Topological Tokenizer' Yükleniyor...")
+    # Çok bekletmemek adına 1000'lik bir hedef vocab seçiyoruz.
+    tokenizer = TopologicalTokenizer(vocab_size=1000)
     
-    print("[VERİ] Metin Tokenlara (Sözlük ID'lerine) çevriliyor...")
-    # Hızlı eğitim için metnin ilk 200.000 karakterini alıyoruz
-    tokens = tokenizer.encode(text[:200000], add_special_tokens=False)
+    print("[TOKENIZER] Shakespeare verisi üzerinde Topolojik Nedensellik eğitiliyor (Kelimeler yaratılıyor)...")
+    # Tokenizer'ı metnin ilk 30.000 karakteri üzerinde (Hızlı demo için) eğitelim
+    tokenizer.train(text[:30000])
+    vocab_size = len(tokenizer.vocab)
+    print(f"   Sözlük Boyutu (Vocab Size): {vocab_size:,}")
+    
+    print("\n[VERİ] Metin, Kendi Topolojik Tokenlarımıza (Sözlük ID'lerine) çevriliyor...")
+    # Eğitim için ilk 200.000 karakteri encode et
+    tokens = tokenizer.encode(text[:200000])
     print(f"[VERİ] Toplam {len(tokens):,} Token oluşturuldu.")
 
     # 2. DATALOADER
@@ -94,7 +102,7 @@ def train():
     for iter_num in range(1, max_iters + 1):
         X, Y = next(batch_iter)
         
-        logits = model(X)
+        logits, _ = model(X)
         loss = criterion(logits.view(-1, vocab_size), Y.view(-1))
         
         optimizer.zero_grad()
@@ -111,9 +119,9 @@ def train():
             # Anlık Test Üretimi
             model.eval()
             with torch.no_grad():
-                test_prompt = tokenizer.encode("ROMEO:\n", return_tensors="pt").to(device)
+                test_prompt = torch.tensor([tokenizer.encode("ROMEO:\n")], dtype=torch.long, device=device)
                 for _ in range(15):
-                    out_logits = model(test_prompt)
+                    out_logits, _ = model(test_prompt)
                     next_tok = torch.argmax(out_logits[0, -1, :]).unsqueeze(0).unsqueeze(0)
                     test_prompt = torch.cat([test_prompt, next_tok], dim=1)
                 gen_text = tokenizer.decode(test_prompt[0].tolist()).replace('\n', ' ')
