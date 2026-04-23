@@ -36,16 +36,11 @@ def chat_with_topos():
             print(f"Tokenizer yükleme hatası: {e}")
             return
     else:
-        # Hızlı Tokenizer Eğitimi (Sözlüğü geri kurmak için train() ile aynı veri/limitler)
-        print("   > Tokenizer sözlüğü diskte bulunamadı. Yeniden inşa ediliyor...")
-        url = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
-        try:
-            text = urllib.request.urlopen(url).read().decode('utf-8')
-            # Train scriptindeki ile birebir aynı (30000 char)
-            tokenizer.train(text[:30000])
-        except Exception as e:
-            print(f"Tokenizer veri indirme hatası: {e}")
-            return
+        print("🚨 HATA: 'weights/tokenizer.json' bulunamadı!")
+        print("   Bu araç tamamen ÇEVRİMDIŞI (Offline) çalışacak şekilde tasarlanmıştır.")
+        print("   Lütfen önce 'topos-train' komutunu (veya train_custom_llm.py) çalıştırarak")
+        print("   kendi modelinizi ve tokenizer'ınızı eğitin.")
+        return
         
     vocab_size = len(tokenizer.vocab)
 

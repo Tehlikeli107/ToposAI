@@ -18,17 +18,19 @@ from topos_ai.mamba import ToposMambaLM
 # için metin ne kadar uzarsa uzasın hızı Lineer (Sabit hızda) artar!
 # =====================================================================
 
-def run_speed_benchmark():
+def run_speed_benchmark(seq_lengths=None):
+    if seq_lengths is None:
+        seq_lengths = [128, 256, 512, 1024, 2048]
+        
     print("=========================================================================")
     print(" BİLİMSEL KANIT 49: THE END OF TRANSFORMERS (TOPOS-MAMBA BENCHMARK) ")
     print(" İddia: Tüm dünya OpenAI/GPT'nin kullandığı O(N^2) Dikkat (Attention)")
     print(" mekanizmasının sınırlarına çarptı. ToposAI ise Kategori Teorisini")
-    print(" 'Sürekli Dinamik Sistemlere' (Mamba/SSM) uygulayarak, O(N) hızında")
-    print(" çalışan yeni nesil bir Mimari sentezledi. Bu test, Transformer'ın")
-    print(" boğulduğu uzunluklarda Mamba'nın nasıl ışık hızında (Sıfır KV-Cache")
-    print(" yüküyle) çalıştığını kanıtlayacaktır.")
+    print(" 'Sürekli Dinamik Sistemlere' (Mamba/SSM) uygulayarak, teorik olarak")
+    print(" O(N) hızında çalışan yeni nesil bir Mimari hedefler. Bu test, ")
+    print(" Transformer ve Mamba'nın hız eğrilerini (Scaling) kıyaslar.")
     print("=========================================================================\n")
-
+    
     vocab_size = 100
     d_model = 64
     batch_size = 1
@@ -41,9 +43,6 @@ def run_speed_benchmark():
     
     # 2. Yeni Nesil ToposMamba (O(N) State Space tabanlı)
     mamba = ToposMambaLM(vocab_size, d_model=d_model, num_layers=2).to(device)
-
-    # Test Uzunlukları
-    seq_lengths = [128, 256, 512, 1024, 2048]
     
     print(f"{'Metin Uzunluğu (N)':<20} | {'Transformer Hızı (O(N^2))':<25} | {'ToposMamba Hızı (O(N))':<25} | {'FARK'}")
     print("-" * 90)

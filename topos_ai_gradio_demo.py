@@ -37,16 +37,8 @@ def load_system():
             print(f"Tokenizer yükleme hatası: {e}")
             return "Model Yükleme Hatası (Tokenizer okunamadı)"
     else:
-        # Hızlı Tokenizer Eğitimi (Sözlüğü geri kurmak için train() ile aynı veri/limitler)
-        print("   > Tokenizer sözlüğü diskte bulunamadı. Yeniden inşa ediliyor...")
-        import urllib.request
-        url = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
-        try:
-            text = urllib.request.urlopen(url).read().decode('utf-8')
-            tokenizer.train(text[:30000])
-        except Exception as e:
-            print(f"Tokenizer veri indirme hatası: {e}")
-            return "Model Yükleme Hatası (İnternet Yok)"
+        print("🚨 HATA: 'weights/tokenizer.json' bulunamadı!")
+        return "Model Yükleme Hatası (Lütfen önce 'topos-train' çalıştırıp modeli eğitin)"
         
     vocab_size = len(tokenizer.vocab)
     model = ToposTransformer(vocab_size=vocab_size, d_model=256, num_universes=8, num_layers=4)
@@ -96,7 +88,7 @@ def generate_topos_text(prompt, max_length):
     return output_text
 
 # --- GRADIO ARAYÜZÜ (GUI) ---
-with gr.Blocks(theme=gr.themes.Default()) as demo:
+with gr.Blocks() as demo:
     gr.Markdown(
         """
         # 🌌 ToposAI: Neuro-Symbolic AGI Framework
@@ -123,10 +115,9 @@ with gr.Blocks(theme=gr.themes.Default()) as demo:
         """
         ---
         ### 🧠 Why ToposAI? (The Pitch for Investors & Researchers)
-        *   **Zero-Hallucination:** Hallucinations in LLMs are caused by continuous vector interpolations. ToposAI uses discrete categorical paths. If there is no morphism (logical arrow), the model outputs 0.0 mathematically.
-        *   **O(1) Backward Pass:** We implemented a custom `Triton C++ Kernel` that accumulates gradients directly in SRAM. Llama-3 crashes (OOM) at 32K context; ToposAI can scale infinitely.
-        *   **Formal Verification:** Native integration with the **Lean 4** Theorem Prover. AI discoveries are automatically transpiled into formal mathematical proofs (Curry-Howard-Lambek correspondence).
-        *   **Singularity Ready:** The framework includes a *Gödel Machine* simulation where the AI analyzes its own AST (Abstract Syntax Tree) and dynamically injects optimized C++ logic into its own RAM during runtime.
+        *   **Reduced Hallucination (Theoretical):** Hallucinations in LLMs are caused by continuous vector interpolations. ToposAI uses discrete categorical paths. If there is no morphism (logical arrow), the model limits hallucination vectors.
+        *   **O(1) Backward Pass Optimization:** We implemented a custom `Triton C++ Kernel` that accumulates gradients directly in SRAM, managing VRAM footprint and allowing the model to scale efficiently.
+        *   **Formal Verification:** Integration with the **Lean 4** Theorem Prover. Categorical logic paths can be formally verified.
         
         *Built by the Principal Investigator. 2026.*
         """
@@ -134,4 +125,4 @@ with gr.Blocks(theme=gr.themes.Default()) as demo:
 
 if __name__ == "__main__":
     print("ToposAI Web Sunucusu Başlatılıyor...")
-    demo.launch(server_name="0.0.0.0", share=False)
+    demo.launch(server_name="0.0.0.0", share=False, theme=gr.themes.Default())

@@ -17,7 +17,7 @@ def get_vram_mb():
     """GPU'nun o an kullandığı maksimum belleği MB cinsinden döndürür."""
     return torch.cuda.max_memory_allocated() / (1024 * 1024)
 
-def run_scaling_benchmark():
+def run_scaling_benchmark(seq_lengths=None):
     if not torch.cuda.is_available():
         print("CUDA bulunamadı. Bu donanım testi GPU gerektirir.")
         return
@@ -27,7 +27,8 @@ def run_scaling_benchmark():
 
     # Test edilecek Bağlam Uzunlukları (Context Length - N)
     # 1K, 2K, 4K, 8K, 16K, 32K (Çok uzun bir kitap)
-    seq_lengths = [1024, 2048, 4096, 8192, 16384, 32768]
+    if seq_lengths is None:
+        seq_lengths = [1024, 2048, 4096, 8192, 16384, 32768]
     dim = 64
     batch_size = 1
 

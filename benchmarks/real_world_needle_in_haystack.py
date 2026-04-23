@@ -98,29 +98,31 @@ def run_needle_in_haystack(seq_len):
         
     return similarity, time_taken
 
-def run_benchmark():
+def run_benchmark(context_sizes=None):
+    if context_sizes is None:
+        context_sizes = [4096, 8192, 16384, 32768]
+        
     print("=========================================================================")
     print(" BİLİMSEL KANIT 47: THE NEEDLE IN A HAYSTACK BENCHMARK (INDUSTRY SOTA) ")
     print(" İddia: Endüstrinin en zorlu testi olan 'Samanlıkta İğne', bir LLM'in")
-    print(" devasa bir kitap (32.000+ kelime) içinde geçen tek bir cümleyi")
-    print(" (İğneyi) ne kadar iyi hatırladığını ölçer. Klasik Transformer'lar")
-    print(" Softmax ezişmesi yüzünden metnin 'Ortasındaki' bilgileri unuturlar.")
-    print(" ToposAI, Lukasiewicz Mantığı (Kategori Teorisi) kullanarak hiçbir")
-    print(" bilgiyi ezmez (No Zero-Sum Game) ve %100 İsabetle iğneyi bulur.")
+    print(" devasa bir kitap içinde geçen tek bir cümleyi ne kadar iyi hatırladığını")
+    print(" ölçer. Klasik Transformer'lar Softmax ezişmesi yüzünden metnin")
+    print(" 'Ortasındaki' bilgileri unuturlar. ToposAI, Lukasiewicz Mantığı")
+    print(" kullanarak bu bilgileri teorik olarak ezmeden korumayı hedefler.")
     print("=========================================================================\n")
 
-    # Kademeli olarak bağlamı (Context) büyüt
-    context_sizes = [4096, 8192, 16384, 32768]
-    
     results = []
     for size in context_sizes:
         try:
             acc, t = run_needle_in_haystack(size)
             results.append((size, acc, t))
         except RuntimeError as e:
-            if "out of memory" in str(e).lower():
-                print(f"  ❌ SONUÇ: OOM (VRAM TÜKENDİ)! {size} Token'da patladı.")
+            if "out of memory" in str(e).lower() or "oom" in str(e).lower():
+                print(f"  ❌ SONUÇ: OOM (VRAM TÜKENDİ)! {size} Token'da patladı. Daha büyük boyutlar atlanıyor.")
                 torch.cuda.empty_cache()
+                import gc; gc.collect()
+                results.append((size, "OOM", "OOM"))
+                break # OOM sonrası daha büyük boyutları denemeye gerek yok
             else:
                 raise e
 
@@ -128,7 +130,10 @@ def run_benchmark():
     print(f"{'Bağlam (Token)':<15} | {'Hatırlama (Recall)':<20} | {'Süre (ms)':<15}")
     print("-" * 55)
     for size, acc, t in results:
-        print(f"{size:<15,} | %{acc*100:<19.4f} | {t:.2f} ms")
+        if acc == "OOM":
+            print(f"{size:<15,} | {'OOM (VRAM Yetersiz)':<20} | {'-':<15}")
+        else:
+            print(f"{size:<15,} | %{acc*100:<19.4f} | {t:.2f} ms")
         
     print("\n[BİLİMSEL DEĞERLENDİRME]")
     print("ToposAI, donanım izin verdiği ölçüde (örn. 4,096 kelime), bağlam")
