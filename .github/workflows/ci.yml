@@ -12,27 +12,27 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python 3.11
       uses: actions/setup-python@v4
       with:
         python-version: "3.11"
-        
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest torch triton networkx matplotlib numpy pandas yfinance nltk gradio requests transformers datasets tensorboard
+        pip install pytest
         pip install -e .
-        
+
     - name: Run pytest (Math & Model Verification)
       run: |
-        # Sadece temel matematik/model testlerini çalıştır (CI sunucusunda GPU olmayabilir)
+        # Run core mathematics and model tests
         pytest tests/
 
     - name: Formal Mathematical Verification (Lean 4)
       run: |
-        # Lean 4'ü yükle ve Curry-Howard-Lambek ispatlarını kontrol et
+        # Install Lean 4 via elan to verify Curry-Howard-Lambek proofs
         curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
-        source $HOME/.elan/env
-        # Sadece syntax ve teorem doğruluğunu test et
+        export PATH="$HOME/.elan/bin:$PATH"
+        # Test theorem correctness
         lean topos_proof.lean
