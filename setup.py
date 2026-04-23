@@ -8,7 +8,6 @@ setup(
     packages=find_packages(),
     install_requires=[
         "torch>=2.0.0",
-        "triton>=2.1.0",
         "yfinance>=0.2.0",
         "pandas>=1.3.0",
         "nltk>=3.6.0",
@@ -18,7 +17,8 @@ setup(
         "requests>=2.25.0",
         "transformers>=4.30.0",
         "datasets>=2.10.0",
-        "tensorboard>=2.10.0"
+        "tensorboard>=2.10.0",
+        "scikit-learn>=1.0.0"
     ],
     entry_points={
         "console_scripts": [
