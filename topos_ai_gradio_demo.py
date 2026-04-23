@@ -28,16 +28,25 @@ def load_system():
     print("[SİSTEM] Kendi İcadımız Olan 'Topological Tokenizer' Yükleniyor...")
     tokenizer = TopologicalTokenizer(vocab_size=1000)
     
-    # Hızlı Tokenizer Eğitimi (Sözlüğü geri kurmak için train() ile aynı veri/limitler)
-    # Gerçek bir üründe bu 'tokenizer.json' olarak diske kaydedilir, şimdilik on-the-fly.
-    import urllib.request
-    url = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
-    try:
-        text = urllib.request.urlopen(url).read().decode('utf-8')
-        tokenizer.train(text[:30000])
-    except Exception as e:
-        print(f"Tokenizer veri indirme hatası: {e}")
-        return "Model Yükleme Hatası (İnternet Yok)"
+    tokenizer_path = "weights/tokenizer.json"
+    if os.path.exists(tokenizer_path):
+        print(f"   > Tokenizer sözlüğü ({tokenizer_path}) diskten yükleniyor...")
+        try:
+            tokenizer.load(tokenizer_path)
+        except Exception as e:
+            print(f"Tokenizer yükleme hatası: {e}")
+            return "Model Yükleme Hatası (Tokenizer okunamadı)"
+    else:
+        # Hızlı Tokenizer Eğitimi (Sözlüğü geri kurmak için train() ile aynı veri/limitler)
+        print("   > Tokenizer sözlüğü diskte bulunamadı. Yeniden inşa ediliyor...")
+        import urllib.request
+        url = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
+        try:
+            text = urllib.request.urlopen(url).read().decode('utf-8')
+            tokenizer.train(text[:30000])
+        except Exception as e:
+            print(f"Tokenizer veri indirme hatası: {e}")
+            return "Model Yükleme Hatası (İnternet Yok)"
         
     vocab_size = len(tokenizer.vocab)
     model = ToposTransformer(vocab_size=vocab_size, d_model=256, num_universes=8, num_layers=4)

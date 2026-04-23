@@ -27,16 +27,25 @@ def chat_with_topos():
     print("[SİSTEM] Kendi İcadımız Olan 'Topological Tokenizer' Yükleniyor...")
     tokenizer = TopologicalTokenizer(vocab_size=1000)
     
-    # Hızlı Tokenizer Eğitimi (Sözlüğü geri kurmak için train() ile aynı veri/limitler)
-    print("   > Tokenizer sözlüğü (1000 kelime) yeniden inşa ediliyor...")
-    url = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
-    try:
-        text = urllib.request.urlopen(url).read().decode('utf-8')
-        # Train scriptindeki ile birebir aynı (30000 char)
-        tokenizer.train(text[:30000])
-    except Exception as e:
-        print(f"Tokenizer veri indirme hatası: {e}")
-        return
+    tokenizer_path = "weights/tokenizer.json"
+    if os.path.exists(tokenizer_path):
+        print(f"   > Tokenizer sözlüğü ({tokenizer_path}) diskten yükleniyor...")
+        try:
+            tokenizer.load(tokenizer_path)
+        except Exception as e:
+            print(f"Tokenizer yükleme hatası: {e}")
+            return
+    else:
+        # Hızlı Tokenizer Eğitimi (Sözlüğü geri kurmak için train() ile aynı veri/limitler)
+        print("   > Tokenizer sözlüğü diskte bulunamadı. Yeniden inşa ediliyor...")
+        url = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
+        try:
+            text = urllib.request.urlopen(url).read().decode('utf-8')
+            # Train scriptindeki ile birebir aynı (30000 char)
+            tokenizer.train(text[:30000])
+        except Exception as e:
+            print(f"Tokenizer veri indirme hatası: {e}")
+            return
         
     vocab_size = len(tokenizer.vocab)
 

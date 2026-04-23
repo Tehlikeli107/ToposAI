@@ -121,13 +121,12 @@ class GenerativeGrammarEngine:
 
 def run_generative_grammar_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 41: GENERATIVE GRAMMAR (ZERO-HALLUCINATION SYNTHESIS) ")
+    print(" BİLİMSEL KANIT 41: GENERATIVE GRAMMAR (SYNTACTIC TOY SYNTHESIS) ")
     print(" İddia: Büyük Dil Modelleri (LLMs) sonraki kelimeyi sadece istatistik")
-    print(" (Olasılık Dağılımı) ile seçer. Bu yüzden halüsinasyon (Dilbilgisi")
-    print(" hataları veya anlamsız cümleler) üretirler. ToposAI ise, kelimeleri")
+    print(" (Olasılık Dağılımı) ile seçer. ToposAI ise, kelimeleri")
     print(" birer Kategori Oku (Functor) olarak alır ve açıkta kalan bağları ")
     print(" (Adjoints) doyurana kadar 'LEGO' gibi kilitler. SIFIR İSTATİSTİK ile ")
-    print(" %100 dilbilgisel, sonsuz sayıda Doğru Cümle (S) Sentezleyebilir.")
+    print(" sentaktik kurallara uyan basit (oyuncak) cümleler (S) sentezleyebilir.")
     print("=========================================================================\n")
 
     engine = GenerativeGrammarEngine()

@@ -131,13 +131,13 @@ def run_benchmark():
         print(f"{size:<15,} | %{acc*100:<19.4f} | {t:.2f} ms")
         
     print("\n[BİLİMSEL DEĞERLENDİRME]")
-    print("ToposAI, 32.000 kelimelik devasa bir bağlamın (Yaklaşık bir Roman)")
-    print("içinde, %73. bölgeye gizlenmiş olan spesifik bir şifreyi (İğneyi)")
+    print("ToposAI, donanım izin verdiği ölçüde (örn. 4,096 kelime), bağlam")
+    print("içinde %73. bölgeye gizlenmiş olan spesifik bir şifreyi (İğneyi)")
     print("KLASİK MODEL HASTALIĞI OLAN 'ORTADAKİLERİ UNUTMA (Lost in the Middle)'")
     print("sendromuna yakalanmadan, %99.99'un üzerinde bir kesinlikle bulmuştur.")
-    print("Bu başarı, ToposAI'nin Hukuk (Dava Dosyaları), Tıp (Hasta Geçmişi) ve")
-    print("Finans (Şirket Bilançoları) gibi devasa belgeleri sıfır halüsinasyonla")
-    print("analiz edebilecek Endüstri Standartlarında bir AGI olduğunu kanıtlar!")
+    print("Daha büyük bağlamlarda (8K, 32K) standart tüketici kartlarında VRAM")
+    print("yetersizliğinden OOM verse de, çalıştığı aralıkta Fuzzy Logic'in")
+    print("bilgiyi ezmeden (Zero-Sum) koruduğunu teorik ve pratik olarak ispatlar.")
 
 if __name__ == "__main__":
     run_benchmark()

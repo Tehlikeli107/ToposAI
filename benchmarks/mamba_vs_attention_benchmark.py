@@ -98,15 +98,15 @@ def run_speed_benchmark():
             
         print(f"{seq:<20,} | {trans_status:<25} | {mamba_status:<25} | {diff_text}")
 
-    print("\n[BİLİMSEL DEĞERLENDİRME: THE END OF ATTENTION]")
+    print("\n[BİLİMSEL DEĞERLENDİRME: THEORETICAL O(N) SCALING]")
     print("Transformer (Dikkat) mekanizması, N büyüdükçe (Uzun romanlar, DNA dizilimleri,")
     print("Milyon satırlık kodlar) kendi ağırlığı ve hafıza yükü altında ezilmektedir.")
     print("ToposMamba ise Kategori Teorisinin (Fuzzy Logic) getirdiği O(N) karmaşıklıklı")
-    print("'Dinamik Durum (State)' okuması sayesinde hızı N ile doğru orantılı tutar.")
-    print("Üstelik donanımsal (GPU) bir Paralel Scan (C++) Kerneli ile birleştiğinde")
-    print("bu O(N) hızlanması klasik Attention'a göre binlerce kat (1000x+) verim sağlar.")
-    print("Geleceğin AGI mimarisi artık 'Attention Is All You Need' değil;")
-    print("'Topological States Are All You Need'dir!")
+    print("'Dinamik Durum (State)' okuması sayesinde teorik olarak hızı N ile doğru")
+    print("orantılı tutar. Mevcut Python for-döngüsü implementasyonu nedeniyle uzun")
+    print("metinlerde şu an PyTorch'un optimize edilmiş Attention'ından yavaş kalsa da,")
+    print("donanımsal (GPU) bir Paralel Scan (C++) Kerneli ile birleştirildiğinde")
+    print("bu O(N) mimarisi gerçek bir hızlanma (Speedup) sağlayacaktır.")
 
 if __name__ == "__main__":
     run_speed_benchmark()

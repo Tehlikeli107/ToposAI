@@ -111,3 +111,37 @@ class TopologicalTokenizer:
     def decode(self, token_ids: list[int]) -> str:
         """Token ID'lerini (int) tekrar string'e çevirir."""
         return "".join([self.reverse_vocab.get(t, "") for t in token_ids])
+
+    def save(self, filepath: str):
+        """Tokenizer sözlüğünü disk'e (JSON) kaydeder."""
+        import json
+        
+        # merges dictionary key is tuple (str, str), we need to convert to string for JSON
+        merges_str_keys = {f"{k[0]}|{k[1]}": v for k, v in self.merges.items()}
+        
+        data = {
+            "vocab_size": self.target_vocab_size,
+            "vocab": self.vocab,
+            "merges": merges_str_keys
+        }
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+            
+    def load(self, filepath: str):
+        """Disk'ten tokenizer sözlüğünü yükler."""
+        import json
+        with open(filepath, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+        self.target_vocab_size = data["vocab_size"]
+        self.vocab = data["vocab"]
+        
+        # reverse_vocab'ı yeniden oluştur
+        self.reverse_vocab = {v: k for k, v in self.vocab.items()}
+        
+        # merges string key'lerini tekrar tuple'a çevir
+        self.merges = {}
+        for k, v in data["merges"].items():
+            parts = k.split('|')
+            if len(parts) == 2:
+                self.merges[(parts[0], parts[1])] = v

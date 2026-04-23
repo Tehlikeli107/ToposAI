@@ -150,11 +150,14 @@ def train():
                 print(f"      AI Diyor ki: '{gen_text}'")
             model.train()
 
-    # 5. AĞIRLIKLARI KAYDET (CHECKPOINT)
+    # 5. AĞIRLIKLARI VE TOKENIZER'I KAYDET (CHECKPOINT)
     save_path = "weights/topos_custom_llm.pt"
+    tokenizer_path = "weights/tokenizer.json"
     torch.save(model.state_dict(), save_path)
+    tokenizer.save(tokenizer_path)
     print(f"\n✅ [BAŞARILI] Topos-LLM Eğitimi Tamamlandı!")
     print(f"Beyin ağırlıkları '{save_path}' konumuna kaydedildi.")
+    print(f"Tokenizer sözlüğü '{tokenizer_path}' konumuna kaydedildi.")
     print("Artık 'chat_custom_llm.py' çalıştırarak kendi AI'ınızla konuşabilirsiniz!")
 
 if __name__ == "__main__":
