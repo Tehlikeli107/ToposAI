@@ -152,7 +152,12 @@ def benchmark():
         
         speedup = time_dense / time_ultra
         
-        print(f"{num_leaves:<15,d} | {time_dense:>15.3f} ms            | {time_ultra:>15.3f} ms            | {speedup:>7.1f}x HIZLI | {accuracy:>6.1f}%")
+        if speedup >= 1.0:
+            speed_text = f"{speedup:.1f}x HIZLI"
+        else:
+            speed_text = f"{(1.0/speedup):.1f}x YAVAŞ"
+            
+        print(f"{num_leaves:<15,d} | {time_dense:>15.3f} ms            | {time_ultra:>15.3f} ms            | {speed_text:<15} | {accuracy:>6.1f}%")
 
 if __name__ == "__main__":
     benchmark()

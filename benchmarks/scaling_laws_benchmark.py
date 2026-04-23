@@ -49,16 +49,18 @@ def run_scaling_benchmark(seq_lengths=None):
         try:
             Q = torch.rand((batch_size, N, dim), device='cuda', dtype=torch.float32)
             K = torch.rand((batch_size, N, dim), device='cuda', dtype=torch.float32)
-            base_vram = get_vram_mb()
             
             torch.cuda.reset_peak_memory_stats()
+            base_vram = torch.cuda.memory_allocated() / (1024 * 1024)
+            
             # PyTorch'un arkaplanda yaratacağı O(N^2 * D) devasa matris:
             Q_exp = Q.unsqueeze(2) 
             K_exp = K.unsqueeze(1) 
             impl = torch.clamp(1.0 - Q_exp + K_exp, max=1.0)
             _ = impl.mean(dim=-1)
             
-            torch_vram = f"{get_vram_mb() - base_vram:.1f}"
+            peak_vram = torch.cuda.max_memory_allocated() / (1024 * 1024)
+            torch_vram = f"{peak_vram - base_vram:.1f}"
             torch_status = "Geçti"
             
             # Matrisi bellekten sil
@@ -81,16 +83,15 @@ def run_scaling_benchmark(seq_lengths=None):
         try:
             Q = torch.rand((batch_size, N, dim), device='cuda', dtype=torch.float32)
             K = torch.rand((batch_size, N, dim), device='cuda', dtype=torch.float32)
-            base_vram = get_vram_mb()
             
             torch.cuda.reset_peak_memory_stats()
+            base_vram = torch.cuda.memory_allocated() / (1024 * 1024)
             
             # FlashTopos, işlemi SRAM'de 64x64 bloklarla yapar
             _ = flash_topos_attention(Q, K)
             
-            # Sadece N*N (Çıktı matrisi) kadar ek bellek kullanmalıdır.
-            # O(N^2 * D) olan devasa ara matris asla VRAM'e yazılmaz!
-            topos_vram = f"{get_vram_mb() - base_vram:.1f}"
+            peak_vram = torch.cuda.max_memory_allocated() / (1024 * 1024)
+            topos_vram = f"{max(0.0, peak_vram - base_vram):.1f}"
             topos_status = "Geçti"
             
             del Q, K

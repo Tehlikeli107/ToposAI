@@ -103,7 +103,7 @@ def run_benchmark(context_sizes=None):
         context_sizes = [4096, 8192, 16384, 32768]
         
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 47: THE NEEDLE IN A HAYSTACK BENCHMARK (INDUSTRY SOTA) ")
+    print(" BİLİMSEL KANIT 47: THE NEEDLE IN A HAYSTACK BENCHMARK ")
     print(" İddia: Endüstrinin en zorlu testi olan 'Samanlıkta İğne', bir LLM'in")
     print(" devasa bir kitap içinde geçen tek bir cümleyi ne kadar iyi hatırladığını")
     print(" ölçer. Klasik Transformer'lar Softmax ezişmesi yüzünden metnin")
