@@ -18,7 +18,8 @@ setup(
         "transformers>=4.30.0",
         "datasets>=2.10.0",
         "tensorboard>=2.10.0",
-        "scikit-learn>=1.0.0"
+        "scikit-learn>=1.0.0",
+        "psutil>=5.8.0"
     ],
     entry_points={
         "console_scripts": [
