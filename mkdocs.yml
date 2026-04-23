@@ -1,1 +1,5 @@
-site_name: ToposAI Official Documentation`nnav:`n  - Home: index.md`n  - API Reference: api.md`ntheme: readthedocs
+site_name: ToposAI Official Documentation
+nav:
+  - Home: index.md
+  - API Reference: api.md
+theme: readthedocs

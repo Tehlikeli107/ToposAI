@@ -91,13 +91,13 @@ def run_thermodynamic_experiment():
     
     print(f"    Geri Hesaplanan Bilgi: X={reconstructed_x}, Y={reconstructed_y}")
     
-    print("\n[BİLİMSEL SONUÇ: SIFIR ENERJİLİ YAPAY ZEKA (ZERO-JOULE AI)]")
+    print("\n[BİLİMSEL SONUÇ: TERSİNİR HESAPLAMA TEORİSİ (THEORETICAL FRAMEWORK)]")
     print("Klasik derin öğrenme algoritmaları, mimarileri gereği evreni ısıtır.")
     print("ToposAI, hesaplamayı bir 'Bjective Morphism (Birebir Örten Ok)' olarak")
-    print("kurgulayarak bilginin kaybolmasını (Information Loss) engellemiştir.")
+    print("kurgulayarak bilginin kaybolmasını (Information Loss) teorik olarak engellemiştir.")
     print("Rolf Landauer ve Claude Shannon'ın teoremlerine göre, bilgi silinmiyorsa")
-    print("ISI DA ÜRETİLEMEZ. ToposAI, Kuantum Bilgisayarlarının (Quantum Computing)")
-    print("ve Sıfır-Enerjili Beyinlerin algoritmik yazılım omurgasıdır.")
+    print("ISI DA ÜRETİLEMEZ. Bu modül, Geleceğin Kuantum Bilgisayarları (Quantum Computing)")
+    print("ve Sıfır-Enerji hedefli donanımlar için Topolojik bir 'Proof-of-Concept' sunar.")
 
 if __name__ == "__main__":
     run_thermodynamic_experiment()

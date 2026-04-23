@@ -21,7 +21,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest torch triton networkx matplotlib numpy
+        pip install pytest torch triton networkx matplotlib numpy pandas yfinance nltk gradio requests transformers datasets tensorboard
         pip install -e .
         
     - name: Run pytest (Math & Model Verification)

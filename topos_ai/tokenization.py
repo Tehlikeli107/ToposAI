@@ -17,21 +17,14 @@ class TopologicalTokenizer:
     BPE (Byte-Pair Encoding) gibi sadece istatistiksel frekansa (sıklığa) bakmaz.
     Karakterlerin veya hecelerin "Birbirini ne kadar zorunlu kıldığına" 
     (Logical Implication / Morphism Strength) bakar. 
-    Örn: 'q' harfi her zaman 'u' harfini gerektiriyorsa (P(u|q) ≈ 1.0),
-    frekansları düşük olsa bile bunları topolojik bir bütün (qu) olarak mühürler.
     """
-    def __init__(self, vocab_size=5000):
+    def __init__(self, vocab_size=1000):
         self.target_vocab_size = vocab_size
-        self.vocab = {}
-        self.merges = {}
-        self.reverse_vocab = {}
+        self.vocab = {} # str -> int
+        self.merges = {} # (str, str) -> str
+        self.reverse_vocab = {} # int -> str
         
     def _compute_topological_morphisms(self, token_list):
-        """
-        Token listesinde, A -> B geçişinin "Gereklilik Gücünü" (Morphism) hesaplar.
-        Güç = P(B | A) = Count(A, B) / Count(A).
-        Eğer A varsa, B'nin gelmesi ne kadar 'Zorunlu' (Deterministic)?
-        """
         pair_counts = {}
         single_counts = {}
         
@@ -44,7 +37,6 @@ class TopologicalTokenizer:
             
         morphism_strengths = {}
         for (A, B), count in pair_counts.items():
-            # A'dan B'ye giden ok'un gücü (Gereklilik / Implication)
             strength = count / single_counts[A]
             morphism_strengths[(A, B)] = strength
             
@@ -53,7 +45,7 @@ class TopologicalTokenizer:
     def train(self, text: str):
         print(f"\n[TOPOLOGICAL TOKENIZER] Eğitiliyor... (Hedef Vocab: {self.target_vocab_size})")
         
-        # Başlangıçta her karakter bir tokendır (Base Alphabet)
+        # Base Alphabet
         unique_chars = sorted(list(set(text)))
         self.vocab = {c: i for i, c in enumerate(unique_chars)}
         self.reverse_vocab = {i: c for i, c in enumerate(unique_chars)}
@@ -63,27 +55,22 @@ class TopologicalTokenizer:
         
         merge_count = 0
         while len(self.vocab) < self.target_vocab_size:
-            # Harfler/Heceler arasındaki nedensellik (morfizma) gücünü bul
             morphisms = self._compute_topological_morphisms(current_tokens)
             
             if not morphisms:
                 break
                 
-            # BPE'den Farkı: "En çok geçen çifti" DEĞİL, "Birbirini en çok GEREKTİREN (Morphism=1.0) çifti" birleştir.
-            # Eşitlik durumunda en çok geçen çifti (Count) tie-breaker olarak kullanmak için filtreleme yaparız.
             best_pair = max(morphisms.items(), key=lambda x: (x[1], x[0]))[0]
             best_strength = morphisms[best_pair]
             
-            if best_strength < 0.01: # Artık anlamlı bir gereklilik bağı kalmadıysa dur
+            if best_strength < 0.01:
                 break
                 
-            # A ve B tokenlarını "AB" olarak topolojik olarak mühürle
             new_token_str = best_pair[0] + best_pair[1]
             self.vocab[new_token_str] = current_id
             self.reverse_vocab[current_id] = new_token_str
             self.merges[best_pair] = new_token_str
             
-            # Metni yeni mühürlü tokenlarla güncelle (Merge Pass)
             new_tokens = []
             i = 0
             while i < len(current_tokens):
@@ -99,16 +86,14 @@ class TopologicalTokenizer:
             merge_count += 1
             
             if merge_count % 100 == 0:
-                print(f"  > {merge_count} Topolojik Birleşme (Merge) yapıldı. Kelimeler nedensellikle bağlanıyor... Sözlük: {len(self.vocab)}")
+                print(f"  > {merge_count} Topolojik Birleşme (Merge) yapıldı. Sözlük: {len(self.vocab)}")
                 
         print(f"✅ Eğitim Tamamlandı. {len(self.vocab)} Topolojik Token icat edildi.")
-        print("  Örnek Keşifler (Kesin Nedensellik Taşıyan Heceler):", list(self.vocab.keys())[-10:])
 
-    def encode(self, text: str) -> List[int]:
-        """Metni, topolojik olarak keşfedilmiş token ID'lerine çevirir (İleri doğru tarama)."""
+    def encode(self, text: str) -> list[int]:
+        """Metni token ID'lerine (int) çevirir."""
         tokens = [c for c in text]
         
-        # Eğitilmiş birleşme kurallarını sırayla uygula
         for (A, B), new_token_str in self.merges.items():
             new_tokens = []
             i = 0
@@ -121,9 +106,8 @@ class TopologicalTokenizer:
                     i += 1
             tokens = new_tokens
             
-        # Sonucu ID listesine çevir (Eğer bilinmeyen bir harf varsa 0 veya 'UNK' farz et)
-        return [self.vocab.get(t, 0) for t in tokens]
+        return [self.vocab.get(t, self.vocab.get(' ', 0)) for t in tokens]
 
-    def decode(self, tokens: List[int]) -> str:
-        """Token ID'lerini tekrar insan diline (String) çevirir."""
-        return "".join([self.reverse_vocab.get(t, "") for t in tokens])
+    def decode(self, token_ids: list[int]) -> str:
+        """Token ID'lerini (int) tekrar string'e çevirir."""
+        return "".join([self.reverse_vocab.get(t, "") for t in token_ids])

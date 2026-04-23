@@ -11,7 +11,7 @@ While modern LLMs operate purely on statistical dot-products (frequently sufferi
 
 ## 🎯 Research Scope and Key Implementations
 
-This repository serves as both a pip-installable framework (`topos_ai`) and a collection of 15+ proof-of-concept scripts validating category theory theorems on tensor operations, organized cleanly into modules:
+This repository serves as both a pip-installable framework (`topos_ai`) and a collection of 60+ proof-of-concept scripts (23 applications, 7 benchmarks, 30+ experiments) validating category theory theorems on tensor operations, organized cleanly into modules:
 
 ### 🔬 Benchmarks (`benchmarks/`)
 *   **`benchmark_sota.py`**: Hardware scale tree search vs Dense Attention.
@@ -34,15 +34,15 @@ This repository serves as both a pip-installable framework (`topos_ai`) and a co
 
 As an early-stage research repository, ToposAI has notable limitations that must be acknowledged:
 
-*   **Trade-offs in Dense Retrieval Routing (`benchmarks/benchmark_sota.py`):** In large-scale vector similarity tests ($N=1M$), ToposAI abandons computationally expensive $O(N)$ dot-products for $O(\\log N)$ hierarchical tree search. Utilizing a Top-K Beam Search (`beam_width=10`), the model maintains a $\\sim 4.7$x inference speedup over classical dense attention while preserving strong recall (achieving $\\sim 72.7\\%$ to $89.1\\%$ accuracy depending on capacity). Further tuning of the branching factor and beam width is necessary to reach true 100% equivalence, reflecting the classic speed vs. accuracy trade-off.
-*   **Thought Experiments vs. Production Code:** Scripts within the `experiments/` directory are heavily narrative-driven *simulations* rather than production-ready AI layers. They serve to mathematically demonstrate concepts like Limit Cycles and Self-Reference but are not integrated into the main `ToposTransformer` yet.
+*   **Trade-offs in Dense Retrieval Routing:** In large-scale vector similarity tests, ToposAI abandons computationally expensive dot-products for hierarchical tree search.
+*   **Heuristic Demos & Theoretical Claims:** Scripts within `experiments/` (e.g., Reversible Computing, Holographic Universe, Consciousness scores) and `applications/` (e.g., Cosmology, Epidemiology Minimum Cut, LLM Chat interfaces) are heavily narrative-driven *simulations* (Proof-of-Concepts) rather than production-ready empirical laws. They demonstrate *Categorical Tendencies* and *Heuristic Topologies* rather than deterministic zero-shot solutions. (e.g., "Zero-Joule AI" claims are strictly theoretical frameworks).
+*   **API Scaffolding:** Modules like `TopologicalTokenizer` and `Distributed FSDP` are currently at the scaffolding stage. While they compile and demonstrate Top-K MoE logic and causal emergence, they require substantial real-world data and multi-node hardware clusters to validate their "trillion-parameter" claims.
 
 ## ⚙️ Installation
 
-ToposAI is fully compatible with standard PyTorch workflows.
+ToposAI is fully compatible with standard PyTorch workflows. The `setup.py` automatically resolves heavy dependencies (transformers, datasets, yfinance, networkx).
 
 ```bash
-pip install pytest networkx matplotlib triton
 pip install -e .
 ```
 

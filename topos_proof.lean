@@ -4,13 +4,11 @@
 -- Target Theorem: Formal Proof of Topos Reasoning
 -- ==========================================
 
-variable (smoking lung_damage cell_mutation cancer : Prop)
-variable (h1 : smoking → lung_damage)
-variable (h2 : lung_damage → cell_mutation)
-variable (h3 : cell_mutation → cancer)
 
 -- ToposAI'nin iddia ettiği nihai sonuç:
-theorem topos_proof_smoking_to_cancer : smoking → cancer := 
-  -- Curry-Howard correspondence via functional composition
-  intro (x : smoking)
-  exact (h3 (h2 (h1 x)))
+theorem topos_proof_smoking_to_cancer (smoking lung_damage cell_mutation cancer : Prop) (h1 : smoking → lung_damage) (h2 : lung_damage → cell_mutation) (h3 : cell_mutation → cancer) : smoking → cancer := by
+  intro x
+  apply h3
+  apply h2
+  apply h1
+  exact x

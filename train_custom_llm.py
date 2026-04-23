@@ -14,6 +14,9 @@ import time
 
 from topos_ai.models import ToposTransformer
 from topos_ai.tokenization import TopologicalTokenizer
+from topos_ai.optim import ToposAdam
+from topos_ai.optim import ToposAdam
+from torch.utils.tensorboard import SummaryWriter
 
 # =====================================================================
 # TOPOS-LLM CUSTOM TRAINING ENGINE
@@ -21,6 +24,7 @@ from topos_ai.tokenization import TopologicalTokenizer
 # Teorisi (Yoneda, MoE, RoPE) mimarisini kullanarak sıfırdan bir Dil Modeli 
 # eğitmek. Model, "Tiny Shakespeare" veri setini okuyarak İngilizceyi
 # kendi kendine sentezleyecek ve ağırlıklarını kaydedecek.
+# Eklemeler: torch.compile() (Hızlandırma) ve TensorBoard (MLOps)
 # =====================================================================
 
 class CharDataset(Dataset):
@@ -40,6 +44,12 @@ class CharDataset(Dataset):
 def train():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"\n[SİSTEM] Eğitim Cihazı: {device} (SRAM/Triton destekli Kategori Motoru)")
+
+    # [MLOps] TensorBoard Başlatıcı
+    # Terminalden izlemek için: tensorboard --logdir=runs
+    run_name = f"topos_llm_run_{int(time.time())}"
+    writer = SummaryWriter(f"runs/{run_name}")
+    print(f"[MLOps] TensorBoard logları 'runs/{run_name}' dizinine kaydediliyor.")
 
     # 1. VERİ İNDİRME VE TOKENİZASYON
     print("[VERİ] 'Tiny Shakespeare' veri seti indiriliyor...")
@@ -89,7 +99,7 @@ def train():
     print(f"  > Parametre Sayısı: {total_params / 1e6:.2f} Milyon")
     print(f"  > VRAM Dostu Low-Rank Yoneda Embedding Aktif.")
 
-    optimizer = optim.AdamW(model.parameters(), lr=5e-4, weight_decay=0.01)
+    optimizer = ToposAdam(model.parameters(), lr=5e-4, topological_weight_decay=0.01)
 
     # [PURE TOPOLOGICAL LOSS (NO ZERO-SUM GAMES)]
     # Klasik CrossEntropyLoss, "Kral" kelimesini doğru sayıp "Adam" kelimesini

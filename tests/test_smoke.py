@@ -16,11 +16,20 @@ def get_all_python_scripts():
     repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     target_dirs = ['applications', 'benchmarks', 'experiments']
     scripts = []
+    
+    # 1. Alt Klasörler
     for d in target_dirs:
         dir_path = os.path.join(repo_root, d)
         for f in glob.glob(os.path.join(dir_path, '*.py')):
             if not os.path.basename(f).startswith('__'):
                 scripts.append(f)
+                
+    # 2. Ana Dizin (Kök - Top Level)
+    for f in glob.glob(os.path.join(repo_root, '*.py')):
+        basename = os.path.basename(f)
+        if not basename.startswith('__') and not basename.startswith('test_') and basename != 'setup.py':
+            scripts.append(f)
+            
     return scripts
 
 @pytest.mark.parametrize("script_path", get_all_python_scripts())

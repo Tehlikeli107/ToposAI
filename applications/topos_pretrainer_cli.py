@@ -81,7 +81,7 @@ def train_topos_model(dataset_text, seq_len=64, batch_size=32, max_iters=2000, l
     for iter_num in range(1, max_iters + 1):
         # Forward Pass
         X, Y = next(batch_iter)
-        logits = model(X) # [B, T, Vocab]
+        logits, _ = model(X) # [B, T, Vocab]
         
         # Loss Hesapla
         loss = criterion(logits.view(-1, vocab_size), Y.view(-1))
@@ -102,7 +102,7 @@ def train_topos_model(dataset_text, seq_len=64, batch_size=32, max_iters=2000, l
                 # Rastgele bir harften başla
                 sample_idx = torch.tensor([[dataset.stoi['T']]], device=device)
                 for _ in range(20): # 20 karakter üret
-                    out = model(sample_idx)
+                    out, _ = model(sample_idx)
                     next_token = torch.argmax(out[0, -1, :]).item()
                     sample_idx = torch.cat([sample_idx, torch.tensor([[next_token]], device=device)], dim=1)
                 

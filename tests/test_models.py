@@ -24,7 +24,7 @@ def test_topos_transformer_initialization_and_forward():
     # 2. İLERİ BESLEME (FORWARD PASS) TESTİ
     idx = torch.randint(0, vocab_size, (batch_size, seq_len))
     try:
-        logits = model(idx)
+        logits, _ = model(idx)
         # Çıktı boyutlarının doğru olup olmadığını kontrol et
         assert logits.shape == (batch_size, seq_len, vocab_size), "Çıktı boyutu [Batch, SeqLen, VocabSize] olmalıdır."
     except Exception as e:

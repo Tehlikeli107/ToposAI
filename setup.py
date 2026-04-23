@@ -17,6 +17,7 @@ setup(
         "matplotlib>=3.3.0",
         "requests>=2.25.0",
         "transformers>=4.30.0",
-        "datasets>=2.10.0"
+        "datasets>=2.10.0",
+        "tensorboard>=2.10.0"
     ],
 )
