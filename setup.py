@@ -20,4 +20,11 @@ setup(
         "datasets>=2.10.0",
         "tensorboard>=2.10.0"
     ],
+    entry_points={
+        "console_scripts": [
+            "topos-train=train_custom_llm:train",
+            "topos-chat=chat_custom_llm:chat_with_topos",
+            "topos-showcase=topos_showcase:run_showcase",
+        ]
+    },
 )
