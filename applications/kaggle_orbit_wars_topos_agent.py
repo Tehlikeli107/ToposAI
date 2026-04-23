@@ -1,6 +1,11 @@
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+try:
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+except NameError:
+    pass
+
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
 
@@ -79,39 +84,31 @@ class OrbitWarsToposAgent:
                 continue
                 
             dist_to_target = math.sqrt((planet['x'] - my_best_planet['x'])**2 + (planet['y'] - my_best_planet['y'])**2)
-            estimated_travel_time = dist_to_target / 5.0 # Tahmini filo hızı
+            # Fleet speed ranges from 1 to 6. Assume a safe average of 3 units/turn.
+            estimated_travel_time = dist_to_target / 3.0
             
-            # Gezegenin o anki YENİ konumu
+            # Predict future position considering the continuous rotation
             future_pos = self._predict_orbital_position(planet, estimated_travel_time, angular_velocity)
             
-            # Rakibin bu gezegene yolladığı gemi var mı?
-            # Kaggle Fleet Format: [id, owner, x, y, angle, from_planet_id, ships]
-            # Basit simülasyon için filonun nereye gittiğini tam bilmediğimizi varsayıp sadece planet savunmasını alalım
             defense_strength = planet['ships']
             
-            morphism_value = (planet['production'] * 10.0) - (defense_strength * 1.5) - estimated_travel_time
+            # Simple heuristic
+            morphism_value = (planet['production'] * 5.0) - (defense_strength * 1.0) - estimated_travel_time
             
             if morphism_value > best_morphism_value:
-                required_ships = int(defense_strength + 1)
+                required_ships = int(defense_strength + 2) # +2 for safety
                 
                 if my_total_ships >= required_ships:
                     best_morphism_value = morphism_value
                     best_target = p_id
                     best_fleet_size = required_ships
                     launch_planet_id = my_best_planet['id']
-                    # Gelecek konuma (Fibration) doğru açıyı hesapla!
+                    
+                    # Angle from our planet to their future planet
                     best_angle = math.atan2(future_pos[1].item() - my_best_planet['y'], future_pos[0].item() - my_best_planet['x'])
                     
         moves = []
-        if best_target is None:
-            # Hiçbir yeri alamıyorsak, üretimi en yüksek tarafsız gezegenin 'geleceğine' 1 gemilik Sonda at!
-            targets = [p for p in planets if p['owner'] != player]
-            if targets:
-                t = max(targets, key=lambda p: p['production'])
-                future_pos = self._predict_orbital_position(t, 20, angular_velocity) # Uydurma 20 tur
-                angle = math.atan2(future_pos[1].item() - my_best_planet['y'], future_pos[0].item() - my_best_planet['x'])
-                moves.append([my_best_planet['id'], angle, 1])
-        else:
+        if best_target is not None and launch_planet_id is not None:
             moves.append([launch_planet_id, best_angle, best_fleet_size])
             
         return moves
@@ -219,6 +216,34 @@ def simulate_kaggle_orbit_wars():
     print("Yörünge Matematiğini 'Fibration (Liflenme)' teoremiyle aşarak, rakibin ıskaladığı")
     print("gezegenleri gelecekteki rotalarında pusuya düşürüp %100 isabet oranıyla")
     print("fethetmeyi başaran 'Şampiyon (Grandmaster)' sınıfı bir ajana dönüşmüştür!")
+
+# =====================================================================
+# KAGGLE ENVIRONMENTS API WRAPPER
+# Bu fonksiyon Kaggle tarafından her tur (turn) çağrılır.
+# =====================================================================
+_topos_agent_instance = None
+
+def agent(obs, config=None):
+    """
+    Kaggle ortamında (OpenSpiel C++) çalışması için gerekli global fonksiyon.
+    obs: Gözlem nesnesi (Dictionary veya Kaggle nesnesi)
+    """
+    global _topos_agent_instance
+    
+    player_id = obs.get("player", 0) if isinstance(obs, dict) else getattr(obs, 'player', 0)
+    
+    if _topos_agent_instance is None:
+        _topos_agent_instance = OrbitWarsToposAgent(agent_id=player_id)
+        
+    # Eğer obs nesne (object) formatındaysa dictionary'e çevir
+    obs_dict = {
+        "player": player_id,
+        "planets": obs.get("planets", []) if isinstance(obs, dict) else getattr(obs, 'planets', []),
+        "fleets": obs.get("fleets", []) if isinstance(obs, dict) else getattr(obs, 'fleets', []),
+        "angular_velocity": obs.get("angular_velocity", 0.05) if isinstance(obs, dict) else getattr(obs, 'angular_velocity', 0.05)
+    }
+    
+    return _topos_agent_instance.topological_target_selector(obs_dict)
 
 if __name__ == "__main__":
     simulate_kaggle_orbit_wars()
