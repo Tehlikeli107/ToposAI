@@ -168,7 +168,7 @@ def run_topological_alpha_experiment():
     
     final_wallet = wallet + total_profit
     
-    print("\n[BİLİMSEL SONUÇ: THE TOPOS ALPHA (PARA MAKİNESİ)]")
+    print("\n[BİLİMSEL SONUÇ: TOPOLOGICAL PAIRS TRADING (THEORETICAL ALPHA)]")
     print(f"  Başlangıç Bakiyesi : ${wallet:.2f}")
     print(f"  Kazanılan Net Kâr  : ${total_profit:.2f} ({trades} İşlem, Komisyonlar Ödendi)")
     print(f"  Nihai Bakiye       : ${final_wallet:.2f} (Büyüme: %{(final_wallet-wallet)/wallet*100:.1f})")
@@ -176,8 +176,10 @@ def run_topological_alpha_experiment():
     print("siz işleme girene kadar HFT Botları çoktan fiyatı uçurmuş ve sizi tepeden")
     print("maliyete sokmuş olurdu (Slippage kurbanı olurdunuz).")
     print("ToposAI, Yoneda Asimetrisini (A->B) kullanarak, henüz uçmamış olan, ancak")
-    print("Topolojik olarak uçmaya mecbur olan 'Takipçi' (Lagging) coinleri bularak")
-    print("komisyonları ezmiş ve gerçek bir Piyasa Yenen (Alpha) strateji yaratmıştır.")
+    print("Topolojik olarak uçmaya eğilimli olan 'Takipçi' (Lagging) coinleri bularak")
+    print("bu sentetik testte komisyonları ezmiş ve teorik bir Alpha stratejisi yaratmıştır.")
+    print("Ancak unutulmamalıdır ki, gerçek piyasalardaki (Out-of-Sample) gürültü")
+    print("ve piyasa etkinliği, bu teorik kârları büyük oranda eritecektir.")
 
 if __name__ == "__main__":
     run_topological_alpha_experiment()

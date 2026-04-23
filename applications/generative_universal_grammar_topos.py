@@ -141,15 +141,14 @@ def run_generative_grammar_experiment():
         sentence = engine.generate_sentence()
         print(f"  > Sentez {i}: '{sentence}'")
         
-    print("\n[BİLİMSEL DEĞERLENDİRME: THE GENERATIVE SINGULARITY]")
-    print("Fark ettiyseniz, sistem hiçbir zaman 'kırmızı hızlı' veya 'kedi kovalar uyur'")
-    print("gibi hatalı dizilimler yapmadı. Çünkü 'hızlı' sıfatının sol ok (Left Adjoint)")
-    print("girişi kapalıdır, başka bir sıfata yapışamaz. 'Kovalar' fiili ise sadece bir")
-    print("isim (N) arar, başka bir fiile ('uyur') bağlanamaz.")
-    print("Eğer sözlüğe (Lexicon) 100.000 kelime ve onların Topolojik (L/R) Yönleri")
-    print("eklenirse, ToposAI hiçbir Derin Öğrenme (GPU) eğitimi yapmadan, Noam Chomsky'nin")
-    print("'Evrensel Gramer (Universal Grammar)' teoremini simüle ederek insan")
-    print("dilini TERTEMİZ ve SIFIR HALÜSİNASYONLA kendiliğinden (Otonom) konuşabilir!")
+    print("\n[BİLİMSEL DEĞERLENDİRME: THE GENERATIVE PROOF-OF-CONCEPT]")
+    print("Sistem, klasik LLM'lerin aksine 'Olasılık Dağılımı' kullanmadan")
+    print("sadece sentaktik kilitlenmelerle (Adjoint Functors) çalışmıştır.")
+    print("Elbette kelime haznesi ve derin semantik vektörler olmadığı için ")
+    print("üretilen cümleler 'zeki hızlı kedi yazar' gibi ilkel veya döngüsel")
+    print("(tekrarlı sıfatlar) olabilir. Ancak bu PoC (Proof of Concept), Chomsky'nin")
+    print("'Evrensel Gramer' hipotezinin donanımsal/topolojik olarak makinelere")
+    print("kodlanabileceğinin matematiksel ilk adımıdır.")
 
 if __name__ == "__main__":
     run_generative_grammar_experiment()

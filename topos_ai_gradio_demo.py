@@ -87,7 +87,7 @@ def generate_topos_text(prompt, max_length):
     return output_text
 
 # --- GRADIO ARAYÜZÜ (GUI) ---
-with gr.Blocks(theme=gr.themes.Monochrome()) as demo:
+with gr.Blocks(theme=gr.themes.Default()) as demo:
     gr.Markdown(
         """
         # 🌌 ToposAI: Neuro-Symbolic AGI Framework
@@ -125,4 +125,4 @@ with gr.Blocks(theme=gr.themes.Monochrome()) as demo:
 
 if __name__ == "__main__":
     print("ToposAI Web Sunucusu Başlatılıyor...")
-    demo.launch(server_name="0.0.0.0", server_port=7860, share=False)
+    demo.launch(server_name="0.0.0.0", share=False)
