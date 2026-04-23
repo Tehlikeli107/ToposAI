@@ -66,23 +66,23 @@ def run_huggingface_sheaf_experiment():
         print("🚨 HATA: 'datasets' veya 'scikit-learn' bulunamadı!")
         return
 
-    # Devasa (20GB+) Wikipedia Datasetini Sadece Akış (Streaming) olarak aç
-    print("[BÜYÜK VERİ (BIG DATA)]: HuggingFace WikiText Canlı Akışı Başlatılıyor...")
-    print("  (Biz devasa metinleri RAM'e almadan buluttan akıtacağız!)")
+    # Devasa (305GB+) C4 Datasetini Sadece Akış (Streaming) olarak aç
+    print("[BÜYÜK VERİ (BIG DATA)]: HuggingFace C4 (Colossal Clean Crawled Corpus) Canlı Akışı Başlatılıyor...")
+    print("  (Bu dataset indirilse ~305 GB yer kaplar. Biz RAM'e almadan akıtacağız!)")
     
     try:
-        # Wikipedia dataseti streaming mode (Wikitext güvenli)
-        dataset = load_dataset("wikitext", "wikitext-2-v1", split="train", streaming=True)
+        # C4 dataseti streaming mode
+        dataset = load_dataset("allenai/c4", "en", split="train", streaming=True)
         iterator = iter(dataset)
     except Exception as e:
         print(f"🚨 HATA: HuggingFace bağlantısı kurulamadı: {e}")
         return
 
-    # CPU tarafında çalışacak devasa (50.000 kelimelik) Vektörleştirici
-    vocab_size = 50000
+    # CPU tarafında çalışacak devasa (100.000 kelimelik) Vektörleştirici
+    vocab_size = 100000
     vectorizer = HashingVectorizer(n_features=vocab_size, norm=None, alternate_sign=False)
     
-    # Yoneda CPU Motoru (50.000 Boyutu -> 64 Boyuta düşürür)
+    # Yoneda CPU Motoru (100.000 Boyutu -> 64 Boyuta düşürür)
     num_probes = 64
     yoneda_engine = RealWorldYonedaStreamer(vocab_size=vocab_size, num_probes=num_probes)
     
@@ -100,7 +100,7 @@ def run_huggingface_sheaf_experiment():
     print(f"  > Başlangıç RAM : {initial_ram:.1f} MB")
     print(f"  > Başlangıç VRAM: {initial_vram:.1f} MB\n")
     
-    batch_size = 64
+    batch_size = 128
     total_articles_processed = 0
     total_bytes_sent_to_gpu = 0
     
@@ -109,9 +109,9 @@ def run_huggingface_sheaf_experiment():
     
     t0 = time.time()
     
-    # Gerçek zamanlı olarak HuggingFace'den Wikipedia Makaleleri çekiliyor!
-    # Testi çok uzatmamak için 10.000 makale (yaklaşık yüz milyonlarca karakter) okuyup duralım.
-    max_articles = 500 # Simülasyon süresi için 500 yeterli
+    # Gerçek zamanlı olarak HuggingFace'den C4 Makaleleri çekiliyor!
+    # Testi devasa bir akışla (10.000 makale) sınayalım
+    max_articles = 10000
     
     while total_articles_processed < max_articles:
         batch_texts = []
