@@ -40,18 +40,16 @@ def run_scaling_benchmark():
         gc.collect()
         torch.cuda.reset_peak_memory_stats()
         
-        # Girdiler (Q, K)
-        Q = torch.rand((batch_size, N, dim), device='cuda', dtype=torch.float32)
-        K = torch.rand((batch_size, N, dim), device='cuda', dtype=torch.float32)
-        
-        base_vram = get_vram_mb() # Sadece Q ve K'nın kapladığı temel bellek
-
         # ---------------------------------------------------------
         # 1. PYTORCH STANDART HESAPLAMA (OOM Bekleniyor)
         # ---------------------------------------------------------
         torch_vram = "OOM (Çöktü)"
         torch_status = "Bşrsz"
         try:
+            Q = torch.rand((batch_size, N, dim), device='cuda', dtype=torch.float32)
+            K = torch.rand((batch_size, N, dim), device='cuda', dtype=torch.float32)
+            base_vram = get_vram_mb()
+            
             torch.cuda.reset_peak_memory_stats()
             # PyTorch'un arkaplanda yaratacağı O(N^2 * D) devasa matris:
             Q_exp = Q.unsqueeze(2) 
@@ -63,9 +61,9 @@ def run_scaling_benchmark():
             torch_status = "Geçti"
             
             # Matrisi bellekten sil
-            del Q_exp, K_exp, impl
+            del Q_exp, K_exp, impl, Q, K
         except RuntimeError as e:
-            if "out of memory" in str(e):
+            if "out of memory" in str(e).lower():
                 pass # Beklenen çöküş
             else:
                 torch_vram = "HATA"
@@ -80,6 +78,10 @@ def run_scaling_benchmark():
         topos_vram = "HATA"
         topos_status = "Bşrsz"
         try:
+            Q = torch.rand((batch_size, N, dim), device='cuda', dtype=torch.float32)
+            K = torch.rand((batch_size, N, dim), device='cuda', dtype=torch.float32)
+            base_vram = get_vram_mb()
+            
             torch.cuda.reset_peak_memory_stats()
             
             # FlashTopos, işlemi SRAM'de 64x64 bloklarla yapar
@@ -90,8 +92,15 @@ def run_scaling_benchmark():
             topos_vram = f"{get_vram_mb() - base_vram:.1f}"
             topos_status = "Geçti"
             
+            del Q, K
+            
+        except RuntimeError as e:
+            if "out of memory" in str(e).lower():
+                topos_vram = "OOM (Çöktü)"
+            else:
+                topos_vram = "HATA"
         except Exception as e:
-            topos_vram = "OOM/Hata"
+            topos_vram = "HATA"
 
         print(f"{N:<12} | {torch_vram:<20} | {topos_vram:<20} | Topos: {topos_status}")
 

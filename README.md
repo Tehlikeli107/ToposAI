@@ -11,11 +11,11 @@ While modern LLMs operate purely on statistical dot-products (frequently sufferi
 
 ## 🎯 Research Scope and Key Implementations
 
-This repository serves as both a pip-installable framework (`topos_ai`) and a collection of 60+ proof-of-concept scripts (23 applications, 7 benchmarks, 30+ experiments) validating category theory theorems on tensor operations, organized cleanly into modules:
+This repository serves as both a pip-installable framework (`topos_ai`) and a collection of 50+ proof-of-concept scripts (~39 applications, 10 benchmarks, ~40 experiments) validating category theory theorems on tensor operations, organized cleanly into modules:
 
 ### 🔬 Benchmarks (`benchmarks/`)
 *   **`benchmark_sota.py`**: Hardware scale tree search vs Dense Attention.
-*   **`scaling_laws_benchmark.py`**: VRAM measurement proving O(1) limits.
+*   **`scaling_laws_benchmark.py`**: VRAM measurement proving O(1) SRAM gradient accumulation within VRAM limits.
 *   **`babi_logic_benchmark.py`**: Meta bAbI Task 15 evaluation.
 *   **`real_world_ontology_benchmark.py`**: Asymmetry tests on NLTK WordNet vs Dot-Product.
 

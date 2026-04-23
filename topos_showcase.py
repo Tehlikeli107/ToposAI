@@ -43,7 +43,10 @@ def run_showcase():
             break
             
         if choice in options:
-            script_path = options[choice][1]
+            rel_path = options[choice][1]
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            script_path = os.path.join(base_dir, rel_path)
+            
             if script_path and os.path.exists(script_path):
                 clear_screen()
                 print(f">>> ÇALIŞTIRILIYOR: {script_path} <<<\n")

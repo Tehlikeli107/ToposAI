@@ -35,4 +35,4 @@ jobs:
         curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
         source $HOME/.elan/env
         # Sadece syntax ve teorem doğruluğunu test et
-        lean topos_proof.lean || echo "Lean proof compilation succeeded or skipped depending on Lean version."
+        lean topos_proof.lean
