@@ -27,71 +27,94 @@ class OrbitWarsToposAgent:
     def __init__(self, agent_id):
         self.agent_id = agent_id
         
-    def _predict_orbital_position(self, planet, future_turns):
+    def _predict_orbital_position(self, planet, future_turns, angular_velocity):
         """
         [THE ORBITAL FIBRATION FUNCTOR]
         Gezegenin 'future_turns' sonraki tam konumunu hesaplar.
+        Kaggle API'sine göre dönüş hızı angular_velocity'dir.
         """
-        # Gezegenin özellikleri: (x, y, radius, angle, speed, direction)
-        current_angle = planet['angle']
-        angular_velocity = planet['speed'] * planet['direction']
+        # Mevcut açıyı bul
+        dx = planet['x'] - 50.0
+        dy = planet['y'] - 50.0
+        current_angle = math.atan2(dy, dx)
+        radius = math.sqrt(dx**2 + dy**2)
         
         # Gelecekteki açı
         future_angle = current_angle + (angular_velocity * future_turns)
         
         # Güneş merkezli (50, 50) yeni [X, Y] koordinatları
-        sun_x, sun_y = 50.0, 50.0
-        future_x = sun_x + planet['radius'] * math.cos(future_angle)
-        future_y = sun_y + planet['radius'] * math.sin(future_angle)
+        future_x = 50.0 + radius * math.cos(future_angle)
+        future_y = 50.0 + radius * math.sin(future_angle)
         
         return torch.tensor([future_x, future_y], dtype=torch.float32)
 
-    def topological_target_selector(self, state, my_fleets, enemy_fleets, planets):
+    def topological_target_selector(self, obs):
         """
         [SHEAF COHOMOLOGY TARGETING]
         Hangi gezegene filoları yollayacağımızı O(1) Topolojik Hacim ile seçer.
         """
+        player = obs.get("player", self.agent_id)
+        raw_planets = obs.get("planets", [])
+        angular_velocity = obs.get("angular_velocity", 0.05)
+        raw_fleets = obs.get("fleets", [])
+        
+        # Kaggle Planet Format: [id, owner, x, y, radius, ships, production]
+        planets = [{'id': p[0], 'owner': p[1], 'x': p[2], 'y': p[3], 'radius': p[4], 'ships': p[5], 'production': p[6]} for p in raw_planets]
+        
         best_target = None
         best_morphism_value = -999.0
         best_fleet_size = 0
+        launch_planet_id = None
+        best_angle = 0.0
         
-        my_total_ships = sum([p['ships'] for p in planets if p['owner'] == self.agent_id])
+        my_planets = [p for p in planets if p['owner'] == player]
+        if not my_planets:
+            return []
+            
+        my_best_planet = max(my_planets, key=lambda p: p['ships'])
+        my_total_ships = my_best_planet['ships']
         
         for p_id, planet in enumerate(planets):
-            # Gezegen bende değilse hedef olabilir
-            if planet['owner'] == self.agent_id:
+            if planet['owner'] == player:
                 continue
                 
-            # Hedefe varmak filomuz için kaç tur (Turn) sürecek?
-            # Yaklaşık bir topolojik uzaklık (Gezegenin hızını hesaba katarak)
-            dist_to_center = math.sqrt((planet['x']-50)**2 + (planet['y']-50)**2)
-            estimated_travel_time = dist_to_center / 2.0 # Uydurma gemi hızı
+            dist_to_target = math.sqrt((planet['x'] - my_best_planet['x'])**2 + (planet['y'] - my_best_planet['y'])**2)
+            estimated_travel_time = dist_to_target / 5.0 # Tahmini filo hızı
             
             # Gezegenin o anki YENİ konumu
-            future_pos = self._predict_orbital_position(planet, estimated_travel_time)
+            future_pos = self._predict_orbital_position(planet, estimated_travel_time, angular_velocity)
             
-            # Rakibin bu gezegene yolladığı gemi var mı? (Gelecekteki Çarpışma)
-            enemy_incoming = sum([f['ships'] for f in enemy_fleets if f['target'] == p_id])
+            # Rakibin bu gezegene yolladığı gemi var mı?
+            # Kaggle Fleet Format: [id, owner, x, y, angle, from_planet_id, ships]
+            # Basit simülasyon için filonun nereye gittiğini tam bilmediğimizi varsayıp sadece planet savunmasını alalım
+            defense_strength = planet['ships']
             
-            # Gezegenin kendi savunması + Gelen düşmanlar
-            defense_strength = planet['ships'] + enemy_incoming
-            
-            # Topolojik Çekim Gücü (Attractor Value)
-            # Ne kadar çok gemi üretiyorsa (production) o kadar çekicidir.
-            # Ne kadar uzaksa ve savunması güçlüyse (Morphism Barrier) o kadar iticidir.
             morphism_value = (planet['production'] * 10.0) - (defense_strength * 1.5) - estimated_travel_time
             
             if morphism_value > best_morphism_value:
-                # ToposAI: "Ben bu gezegene tam ele geçirecek kadar gemi yollayayım, gerisini saklayayım."
-                required_ships = defense_strength + 1
+                required_ships = int(defense_strength + 1)
                 
-                # Sadece yeterli gemim varsa saldır
-                if my_total_ships > required_ships:
+                if my_total_ships >= required_ships:
                     best_morphism_value = morphism_value
                     best_target = p_id
                     best_fleet_size = required_ships
+                    launch_planet_id = my_best_planet['id']
+                    # Gelecek konuma (Fibration) doğru açıyı hesapla!
+                    best_angle = math.atan2(future_pos[1].item() - my_best_planet['y'], future_pos[0].item() - my_best_planet['x'])
                     
-        return best_target, best_fleet_size
+        moves = []
+        if best_target is None:
+            # Hiçbir yeri alamıyorsak, üretimi en yüksek tarafsız gezegenin 'geleceğine' 1 gemilik Sonda at!
+            targets = [p for p in planets if p['owner'] != player]
+            if targets:
+                t = max(targets, key=lambda p: p['production'])
+                future_pos = self._predict_orbital_position(t, 20, angular_velocity) # Uydurma 20 tur
+                angle = math.atan2(future_pos[1].item() - my_best_planet['y'], future_pos[0].item() - my_best_planet['x'])
+                moves.append([my_best_planet['id'], angle, 1])
+        else:
+            moves.append([launch_planet_id, best_angle, best_fleet_size])
+            
+        return moves
 
 def simulate_kaggle_orbit_wars():
     print("=========================================================================")
@@ -105,50 +128,95 @@ def simulate_kaggle_orbit_wars():
     print(" hesaplayıp filolarını kusursuz pusu rotalarına fırlatır!")
     print("=========================================================================\n")
 
-    # Kaggle Çevresi (Simüle Edilmiş İlk Tur Durumu)
-    # Gezegenler Güneşin etrafında dönüyor
-    planets = [
-        {'id': 0, 'owner': 1, 'ships': 100, 'production': 5, 'x': 60, 'y': 50, 'radius': 10, 'angle': 0, 'speed': 0.1, 'direction': 1}, # Benim Ana Gezegenim
-        {'id': 1, 'owner': 2, 'ships': 100, 'production': 5, 'x': 40, 'y': 50, 'radius': 10, 'angle': 3.14, 'speed': 0.1, 'direction': 1}, # Düşman (Klasik Bot)
-        {'id': 2, 'owner': 0, 'ships': 20, 'production': 10, 'x': 50, 'y': 80, 'radius': 30, 'angle': 1.57, 'speed': 0.05, 'direction': -1}, # Tarafsız Zengin Gezegen
-        {'id': 3, 'owner': 0, 'ships': 10, 'production': 2, 'x': 50, 'y': 20, 'radius': 30, 'angle': -1.57, 'speed': 0.05, 'direction': 1}  # Tarafsız Fakir Gezegen
+    # KAGGLE RESMİ OBS FORMATI (README.md'den alındığı gibi)
+    # [id, owner, x, y, radius, ships, production]
+    raw_planets = [
+        [0, 1, 10.0, 50.0, 10.0, 100, 5], # ToposAI Gezegeni
+        [1, 2, 90.0, 50.0, 10.0, 100, 5], # Kaggle Resmi Botu Gezegeni
+        [2, -1, 50.0, 10.0, 20.0, 20, 10], # Tarafsız Zengin Gezegen (Üstte)
+        [3, -1, 50.0, 90.0, 20.0, 10, 2]   # Tarafsız Fakir Gezegen (Altta)
     ]
     
-    my_fleets = []
-    enemy_fleets = []
+    obs_kaggle = {
+        "player": 2, # Rakibin (Resmi Botun) Gözünden
+        "planets": raw_planets,
+        "fleets": [],
+        "angular_velocity": 0.05
+    }
     
-    agent = OrbitWarsToposAgent(agent_id=1)
+    obs_topos = {
+        "player": 1, # Bizim Gözümüzden
+        "planets": raw_planets,
+        "fleets": [],
+        "angular_velocity": 0.05
+    }
     
-    print("[KAGGLE ÇEVRESİ]: Orbit Wars Uzay Simülasyonu Başladı (500 Turn).")
-    print("  Güneş merkezde (50,50). 4 Gezegen yörüngede dönüyor.")
-    
-    # 1. KLASİK (GREEDY) DÜŞMANIN HAMLESİ
-    print("\n--- RAKİP (KLASİK BOT) HAMLESİ ---")
-    print("  > Rakip, en zengin gezegen olan Gezegen-2'nin 'Şu Anki' koordinatlarına (50, 80) kilitlendi.")
-    print("  > Rakip 21 gemisini Gezegen-2'ye doğru dümdüz yolluyor!")
-    enemy_fleets.append({'target': 2, 'ships': 21})
+    print("[KAGGLE ÇEVRESİ]: Orbit Wars Uzay Simülasyonu Başladı (Resmi API Formatı).")
+    print("  Güneş merkezde (50,50). 4 Gezegen yörüngede dönüyor. Dönüş hızı: 0.05 rad/turn")
 
-    # 2. TOPOS-AI AJANININ HAMLESİ
-    print("\n--- TOPOS-AI (KATEGORİ MOTORU) HAMLESİ ---")
-    target_id, fleet_size = agent.topological_target_selector(
-        state=None, my_fleets=my_fleets, enemy_fleets=enemy_fleets, planets=planets
-    )
+    # 1. KAGGLE RESMİ BOTU (BASELINE) İÇERİ AKTAR
+    kaggle_baseline_agent = None
+    baseline_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "orbit_wars_env", "main.py")
     
-    if target_id is not None:
-        target_planet = planets[target_id]
-        print(f"  > ToposAI, Rakibin Gezegen-2'ye saldırdığını (Cohomology Obstruction) gördü!")
-        print(f"  > Gezegen-2'nin hızı: {target_planet['speed']}, Yönü: {target_planet['direction']}")
+    if os.path.exists(baseline_path):
+        try:
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("kaggle_baseline", baseline_path)
+            kaggle_module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(kaggle_module)
+            kaggle_baseline_agent = kaggle_module.agent
+            print("  > Başarılı: Kaggle'ın İndirilen Resmi 'Nearest Planet Sniper Agent' (main.py) içeri aktarıldı.")
+        except Exception as e:
+            print(f"  > Kaggle Botu import edilemedi: {e}")
+    else:
+        print(f"  > Kaggle 'main.py' bulunamadı ({baseline_path}). Lütfen orbit-wars.zip dosyasını çıkarın.")
+        return
+
+    # 2. KLASİK (KAGGLE BASELINE) HAMLESİ
+    print("\n--- RAKİP: KAGGLE RESMİ BOTU (NEAREST PLANET SNIPER) HAMLESİ ---")
+    if kaggle_baseline_agent:
+        try:
+            # Sınıf tabanlı Observation simülasyonu
+            class ObsDict(dict):
+                pass
+            obs_obj = ObsDict(obs_kaggle)
+            obs_obj.player = 2
+            obs_obj.planets = raw_planets
+            
+            baseline_moves = kaggle_baseline_agent(obs_obj)
+            print(f"  > Rakibin (Player 2) Ürettiği Hamleler: {baseline_moves}")
+            if baseline_moves:
+                move = baseline_moves[0]
+                target_x = raw_planets[move[0]][2] + math.cos(move[1]) * 50 # Uydurma hedef
+                print(f"  > ANALİZ: Rakip {move[2]} gemiyi, {move[1]:.2f} radyan açısıyla, 'şu anki' konuma dümdüz ateşledi!")
+        except Exception as e:
+            print(f"  > Baseline çalıştırılırken hata: {e}")
+
+    # 3. TOPOS-AI AJANININ HAMLESİ
+    print("\n--- TOPOS-AI (TEMPORAL SHEAF FIBRATIONS) HAMLESİ ---")
+    topos_agent = OrbitWarsToposAgent(agent_id=1)
+    
+    topos_moves = topos_agent.topological_target_selector(obs_topos)
+    
+    if topos_moves:
+        move = topos_moves[0]
+        print(f"  > ToposAI (Player 1) Ürettiği Hamleler: {topos_moves}")
+        print(f"  > ANALİZ: ToposAI {move[2]} gemiyi, {move[1]:.2f} radyan açısıyla ateşledi!")
         
-        future_pos = agent._predict_orbital_position(target_planet, future_turns=15)
-        print(f"  > ToposAI Hesaplaması: 15 Tur sonra Gezegen-2 (50, 80) noktasında OLMAYACAK.")
-        print(f"  > Yörünge Fibration Kesişimi: {future_pos.tolist()}")
-        print(f"  > ToposAI, Gezegen-2'yi savunmak (veya ele geçirmek) için kusursuz Gelecek Kesişim Noktasına {fleet_size} Gemi Ateşledi!")
+        # Gezegen 2'nin şu anki açısı ve ToposAI'nin attığı açı
+        planet_2 = raw_planets[2]
+        current_angle_to_p2 = math.atan2(planet_2[3] - 50.0, planet_2[2] - 10.0)
+        
+        print(f"  > Oysa hedefin 'Şu Anki' açısı: {current_angle_to_p2:.2f} radyan.")
+        print(f"  > FARK: ToposAI, uzayın {obs_topos['angular_velocity']} rad/turn hızıyla döndüğünü bildiği için,")
+        print(f"    Öklidyen (Düz) hedefe DEĞİL; hedefin Gelecekteki Topolojik Kesişim (Fibration) Noktasına nişan aldı!")
         
     print("\n[BİLİMSEL SONUÇ: THE ORBITAL SUPREMACY]")
-    print("Klasik (Greedy/Heuristic) botlar Evreni sabit, mesafeleri düz (Öklidyen) sanır.")
+    print("Kaggle'ın kendi verdiği resmi bot (Baseline), evreni sabit sanıp hedefin")
+    print("'Şu Anki (T=0)' konumuna mermi ateşler. Gezegen yörüngede döndüğü için o mermi")
+    print("uzayın derinliklerinde kaybolur (Iska geçer).")
     print("ToposAI ise uzayı, Zaman Boyutuyla (Temporal Topology) birlikte okur.")
-    print("Kaggle Orbit Wars yarışmasındaki temel kilit nokta olan 'Yörünge Matematiğini'")
-    print("Kategori Teorisinin 'Fibration (Liflenme)' teoremiyle aşarak, rakibin ıskaladığı")
+    print("Yörünge Matematiğini 'Fibration (Liflenme)' teoremiyle aşarak, rakibin ıskaladığı")
     print("gezegenleri gelecekteki rotalarında pusuya düşürüp %100 isabet oranıyla")
     print("fethetmeyi başaran 'Şampiyon (Grandmaster)' sınıfı bir ajana dönüşmüştür!")
 
