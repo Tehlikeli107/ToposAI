@@ -44,16 +44,19 @@ class ToposConstrainedDecoder:
         # Eğer bağlantı gücü threshold'dan düşükse, bu kelime mantıksal olarak KANITLANAMAZ demektir (False/0).
         # Boolean bir maske oluşturuyoruz.
         valid_logical_mask = logical_connections >= self.threshold
-        
+
+        # Eğer hiçbir kelime mantıksal olarak kanıtlanamıyorsa (Maske tamamen False ise),
+        # sistemin çökmemesi (NaN dönmemesi) için maskelemeyi iptal et (Fallback).
+        if not valid_logical_mask.any():
+            return next_token_logits.clone()
+
         # Dil modelinin logitlerini kopyala
         masked_logits = next_token_logits.clone()
-        
-        # Mantıksal olarak KANITLANAMAYAN kelimelerin ihtimalini EKSİ SONSUZ (-inf) yap.
-        # Bu sayede ağ, ezberden o kelimeyi çok istese bile Softmax/Argmax aşamasında asla seçemez.
-        masked_logits[~valid_logical_mask] = float('-inf')
-        
-        return masked_logits
 
+        # Mantıksal olarak KANITLANAMAYAN kelimelerin ihtimalini EKSİ SONSUZ (-inf) yap.
+        masked_logits[~valid_logical_mask] = float('-inf')
+
+        return masked_logits
     def generate_safe_token(self, current_token_idx, next_token_logits, temperature=1.0, top_k=None):
         """
         Güvenli (Logit-Maskeli) metin üretimi. Halüsinasyon garantili 0.

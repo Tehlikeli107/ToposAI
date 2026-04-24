@@ -29,13 +29,16 @@ class DefeasibleReasoning:
         active_facts = R_reach[0, :]
         active_facts[0] = 1.0 
         
-        # 2. Topolojik Makas (İptalleri uygula)
-        for i in range(self.N):
-            if active_facts[i] > 0:
-                for j in range(self.N):
-                    if self.R_neg[i, j] > 0:
-                        defeater_strength = self.R_neg[i, j].item()
-                        filtered_pos[:, j] *= (1.0 - defeater_strength)
+        # 2. Topolojik Makas (İptalleri uygula - Vektörize)
+        # Sadece aktif olan düğümlerden gelen negatif okları (Defeaters) al
+        active_mask = (active_facts > 0).float().unsqueeze(1) # [N, 1]
+        active_R_neg = self.R_neg * active_mask # [N, N]
+        
+        # Her 'j' hedefi için gelen tüm aktif negatif okların (1 - güç) çarpanlarını bul ve çarp
+        defeater_multipliers = torch.prod(1.0 - active_R_neg, dim=0) # [N]
+        
+        # Filtrelenmiş pozitif matrise tüm çarpanları aynı anda (Broadcasting) uygula
+        filtered_pos = filtered_pos * defeater_multipliers.unsqueeze(0)
 
         # 3. Sağlam Kanunlarla Geçişlilik (Closure)
         R_current_pos = filtered_pos.clone()
@@ -59,16 +62,19 @@ class AutonomousTheoremProver:
         """Yeni yollar (Teoremler) bulduğunda bunların listesini (ve yeni evreni) döner."""
         new_theorems = []
         R_current = self.R.clone()
-        
+
         for step in range(iterations):
             R_next = soft_godel_composition(R_current, R_current, tau=5.0)
-            
-            for i in range(self.N):
-                for j in range(self.N):
-                    # Daha önce bağ zayıf (<0.1) iken sentezle güçlendiyse (>Threshold)
-                    if i != j and R_current[i, j] < 0.1 and R_next[i, j] > threshold:
-                        new_theorems.append((i, j, step + 1, R_next[i, j].item()))
-                        
+
+            # Vektörize edilmiş Teorem Keşfi (O(N^2) Python döngüsünü kaldırır)
+            new_mask = (R_current < 0.1) & (R_next > threshold)
+            new_mask.fill_diagonal_(False)
+
+            indices = new_mask.nonzero(as_tuple=False)
+            for idx in indices:
+                i, j = idx.tolist()
+                new_theorems.append((i, j, step + 1, R_next[i, j].item()))
+
             R_current = torch.max(R_current, R_next)
-            
+
         return R_current, new_theorems
