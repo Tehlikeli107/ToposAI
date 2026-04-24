@@ -8,7 +8,7 @@ import torch.nn as nn
 # Klasik mantıkta 'Değilinin Değili Kendisidir' (~~A == A) ve
 # 'Bir şey ya Doğrudur ya Yanlış' (A V ~A == True).
 # Sürekli Toposlarda (Continuous Topoi) bu kurallar ÇÖKER.
-# Biz burada yapay zekaya klasik Olasılık (Probability) değil, 
+# Biz burada yapay zekaya klasik Olasılık (Probability) değil,
 # Gödel T-Norm'unu kullanarak Kesin Topolojik Mantık (Heyting) öğretiyoruz.
 # =====================================================================
 
@@ -71,19 +71,19 @@ class HeytingNeuralLayer(nn.Module):
         # x'i [0,1] aralığına sıkıştır (Fiziksel uzaydan Mantıksal uzaya geçiş)
         x_logical = torch.sigmoid(x)
         w_logical = torch.sigmoid(self.weight)
-        
+
         # O(batch x out_features) Python döngüsü YERİNE, Broadcasting ile Vektörize İşlem (GPU)
         x_exp = x_logical.unsqueeze(1) # [Batch, 1, in_features]
         w_exp = w_logical.unsqueeze(0) # [1, out_features, in_features]
-        
+
         # Her bir nöron (Çıktı), girdilerin ağırlıkları "gerektirmesi" (Implication)
         # üzerine kurulu bir Heyting Mantık Kapısıdır.
         # Nöron j = AND_i ( x_i => w_ji )
-        
+
         # [Batch, out_features, in_features] boyutunda tüm implicationlar
         implications = self.omega.implies(x_exp, w_exp)
-        
+
         # Tüm öncüllerin Topolojik Kesişimi (Meet/Min) in_features boyutunda
         out = implications.min(dim=-1).values # [Batch, out_features]
-                
+
         return out

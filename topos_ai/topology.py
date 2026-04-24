@@ -1,5 +1,6 @@
-import torch
 import networkx as nx
+import torch
+
 
 class PersistentHomology:
     """

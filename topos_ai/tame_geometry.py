@@ -1,7 +1,3 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
 # =====================================================================
 # O-MINIMAL STRUCTURES & TAME GEOMETRY (THE PERFECT OPTIMIZER)
 # Amacı: Grothendieck'in "Esquisse d'un Programme" eserindeki Tame
@@ -13,8 +9,12 @@ import torch.nn.functional as F
 # (Tame) polinomlara izdüşümler (Projection). Optimizatörlerin
 # fraktal çukurlarına düşmesini sonsuza dek engeller.
 # =====================================================================
-
 import math
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
 
 class OMinimalProjector(nn.Module):
     """
@@ -37,9 +37,9 @@ class OMinimalProjector(nn.Module):
         # x'in [-1, 1] aralığına sıkıştırılmış (Compactified) hali
         # Sonsuzlukları sonlu bir interval'e çekiyoruz (Tame Topology'nin temeli)
         x_compact = torch.tanh(x)
-        
+
         tame_signal = torch.zeros_like(x_compact)
-        
+
         # Sonlu dereceli polinom (Semi-Algebraic) yaklaşımı
         # P(x) = c_1*x + c_3*x^3 + ...
         # Sadece tek (odd) dereceler kullanılarak orijin simetrisi korunur
@@ -47,7 +47,7 @@ class OMinimalProjector(nn.Module):
             # Taylor benzeri katsayılar (Alternating signs)
             coef = ((-1.0) ** ((i - 1) // 2)) / float(math.factorial(i))
             tame_signal += coef * (x_compact ** i)
-            
+
         return tame_signal
 
 class TameNeuralLayer(nn.Module):
@@ -59,14 +59,14 @@ class TameNeuralLayer(nn.Module):
         super().__init__()
         self.linear = nn.Linear(in_features, out_features)
         self.tame_projector = OMinimalProjector(degree=3)
-        
+
     def forward(self, x):
         # 1. Doğrusal Dönüşüm
         raw_out = self.linear(x)
-        
+
         # 2. Uysal (Tame) Aktivasyon
         # Bu aktivasyonun hiçbir fraktal yapısı veya sonsuz salınımı yoktur.
         # Bu sayede Loss yüzeyi her zaman sonlu sayıda vadi (Basin) içerir.
         tame_out = self.tame_projector(raw_out)
-        
+
         return tame_out

@@ -1,7 +1,8 @@
+import logging
 import os
+
 import torch
 import torch.nn as nn
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -32,18 +33,18 @@ def setup_distributed_topos(model: nn.Module, rank: int, world_size: int):
     if not HAS_FSDP:
         logger.warning("PyTorch FSDP (Distributed) modülü bulunamadı veya sisteminiz tek GPU'lu. Dağıtık eğitim atlanıyor.")
         return model
-        
+
     if not dist.is_initialized():
         logger.warning("torch.distributed başlatılmamış. Lütfen 'torchrun' veya 'mpirun' kullanın.")
         return model
-        
+
     print(f"[DISTRIBUTED SCALING] Topos Modeli GPU-{rank} üzerine FSDP ile parçalanıyor (Sharding)...")
-    
+
     # Modeli FSDP sarmalayıcısına al (Memory-efficient training)
     sharded_model = FSDP(
         model,
         cpu_offload=CPUOffload(offload_params=True) # Hafıza yetmezse RAM'e taşır
     )
-    
+
     print(f"  > GPU-{rank} başarıyla Cluster'a (Kümeye) katıldı. Trilyon parametreye hazır.")
     return sharded_model
