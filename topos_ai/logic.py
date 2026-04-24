@@ -32,28 +32,19 @@ class SubobjectClassifier(nn.Module):
         """Topolojik Birleşim (Join / Supremum): Gödel T-Conorm -> max(A, B)"""
         return torch.maximum(A, B)
 
-    def implies(self, A, B):
+    def implies(self, A, B, hardness=50.0):
         """
         [HEYTING IMPLICATION: A => B]
         Sezgisel mantığın kalbi! "A, B'yi gerektirir" morfizması.
-        A <= B ise sonuç 1.0 (True) olur.
+        A <= B ise sonuç 1.0'a (True) yaklaşır.
         A > B ise sonuç B'nin kendisine eşit olur (Lukasiewicz gibi 1-A+B DEĞİL!).
-        Bu, uzayın topolojik açık kümelerini (Open Sets) ifade eder.
         """
-        # Matematiksel olarak kesin koşul (İleri geçiş için)
-        condition_exact = (A <= B).float()
-        
-        # Geri yayılım (Backprop) için yumuşatılmış türevlenebilir yüzey
-        tau = 50.0
-        condition_soft = torch.sigmoid(tau * (B - A))
-        
-        # Straight-Through Estimator (STE)
-        # İleri geçişte KESİN (Exact) Mantık, Geri yayılımda YUMUŞAK (Soft) Türev!
-        condition = condition_exact.detach() - condition_soft.detach() + condition_soft
-        
-        return condition * 1.0 + (1.0 - condition) * B
+        # Geri yayılım (Backprop) için pürüzsüz (Smooth) sigmoid yaklaşımı
+        # Bu sayede her durumda A ve B gradyan (türev) alır.
+        sigma = torch.sigmoid((B - A) * hardness)
+        return sigma + (1.0 - sigma) * B
 
-    def logical_not(self, A):
+    def logical_not(self, A, hardness=50.0):
         """
         [INTUITIONISTIC NEGATION: ~A]
         Toposlarda "Değil (Not)" kavramı, A'nın "Yanlış"ı (0.0) gerektirmesidir: (A => False)
@@ -61,8 +52,8 @@ class SubobjectClassifier(nn.Module):
         İçinde en ufak bir doğruluk payı (Örn: 0.1) varsa, değili ANINDA 0.0 (False) olur!
         (Klasik olasılıktaki 1.0 - 0.1 = 0.9 mantığını reddeder).
         """
-        false_tensor = torch.zeros_like(A)
-        return self.implies(A, false_tensor)
+        # Gradient kesilmemesi için pürüzsüz yaklaşım (A == 0 ise 1, A > 0 ise 0)
+        return torch.sigmoid(-A * hardness)
 
 class HeytingNeuralLayer(nn.Module):
     """
@@ -81,18 +72,18 @@ class HeytingNeuralLayer(nn.Module):
         x_logical = torch.sigmoid(x)
         w_logical = torch.sigmoid(self.weight)
         
-        batch_size = x.size(0)
-        out_features = self.weight.size(0)
-        out = torch.zeros(batch_size, out_features, device=x.device)
+        # O(batch x out_features) Python döngüsü YERİNE, Broadcasting ile Vektörize İşlem (GPU)
+        x_exp = x_logical.unsqueeze(1) # [Batch, 1, in_features]
+        w_exp = w_logical.unsqueeze(0) # [1, out_features, in_features]
         
         # Her bir nöron (Çıktı), girdilerin ağırlıkları "gerektirmesi" (Implication)
         # üzerine kurulu bir Heyting Mantık Kapısıdır.
         # Nöron j = AND_i ( x_i => w_ji )
-        for b in range(batch_size):
-            for j in range(out_features):
-                # x'in w'yi gerektirmesi (Eğer Girdi, Beklentiden küçük eşitse sorun yok)
-                implications = self.omega.implies(x_logical[b], w_logical[j])
-                # Tüm öncüllerin Topolojik Kesişimi (Meet/Min)
-                out[b, j] = torch.min(implications)
+        
+        # [Batch, out_features, in_features] boyutunda tüm implicationlar
+        implications = self.omega.implies(x_exp, w_exp)
+        
+        # Tüm öncüllerin Topolojik Kesişimi (Meet/Min) in_features boyutunda
+        out = implications.min(dim=-1).values # [Batch, out_features]
                 
         return out

@@ -40,8 +40,8 @@ def apply_rotary_emb(xq: torch.Tensor, xk: torch.Tensor, freqs_cis: torch.Tensor
 class TopologicalLinear(nn.Module):
     """
     [PURE TOPOS LINEAR PROJECTION]
-    Klasik nn.Linear ağırlıkları (Weights) negatif değerler alabilir ve 
-    boyutsuz büyüyebilir (-5.4, +12.1). Bu, Kategori Teorisinin 
+    Klasik nn.Linear ağırlıkları (Weights) negatif değerler alabilir ve
+    boyutsuz büyüyebilir (-5.4, +12.1). Bu, Kategori Teorisinin
     'Morfizma (Ok) Gücü' mantığına ([0, 1] arası olasılık) ihanettir.
     Bu sınıf, öğrenilebilir ağırlıkları her zaman (sigmoid ile) 0.0 ile 1.0
     arasına hapseder. Negatif bilgi (Eksi ok) kavramı yoktur.
@@ -50,10 +50,10 @@ class TopologicalLinear(nn.Module):
         super().__init__()
         self.in_features = in_features
         self.out_features = out_features
-        
-        # Ağırlıkları başlat (Klasik Xavier/Kaiming yerine 0 etrafında, sigmoid sonrası ~0.5 olur)
-        self.weight_raw = nn.Parameter(torch.randn(out_features, in_features) * 0.1)
-        
+
+        # Ağırlıkları başlat (Daha geniş bir spread [2.0], sigmoid sonrası daha zengin çeşitlilik sağlar)
+        self.weight_raw = nn.Parameter(torch.randn(out_features, in_features) * 2.0)
+
         if bias:
             self.bias_raw = nn.Parameter(torch.zeros(out_features))
         else:
@@ -62,20 +62,20 @@ class TopologicalLinear(nn.Module):
     def forward(self, x):
         # Ağırlıkları Kategori Teorisinin doğasına ([0, 1]) zorla
         W_topos = torch.sigmoid(self.weight_raw)
-        
+
         out = F.linear(x, W_topos)
-        
+
         if self.bias_raw is not None:
             B_topos = torch.sigmoid(self.bias_raw)
             out = out + B_topos
-            
+
         # Çıktının 1.0'ı aşmamasını (Probabilistic Bound) veya normalize olmasını TopoNorm sağlar,
         # ancak doğrusal projeksiyonda ağırlıklı toplamlar büyüyebilir.
         return out
 
 class TopologicalNorm(nn.Module):
     """
-    [PURE TOPOS NORMALIZATION]
+    [SHEAF NORMALIZATION]
     Klasik LayerNorm ortalamayı 0 yapar ve negatif sayılar (-0.5) üretir.
     Kategori Teorisinde okların gücü negatife inemez.
     Bu Norm, vektördeki değerleri [0, 1] aralığına doğrusal olarak yayar (Min-Max Scaling)
@@ -86,14 +86,18 @@ class TopologicalNorm(nn.Module):
         self.eps = eps
         # Öğrenilebilir ölçek (Scale) ve kaydırma (Shift) [0, 1] arası olmalı
         self.weight = nn.Parameter(torch.ones(d_model))
-        self.bias = nn.Parameter(torch.zeros(d_model))
+        # Norm bias'ının başlangıçta her şeye 0.5 (sigmoid(0)) eklememesi için
+        self.bias = nn.Parameter(torch.full((d_model,), -4.0)) # sigmoid(-4) ≈ 0.018
 
     def forward(self, x):
-        # x: [B, SeqLen, D] (Değerler 0 ile 1 arasında varsayılır)
-        # Sadece maksimuma bölerek normalize et ki bağıl güçler korunsun
-        x_max = torch.max(x, dim=-1, keepdim=True)[0]
-        x_norm = x / (x_max + self.eps)
-        
+        # x: [B, SeqLen, D]
+        # Mutlak maksimum değere oranla (Sınır: [-1.0, 1.0])
+        x_abs_max = torch.max(torch.abs(x), dim=-1, keepdim=True)[0]
+        x_norm = x / (x_abs_max + self.eps)
+
+        # Kategori Teorisinin [0.0, 1.0] (Reachability) aralığına kaydır
+        x_norm = (x_norm + 1.0) / 2.0
+
         # Öğrenilebilir parametrelerle çarp ama sonucu yine [0, 1] arasına sıkıştır
         out = x_norm * torch.sigmoid(self.weight) + torch.sigmoid(self.bias)
         return torch.clamp(out, min=0.0, max=1.0)
@@ -108,25 +112,25 @@ class TopologicalFFN(nn.Module):
     def __init__(self, in_features, hidden_features, out_features):
         super().__init__()
         # Ağırlıklar doğrudan [0, 1] olasılıkları olarak öğrenilecek (TopoLinear)
+        self.w_gate = TopologicalLinear(in_features, hidden_features, bias=False)
         self.w1 = TopologicalLinear(in_features, hidden_features, bias=False)
         self.w2 = TopologicalLinear(hidden_features, out_features, bias=False)
 
     def forward(self, x):
         # x her zaman [0, 1] arasındadır.
-        # W1 projeksiyonu
+        # W1 projeksiyonu ve Gate projeksiyonu
         w1_out = self.w1(x)
-        
+        gate_out = torch.sigmoid(self.w_gate(x))
+
         # Bulanık Mantık (Fuzzy Logic) Aktivasyonu:
-        # Klasik ReLU yerine, "Eğer x yeterince güçlüyse ve ağırlık da güçlüyse geçiş yap"
-        # x.mean(dim=-1) bir nevi 'genel enerji' (Context Activation) seviyesidir.
-        hidden_state = w1_out * x.mean(dim=-1, keepdim=True) 
-        
+        # Gerçek Gating mekanizması: Kapı (Gate) açıksa ve bilgi (W1) güçlüyse geçiş yap
+        hidden_state = w1_out * gate_out
+
         # İkinci katmana geçiş
         w2_out = self.w2(hidden_state)
-        
+
         # Çıktı yine [0, 1] arasına sıkıştırılır
         return torch.clamp(w2_out, min=0.0, max=1.0)
-
 class TopologicalMoERouter(nn.Module):
     """
     [MIXTURE OF EXPERTS (MoE) ROUTER]
@@ -183,21 +187,32 @@ class MultiUniverseToposAttention(nn.Module):
         # Her token için hangi 2 evrenin çalışacağını buluyoruz
         top_k_probs, top_k_indices = self.router(x) # probs: [B, SeqLen, top_k], indices: [B, SeqLen, top_k]
         
-        # 2. Tüm Evrenlerin Projeksiyonları (Şimdilik PyTorch batch matmul kolaylığı için 
-        # hepsini hesaplıyoruz, üretim kodunda custom CUDA kernel ile sadece seçilenler hesaplanır)
-        Q_all = self.q_proj(x).view(B, SeqLen, self.num_universes, self.d_universe)
-        K_all = self.k_proj(x).view(B, SeqLen, self.num_universes, self.d_universe)
-        V_all = self.v_proj(x).view(B, SeqLen, self.num_universes, self.d_universe)
+        # 2. Tüm Evrenlerin Projeksiyonları
+        # (Not: İddiamız olan O(1) Sparse computation tam olarak çalışması için
+        # CUDA kernel gerekir. PyTorch batch matmul kolaylığı için burada
+        # Dense olarak hesaplayıp sonra maskeliyoruz (Simulation of Sparsity).)
+        Q_new = self.q_proj(x).view(B, SeqLen, self.num_universes, self.d_universe)
+        K_new = self.k_proj(x).view(B, SeqLen, self.num_universes, self.d_universe)
+        V_new = self.v_proj(x).view(B, SeqLen, self.num_universes, self.d_universe)
 
-        Q_all, K_all = apply_rotary_emb(Q_all, K_all, freqs_cis)
+        # [KV-CACHE VE RoPE DÜZELTMESİ (P11/P12)]
+        # RoPE sadece YENİ (Q_new ve K_new) vektörlere uygulanır. 
+        # freqs_cis sadece yeni tokenlerin pozisyonunu içermelidir.
+        Q_new, K_new = apply_rotary_emb(Q_new, K_new, freqs_cis)
         
         if kv_cache is not None:
             k_cache, v_cache = kv_cache
-            K_all = torch.cat([k_cache, K_all], dim=1)
-            V_all = torch.cat([v_cache, V_all], dim=1)
-            kv_cache = (K_all, V_all)
+            # Yeni K ve V, mevcut Cache'in sonuna eklenir
+            K_all = torch.cat([k_cache, K_new], dim=1)
+            V_all = torch.cat([v_cache, V_new], dim=1)
+        else:
+            K_all = K_new
+            V_all = V_new
             
-        Q_all = torch.sigmoid(Q_all).transpose(1, 2).contiguous() # [B, U, Seq, D_u]
+        # Gelecek adımlar için cache'i güncelle
+        new_kv_cache = (K_all, V_all)
+            
+        Q_all = torch.sigmoid(Q_new).transpose(1, 2).contiguous() # [B, U, Seq, D_u]
         K_all = torch.sigmoid(K_all).transpose(1, 2).contiguous() # [B, U, Cache_Seq, D_u]
         V_all = V_all.transpose(1, 2).contiguous()
         

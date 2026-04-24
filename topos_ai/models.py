@@ -27,7 +27,8 @@ class ToposTransformerBlock(nn.Module):
 
 class ToposTransformer(nn.Module):
     """
-    Uçtan uca eğitilebilir, Dot-Product içermeyen tam donanımlı Topos Dil Modeli.
+    Uçtan uca eğitilebilir, Dikkat (attention) skorlaması Dot-Product Free (Lukasiewicz T-norm) 
+    olan tam donanımlı Topos Dil Modeli. Çıkış projeksiyonu (Reachability) ise Cosine Similarity kullanır.
     Meta Llama-3 (RoPE, SwiGLU, KV-Cache) teknolojileriyle entegre edilmiştir.
     Klasik Classifier (fc_out) YERİNE, kelimelerin Yoneda uzayındaki yerlerine
     ne kadar ulaşılabildiğini (Topological Reachability) [0, 1] arasında ölçer.
