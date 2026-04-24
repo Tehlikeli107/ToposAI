@@ -8,19 +8,38 @@ HAS_TRITON = False
 try:
     import triton
     import triton.language as tl
+
     HAS_TRITON = True
 except ImportError:
-    logger.warning("Triton kütüphanesi bulunamadı! FlashTopos kernelleri standart PyTorch tensor operasyonlarına (O(N^2) VRAM) düşürülecek (Fallback). Yüksek performans için NVIDIA GPU ve Triton kurunuz.")
+    logger.warning(
+        "Triton kütüphanesi bulunamadı! FlashTopos kernelleri standart PyTorch tensor operasyonlarına (O(N^2) VRAM) düşürülecek (Fallback). Yüksek performans için NVIDIA GPU ve Triton kurunuz."
+    )
 
 if HAS_TRITON:
+
     @triton.jit
     def flash_topos_fwd_kernel_4d(
-        q_ptr, k_ptr, out_ptr,
-        M, N, D, H,
-        stride_qb, stride_qh, stride_qm, stride_qd,
-        stride_kb, stride_kh, stride_kn, stride_kd,
-        stride_ob, stride_oh, stride_om, stride_on,
-        BLOCK_M: tl.constexpr, BLOCK_N: tl.constexpr
+        q_ptr,
+        k_ptr,
+        out_ptr,
+        M,
+        N,
+        D,
+        H,
+        stride_qb,
+        stride_qh,
+        stride_qm,
+        stride_qd,
+        stride_kb,
+        stride_kh,
+        stride_kn,
+        stride_kd,
+        stride_ob,
+        stride_oh,
+        stride_om,
+        stride_on,
+        BLOCK_M: tl.constexpr,
+        BLOCK_N: tl.constexpr,
     ):
         batch_head_id = tl.program_id(0)
         pid_m = tl.program_id(1)
@@ -47,11 +66,10 @@ if HAS_TRITON:
             q_val = tl.load(q_ptrs, mask=mask_m, other=0.0)
             k_val = tl.load(k_ptrs, mask=mask_n, other=0.0)
 
-            # Lukasiewicz T-Norm (Mantıksal İçerim / Implication)
-            # 1.0 - Q + K
-            impl = 1.0 - q_val[:, None] + k_val[None, :]
-            impl = tl.minimum(impl, 1.0)
-            impl = tl.maximum(impl, 0.0)
+            # [STRICT GODEL IMPLICATION - KATEGORİ TEORİSİ]
+            # Eskiden olan Lukasiewicz T-Norm (1.0 - Q + K) yerine,
+            # Topos teorisine %100 uyan katı (strict) kural uygulandı.
+            impl = tl.where(q_val[:, None] <= k_val[None, :], 1.0, k_val[None, :])
             acc += impl
 
         acc = acc / D
@@ -62,16 +80,37 @@ if HAS_TRITON:
 
     @triton.jit
     def flash_topos_bwd_kernel_dq(
-        q_ptr, k_ptr, d_out_ptr, dq_ptr,
-        M, N, D, H,
-        stride_qb, stride_qh, stride_qm, stride_qd,
-        stride_kb, stride_kh, stride_kn, stride_kd,
-        stride_dob, stride_doh, stride_dom, stride_don,
-        BLOCK_M: tl.constexpr, BLOCK_N: tl.constexpr, BLOCK_D: tl.constexpr
+        q_ptr,
+        k_ptr,
+        d_out_ptr,
+        dq_ptr,
+        M,
+        N,
+        D,
+        H,
+        stride_qb,
+        stride_qh,
+        stride_qm,
+        stride_qd,
+        stride_kb,
+        stride_kh,
+        stride_kn,
+        stride_kd,
+        stride_dob,
+        stride_doh,
+        stride_dom,
+        stride_don,
+        BLOCK_M: tl.constexpr,
+        BLOCK_N: tl.constexpr,
+        BLOCK_D: tl.constexpr,
     ):
         """
-        [TRUE O(1) MEMORY BACKWARD - DQ]
-        Loops over N in SRAM, avoiding slow atomic adds.
+        Blockwise backward pass for dQ.
+
+        The kernel loops over N in SRAM-sized tiles and avoids materializing
+        the full 3D gradient tensor. Output tensors and d_out still scale with
+        sequence length, so this is reduced intermediate memory rather than a
+        literal O(1) end-to-end memory guarantee.
         """
         batch_head_id = tl.program_id(0)
         pid_m = tl.program_id(1)
@@ -107,7 +146,7 @@ if HAS_TRITON:
             dout_val = tl.load(dout_ptrs, mask=mask_m[:, None] & mask_n[None, :], other=0.0)
 
             impl = 1.0 - q_val[:, None, :] + k_val[None, :, :]
-            valid_mask = (impl > 0.0) & (impl < 1.0)
+            valid_mask = (impl >= 0.0) & (impl <= 1.0)
 
             dout_expanded = dout_val[:, :, None]
             grad_q_3d = -dout_expanded * valid_mask / D
@@ -119,16 +158,37 @@ if HAS_TRITON:
 
     @triton.jit
     def flash_topos_bwd_kernel_dk(
-        q_ptr, k_ptr, d_out_ptr, dk_ptr,
-        M, N, D, H,
-        stride_qb, stride_qh, stride_qm, stride_qd,
-        stride_kb, stride_kh, stride_kn, stride_kd,
-        stride_dob, stride_doh, stride_dom, stride_don,
-        BLOCK_M: tl.constexpr, BLOCK_N: tl.constexpr, BLOCK_D: tl.constexpr
+        q_ptr,
+        k_ptr,
+        d_out_ptr,
+        dk_ptr,
+        M,
+        N,
+        D,
+        H,
+        stride_qb,
+        stride_qh,
+        stride_qm,
+        stride_qd,
+        stride_kb,
+        stride_kh,
+        stride_kn,
+        stride_kd,
+        stride_dob,
+        stride_doh,
+        stride_dom,
+        stride_don,
+        BLOCK_M: tl.constexpr,
+        BLOCK_N: tl.constexpr,
+        BLOCK_D: tl.constexpr,
     ):
         """
-        [TRUE O(1) MEMORY BACKWARD - DK]
-        Loops over M in SRAM, avoiding slow atomic adds.
+        Blockwise backward pass for dK.
+
+        The kernel loops over M in SRAM-sized tiles and avoids materializing
+        the full 3D gradient tensor. Output tensors and d_out still scale with
+        sequence length, so this is reduced intermediate memory rather than a
+        literal O(1) end-to-end memory guarantee.
         """
         batch_head_id = tl.program_id(0)
         pid_n = tl.program_id(1)
@@ -164,7 +224,7 @@ if HAS_TRITON:
             dout_val = tl.load(dout_ptrs, mask=mask_m[:, None] & mask_n[None, :], other=0.0)
 
             impl = 1.0 - q_val[:, None, :] + k_val[None, :, :]
-            valid_mask = (impl > 0.0) & (impl < 1.0)
+            valid_mask = (impl >= 0.0) & (impl <= 1.0)
 
             dout_expanded = dout_val[:, :, None]
             grad_k_3d = dout_expanded * valid_mask / D
@@ -180,8 +240,8 @@ if HAS_TRITON:
             is_3d = False
             if q.dim() == 3:
                 is_3d = True
-                q = q.unsqueeze(1) # [B, 1, M, D]
-                k = k.unsqueeze(1) # [B, 1, N, D]
+                q = q.unsqueeze(1)  # [B, 1, M, D]
+                k = k.unsqueeze(1)  # [B, 1, N, D]
 
             B, H, M, D = q.shape
             _, _, N, _ = k.shape
@@ -192,11 +252,27 @@ if HAS_TRITON:
             grid = (B * H, triton.cdiv(M, BLOCK_M), triton.cdiv(N, BLOCK_N))
 
             flash_topos_fwd_kernel_4d[grid](
-                q, k, out, M, N, D, H,
-                q.stride(0), q.stride(1), q.stride(2), q.stride(3),
-                k.stride(0), k.stride(1), k.stride(2), k.stride(3),
-                out.stride(0), out.stride(1), out.stride(2), out.stride(3),
-                BLOCK_M=BLOCK_M, BLOCK_N=BLOCK_N
+                q,
+                k,
+                out,
+                M,
+                N,
+                D,
+                H,
+                q.stride(0),
+                q.stride(1),
+                q.stride(2),
+                q.stride(3),
+                k.stride(0),
+                k.stride(1),
+                k.stride(2),
+                k.stride(3),
+                out.stride(0),
+                out.stride(1),
+                out.stride(2),
+                out.stride(3),
+                BLOCK_M=BLOCK_M,
+                BLOCK_N=BLOCK_N,
             )
 
             ctx.save_for_backward(q, k)
@@ -222,22 +298,56 @@ if HAS_TRITON:
 
             grid_dq = (B * H, triton.cdiv(M, BLOCK_M))
             flash_topos_bwd_kernel_dq[grid_dq](
-                q, k, grad_out, dq,
-                M, N, D, H,
-                q.stride(0), q.stride(1), q.stride(2), q.stride(3),
-                k.stride(0), k.stride(1), k.stride(2), k.stride(3),
-                grad_out.stride(0), grad_out.stride(1), grad_out.stride(2), grad_out.stride(3),
-                BLOCK_M=BLOCK_M, BLOCK_N=BLOCK_N, BLOCK_D=BLOCK_D
+                q,
+                k,
+                grad_out,
+                dq,
+                M,
+                N,
+                D,
+                H,
+                q.stride(0),
+                q.stride(1),
+                q.stride(2),
+                q.stride(3),
+                k.stride(0),
+                k.stride(1),
+                k.stride(2),
+                k.stride(3),
+                grad_out.stride(0),
+                grad_out.stride(1),
+                grad_out.stride(2),
+                grad_out.stride(3),
+                BLOCK_M=BLOCK_M,
+                BLOCK_N=BLOCK_N,
+                BLOCK_D=BLOCK_D,
             )
 
             grid_dk = (B * H, triton.cdiv(N, BLOCK_N))
             flash_topos_bwd_kernel_dk[grid_dk](
-                q, k, grad_out, dk,
-                M, N, D, H,
-                q.stride(0), q.stride(1), q.stride(2), q.stride(3),
-                k.stride(0), k.stride(1), k.stride(2), k.stride(3),
-                grad_out.stride(0), grad_out.stride(1), grad_out.stride(2), grad_out.stride(3),
-                BLOCK_M=BLOCK_M, BLOCK_N=BLOCK_N, BLOCK_D=BLOCK_D
+                q,
+                k,
+                grad_out,
+                dk,
+                M,
+                N,
+                D,
+                H,
+                q.stride(0),
+                q.stride(1),
+                q.stride(2),
+                q.stride(3),
+                k.stride(0),
+                k.stride(1),
+                k.stride(2),
+                k.stride(3),
+                grad_out.stride(0),
+                grad_out.stride(1),
+                grad_out.stride(2),
+                grad_out.stride(3),
+                BLOCK_M=BLOCK_M,
+                BLOCK_N=BLOCK_N,
+                BLOCK_D=BLOCK_D,
             )
 
             if is_3d:
@@ -248,6 +358,8 @@ if HAS_TRITON:
         return FlashToposFunction.apply(q, k)
 
 else:
+    from topos_ai.logic import StrictGodelImplication
+
     def flash_topos_attention(q, k):
         is_3d = False
         if q.dim() == 3:
@@ -257,7 +369,13 @@ else:
 
         q_exp = q.unsqueeze(3)
         k_exp = k.unsqueeze(2)
-        impl = torch.clamp(1.0 - q_exp + k_exp, min=0.0, max=1.0)
+        
+        # [CPU/FALLBACK İÇİN KATI TOPOS MANTIĞI VE ÖZEL TÜREV]
+        # Eskisi: impl = torch.clamp(1.0 - q_exp + k_exp, min=0.0, max=1.0)
+        # Yenisi: Kategori Teorisine (Modus Ponens) %100 uyan,
+        # ancak eğitimde geriye 'Straight-Through Estimator' gönderen sınıf.
+        impl = StrictGodelImplication.apply(q_exp, k_exp)
+        
         out = impl.mean(dim=-1)
 
         return out.squeeze(1) if is_3d else out

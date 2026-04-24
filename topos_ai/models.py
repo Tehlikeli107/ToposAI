@@ -27,12 +27,13 @@ class ToposTransformerBlock(nn.Module):
 
         # PURE TOPOS RESIDUAL (T-Conorm): x = max(x, muta_out) veya x + muta_out - x*muta_out
         # 1.0'ı aşmamak için Probabilistic Sum kullanıyoruz
-        x = x + muta_out - (x * muta_out)
+        x = x + muta_out
 
         ffn_out = self.ffn(self.norm2(x))
-        x = x + ffn_out - (x * ffn_out)
+        x = x + ffn_out
 
         return x, kv_cache
+
 
 class ToposTransformer(nn.Module):
     """
@@ -42,6 +43,7 @@ class ToposTransformer(nn.Module):
     Klasik Classifier (fc_out) YERİNE, kelimelerin Yoneda uzayındaki yerlerine
     ne kadar ulaşılabildiğini (Topological Reachability) [0, 1] arasında ölçer.
     """
+
     def __init__(self, vocab_size, d_model=64, num_universes=4, num_layers=2, max_seq_len=2048):
         super().__init__()
         self.yoneda_emb = YonedaEmbedding(vocab_size)
@@ -58,13 +60,15 @@ class ToposTransformer(nn.Module):
         yoneda_repr = self.yoneda_emb(idx)
         x = self.yoneda_proj(yoneda_repr)
 
-        freqs_cis = self.freqs_cis[:SeqLen].to(x.device)
+        past_kv_length = kv_caches[0][0].shape[1] if kv_caches is not None else 0
+        freqs_cis = self.freqs_cis[past_kv_length : past_kv_length + SeqLen].to(x.device)
 
         if SeqLen > 1:
             # [PURE TOPOLOGICAL TIME ARROW (Asymmetric Monoid)]
             # Klasik maskeleme geleceği '-inf' ile doldurur ve softmax ile ezer.
             # Kategori Teorisinde ok ya vardır (1.0) ya yoktur (0.0).
-            mask = torch.tril(torch.ones(SeqLen, SeqLen, device=idx.device)).view(1, 1, SeqLen, SeqLen)
+            mask = torch.ones(SeqLen, past_kv_length + SeqLen, device=idx.device)
+            mask = torch.tril(mask, diagonal=past_kv_length).view(1, 1, SeqLen, past_kv_length + SeqLen)
             # 0.0 olan yerler gelecektir. Çarpım anında (truth_matrix * mask) sıfırlanırlar.
         else:
             mask = None
@@ -75,23 +79,33 @@ class ToposTransformer(nn.Module):
             x, new_kv_cache = block(x, freqs_cis, mask, kv_cache)
             new_kv_caches.append(new_kv_cache)
 
-        x_norm = self.norm(x) # [B, SeqLen, d_model]
+        x_norm = self.norm(x)  # [B, SeqLen, d_model]
 
         # [PURE TOPOLOGICAL PROJECTION]
         # Kosinüs benzerliği için, projeksiyonun arkasındaki o saf (0 ile 1 arasına sıkıştırılmış)
         # ağırlıkları çekmemiz gerekiyor. TopologicalLinear'ın asıl pozitif ağırlıkları:
-        vocab_embeddings = torch.sigmoid(self.yoneda_proj.weight_raw) # [d_model, vocab_size]
+        vocab_embeddings = torch.sigmoid(self.yoneda_proj.weight_raw)  # [d_model, vocab_size]
 
         # L2 Normalize
-        x_normalized = F.normalize(x_norm, p=2, dim=-1) # [B, SeqLen, d_model]
-        vocab_normalized = F.normalize(vocab_embeddings, p=2, dim=0) # [d_model, vocab_size]
+        x_normalized = F.normalize(x_norm, p=2, dim=-1)  # [B, SeqLen, d_model]
+        vocab_normalized = F.normalize(vocab_embeddings, p=2, dim=0).T  # [vocab_size, d_model]
 
-        # [B, SeqLen, vocab_size] (Kosinüs Benzerliği -1 ile 1 arası)
-        cosine_sim = torch.matmul(x_normalized, vocab_normalized)
+        # [STRICT GODEL INTERNAL HOM]
+        # Kosinüs Benzerliği (Cosine Similarity) SİMETRİKTİR ve yönü katleder.
+        # Asimetriyi korumak için StrictGodelImplication kullanıyoruz: A <= B ise 1, değilse B
+        from topos_ai.logic import StrictGodelImplication
+        
+        x_exp = x_normalized.unsqueeze(2)           # [B, SeqLen, 1, d_model]
+        vocab_exp = vocab_normalized.unsqueeze(0).unsqueeze(0) # [1, 1, vocab_size, d_model]
+        
+        # Kelimeden (x) Hedefe (vocab) Topos İçsel Çıkarımı (Implication)
+        implication = StrictGodelImplication.apply(x_exp, vocab_exp)
+        
+        # Boyutlar üzerinden ortalama alarak [0, 1] arası Asimetrik Ulaşılabilirlik (Reachability) bul
+        reachability_logits = implication.mean(dim=-1)
 
         # Topolojik Ulaşılabilirlik (Reachability) Skoru: [0.0, 1.0]
         # Floating point hataları yüzünden -0.00001 veya 1.000001 olmasını engelle (BCELoss CUDA Assert)
-        reachability_logits = (cosine_sim + 1.0) / 2.0
         reachability_logits = torch.clamp(reachability_logits, min=1e-6, max=1.0 - 1e-6)
 
         return reachability_logits, new_kv_caches

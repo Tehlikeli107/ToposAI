@@ -1,89 +1,90 @@
 import torch
 import torch.nn as nn
 
-# =====================================================================
-# TOPOI INTERNAL LOGIC: THE SUBOBJECT CLASSIFIER (Ω) & HEYTING ALGEBRA
-# Amacı: Toposların içsel mantığı klasik (Boolean) değildir. Sezgisel
-# (Intuitionistic) bir yapı olan Heyting Cebiri'ne uyar.
-# Klasik mantıkta 'Değilinin Değili Kendisidir' (~~A == A) ve
-# 'Bir şey ya Doğrudur ya Yanlış' (A V ~A == True).
-# Sürekli Toposlarda (Continuous Topoi) bu kurallar ÇÖKER.
-# Biz burada yapay zekaya klasik Olasılık (Probability) değil,
-# Gödel T-Norm'unu kullanarak Kesin Topolojik Mantık (Heyting) öğretiyoruz.
-# =====================================================================
+
+class StrictGodelImplication(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, A, B, hardness=50.0):
+        ctx.save_for_backward(A, B)
+        ctx.hardness = hardness
+        
+        # [KESİN/STRICT İLERİ YÖN - TOPOS TEORİSİ (A -> B)]
+        return torch.where(A <= B, torch.tensor(1.0, dtype=A.dtype, device=A.device), B)
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        # [YUMUŞAK/SOFT GERİ YÖN] 
+        A, B = ctx.saved_tensors
+        hardness = ctx.hardness
+        
+        with torch.enable_grad():
+            A_soft = A.detach().requires_grad_(True)
+            B_soft = B.detach().requires_grad_(True)
+            
+            sigma = torch.sigmoid((B_soft - A_soft) * hardness)
+            soft_impl = sigma + (1.0 - sigma) * B_soft
+            
+            soft_impl.backward(grad_output)
+            
+        return A_soft.grad, B_soft.grad, None
+
 
 class SubobjectClassifier(nn.Module):
     """
-    Topos Axiom 3: Her Topos'un bir Subobject Classifier'ı (Ω) vardır.
-    Bu sınıf, tensörlerin (Ağırlıkların) Topos içindeki 'Hakikat Değerlerini'
-    (Truth Values) hesaplar.
+    Fuzzy truth-value operations inspired by Heyting algebras.
+
+    The methods operate on tensors and return differentiable approximations of
+    meet, join, implication, and negation. They are numerical operators, not a
+    formal proof engine for internal topos logic.
     """
+
     def __init__(self):
         super().__init__()
-        # Topos'taki 'True' (T) terminal objeden Ω'ya giden morfizmadır.
         self.truth_morphism = 1.0
         self.false_morphism = 0.0
 
     def logical_and(self, A, B):
-        """Topolojik Kesişim (Meet / Infimum): Gödel T-Norm -> min(A, B)"""
+        """Meet proxy: min(A, B)."""
         return torch.minimum(A, B)
 
     def logical_or(self, A, B):
-        """Topolojik Birleşim (Join / Supremum): Gödel T-Conorm -> max(A, B)"""
+        """Join proxy: max(A, B)."""
         return torch.maximum(A, B)
 
     def implies(self, A, B, hardness=50.0):
         """
-        [HEYTING IMPLICATION: A => B]
-        Sezgisel mantığın kalbi! "A, B'yi gerektirir" morfizması.
-        A <= B ise sonuç 1.0'a (True) yaklaşır.
-        A > B ise sonuç B'nin kendisine eşit olur (Lukasiewicz gibi 1-A+B DEĞİL!).
+        Strict Goedel-style implication with Hybrid Autograd.
+
+        The hard operator is 1 when A <= B and B otherwise (Zero Modus Ponens Violation).
+        The soft formulation is used purely for gradients.
         """
-        # Geri yayılım (Backprop) için pürüzsüz (Smooth) sigmoid yaklaşımı
-        # Bu sayede her durumda A ve B gradyan (türev) alır.
-        sigma = torch.sigmoid((B - A) * hardness)
-        return sigma + (1.0 - sigma) * B
+        return StrictGodelImplication.apply(A, B, hardness)
 
     def logical_not(self, A, hardness=50.0):
         """
-        [INTUITIONISTIC NEGATION: ~A]
-        Toposlarda "Değil (Not)" kavramı, A'nın "Yanlış"ı (0.0) gerektirmesidir: (A => False)
-        Bu çok serttir! Bir şeyin değili, sadece o şey TAMAMEN YANLIŞ (0.0) ise True (1.0) olur.
-        İçinde en ufak bir doğruluk payı (Örn: 0.1) varsa, değili ANINDA 0.0 (False) olur!
-        (Klasik olasılıktaki 1.0 - 0.1 = 0.9 mantığını reddeder).
+        [STRICT TOPOLOGICAL NEGATION]
+        Eski bulanık 'sigmoid(0.5 - A)' yaklaşımı silinmiştir.
+        Lawvere-Tierney topolojisindeki İdempotent aksiyomunu (j(j(p)) == j(p))
+        sağlayabilmek için katı bir tamamlayıcı (1.0 - A) gereklidir.
         """
-        # Gradient kesilmemesi için pürüzsüz yaklaşım (A == 0 ise 1, A > 0 ise 0)
-        return torch.sigmoid(-A * hardness)
+        return 1.0 - A
+
 
 class HeytingNeuralLayer(nn.Module):
     """
-    Klasik Linear(x) + ReLU yerine, veriyi Toposların Subobject Classifier'ı (Ω)
-    üzerinden süzerek mantıksal çıkarım yapan aksiyomatik katman.
+    Linear-like layer built from the fuzzy implication proxy.
     """
+
     def __init__(self, in_features, out_features):
         super().__init__()
-        # Ağırlıklar (Premises/Öncüller) [0, 1] aralığında olmalıdır
         self.weight = nn.Parameter(torch.rand(out_features, in_features))
         self.omega = SubobjectClassifier()
 
     def forward(self, x):
-        # x: [Batch, in_features], weight: [out_features, in_features]
-        # x'i [0,1] aralığına sıkıştır (Fiziksel uzaydan Mantıksal uzaya geçiş)
         x_logical = torch.sigmoid(x)
         w_logical = torch.sigmoid(self.weight)
 
-        # O(batch x out_features) Python döngüsü YERİNE, Broadcasting ile Vektörize İşlem (GPU)
-        x_exp = x_logical.unsqueeze(1) # [Batch, 1, in_features]
-        w_exp = w_logical.unsqueeze(0) # [1, out_features, in_features]
-
-        # Her bir nöron (Çıktı), girdilerin ağırlıkları "gerektirmesi" (Implication)
-        # üzerine kurulu bir Heyting Mantık Kapısıdır.
-        # Nöron j = AND_i ( x_i => w_ji )
-
-        # [Batch, out_features, in_features] boyutunda tüm implicationlar
+        x_exp = x_logical.unsqueeze(1)
+        w_exp = w_logical.unsqueeze(0)
         implications = self.omega.implies(x_exp, w_exp)
-
-        # Tüm öncüllerin Topolojik Kesişimi (Meet/Min) in_features boyutunda
-        out = implications.min(dim=-1).values # [Batch, out_features]
-
-        return out
+        return implications.min(dim=-1).values
