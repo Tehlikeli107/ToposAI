@@ -9,9 +9,7 @@ description = "A neuro-symbolic AI framework bridging Category Theory (Toposes, 
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
-authors = [
-    { name = "Salih Can Kurnaz", email = "salihcankurnaz@gmail.com" }
-]
+authors = []
 keywords = ["category-theory", "topos", "neuro-symbolic", "AI", "heyting-algebra", "sheaf", "yoneda"]
 classifiers = [
     "Development Status :: 3 - Alpha",

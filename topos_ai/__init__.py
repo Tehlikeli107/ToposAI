@@ -38,8 +38,6 @@ from . import (
 )
 
 __version__ = "1.0.0"
-__author__ = "Salih Can Kurnaz"
-__email__ = "salihcankurnaz@gmail.com"
 __license__ = "MIT"
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())

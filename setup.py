@@ -9,8 +9,6 @@ setup(
     description="A neuro-symbolic AI framework bridging Category Theory with PyTorch",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="Salih Can Kurnaz",
-    author_email="salihcankurnaz@gmail.com",
     url="https://github.com/Tehlikeli107/ToposAI",
     license="MIT",
     python_requires=">=3.10",

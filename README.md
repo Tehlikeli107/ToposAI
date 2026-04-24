@@ -148,10 +148,9 @@ MIT — see [LICENSE](LICENSE).
 If you use ToposAI in your research, please cite:
 
 ```bibtex
-@software{toposai2024,
-  author  = {Kurnaz, Salih Can},
+@software{toposai2026,
   title   = {{ToposAI}: Neuro-Symbolic AI via Category Theory},
-  year    = {2024},
+  year    = {2026},
   url     = {https://github.com/Tehlikeli107/ToposAI},
   license = {MIT}
 }
