@@ -1,15 +1,16 @@
-import torch
 import math
+
+import torch
 from torch.optim import Optimizer
 
 # =====================================================================
 # TOPOS ADAM (TOPOLOGICAL NATURAL GRADIENT DESCENT)
 # Problem: AdamW, uzayın düz (Euclidean) olduğunu varsayar. Ancak ToposAI
-# (Kategori Teorisi) [0, 1] olasılık sınırlarına sahip, bükülü (Curved) 
+# (Kategori Teorisi) [0, 1] olasılık sınırlarına sahip, bükülü (Curved)
 # bir Riemannian Manifold'udur (Information Geometry).
-# Çözüm: ToposAdam, Fisher Bilgi Matrisini (Fisher Information Metric) 
+# Çözüm: ToposAdam, Fisher Bilgi Matrisini (Fisher Information Metric)
 # kullanarak klasik eğimleri (Gradients) Doğal Eğimlere (Natural Gradients)
-# çevirir. [0, 1] uç noktalarındaki "Vanishing Gradient" (Ölü türev) 
+# çevirir. [0, 1] uç noktalarındaki "Vanishing Gradient" (Ölü türev)
 # sorununu çözer ve Kategori oklarını çok daha hızlı optimize eder.
 # =====================================================================
 
@@ -73,7 +74,7 @@ class ToposAdam(Optimizer):
                 # p*(1-p) değeri sınırlar (0 veya 1) yaklaştıkça küçülür (Gradyan ölür).
                 # Biz bunu tersine çevirerek (Bölerek) o ölü noktaları canlandırıyoruz (Curved Geometry).
                 # S6 FIX: Ancak sıfıra çok yakın değerler 10000x amplifikasyona (patlamaya) yol açabilir.
-                fisher_metric = (p_val * (1.0 - p_val)).clamp(min=1e-4, max=0.25) 
+                fisher_metric = (p_val * (1.0 - p_val)).clamp(min=1e-4, max=0.25)
 
                 # Natural Update
                 step_size = group['lr'] / bias_correction1

@@ -1,5 +1,6 @@
 import torch
 
+
 def soft_godel_composition(R1, R2, tau=10.0):
     """
     [DIFFERENTIABLE TOPOS LOGIC]
@@ -49,7 +50,7 @@ def sheaf_gluing(truth_A, truth_B, threshold=0.2):
     """
     disagreement = torch.abs(truth_A - truth_B)
     max_conflict = torch.max(disagreement).item()
-    
+
     if max_conflict > threshold:
         return False, None
     return True, torch.max(truth_A, truth_B)

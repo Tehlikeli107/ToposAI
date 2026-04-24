@@ -1,5 +1,6 @@
-import torch
 import logging
+
+import torch
 
 logger = logging.getLogger(__name__)
 
@@ -33,28 +34,28 @@ if HAS_TRITON:
         offs_n = pid_n * BLOCK_N + tl.arange(0, BLOCK_N)
         mask_m = offs_m < M
         mask_n = offs_n < N
-    
+
         acc = tl.zeros((BLOCK_M, BLOCK_N), dtype=tl.float32)
-    
+
         q_base = q_ptr + batch_id * stride_qb + head_id * stride_qh
         k_base = k_ptr + batch_id * stride_kb + head_id * stride_kh
-    
+
         for d in range(D):
             q_ptrs = q_base + offs_m * stride_qm + d * stride_qd
             k_ptrs = k_base + offs_n * stride_kn + d * stride_kd
-    
+
             q_val = tl.load(q_ptrs, mask=mask_m, other=0.0)
             k_val = tl.load(k_ptrs, mask=mask_n, other=0.0)
-            
+
             # Lukasiewicz T-Norm (Mantıksal İçerim / Implication)
             # 1.0 - Q + K
             impl = 1.0 - q_val[:, None] + k_val[None, :]
             impl = tl.minimum(impl, 1.0)
             impl = tl.maximum(impl, 0.0)
             acc += impl
-    
+
         acc = acc / D
-        
+
         out_base = out_ptr + batch_id * stride_ob + head_id * stride_oh
         out_ptrs = out_base + offs_m[:, None] * stride_om + offs_n[None, :] * stride_on
         tl.store(out_ptrs, acc, mask=mask_m[:, None] & mask_n[None, :])
@@ -253,10 +254,10 @@ else:
             is_3d = True
             q = q.unsqueeze(1)
             k = k.unsqueeze(1)
-            
-        q_exp = q.unsqueeze(3) 
-        k_exp = k.unsqueeze(2) 
+
+        q_exp = q.unsqueeze(3)
+        k_exp = k.unsqueeze(2)
         impl = torch.clamp(1.0 - q_exp + k_exp, min=0.0, max=1.0)
-        out = impl.mean(dim=-1) 
-        
+        out = impl.mean(dim=-1)
+
         return out.squeeze(1) if is_3d else out

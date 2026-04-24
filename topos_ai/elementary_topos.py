@@ -3,7 +3,7 @@ import torch.nn as nn
 
 # =====================================================================
 # THE ELEMENTARY TOPOS AXIOMS (CARTESIAN CLOSED CATEGORY)
-# Amacı: Bir uzayın "Topos" olabilmesi için 3 temel şartı sağlaması 
+# Amacı: Bir uzayın "Topos" olabilmesi için 3 temel şartı sağlaması
 # gerekir: Sonlu Limitler (Çarpım), Üstel Objeler (Exponentials) ve
 # Subobject Classifier (Ω).
 # Bu modül, PyTorch tensörlerini birer 'Topos Objesi' olarak kabul
@@ -16,11 +16,11 @@ class ElementaryTopos(nn.Module):
     def __init__(self, dim):
         super().__init__()
         self.dim = dim
-        
+
         # 1. INITIAL OBJECT (0) - 'Big Bang' veya 'Kesin Yanlış'
         # Her objeye ondan sadece TEK BİR ok (Morphism) gider.
         self.initial_object = torch.zeros(dim)
-        
+
         # 2. TERMINAL OBJECT (1) - 'Kara Delik' veya 'Kesin Doğru'
         # Her objeden ona sadece TEK BİR ok gider.
         self.terminal_object = torch.ones(dim)
