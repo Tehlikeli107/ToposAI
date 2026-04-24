@@ -39,7 +39,8 @@ class HomotopyEquivalence:
         C = torch.matmul(centered_B.t(), centered_A)
         
         # 3. SVD (Singular Value Decomposition) - Topolojik Çekirdeği bulma
-        U, S, V = torch.svd(C)
+        U, S, Vh = torch.linalg.svd(C, full_matrices=False)
+        V = Vh.t()
         
         # 4. Homotopi Yolu (Rotasyon Matrisi: R = U * V^T)
         R = torch.matmul(U, V.t())

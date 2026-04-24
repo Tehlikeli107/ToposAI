@@ -52,7 +52,11 @@ class ElementaryTopos(nn.Module):
         Heyting Cebirindeki Implication ile modellenir:
         Eğer Y <= Z ise 1.0 (Kesin doğru), değilse Z.
         """
-        condition = (Y <= Z).float()
+        # Straight-Through Estimator (İleri geçişte kesin, Geri yayılımda türevlenebilir)
+        condition_exact = (Y <= Z).float()
+        condition_soft = torch.sigmoid(50.0 * (Z - Y))
+        condition = condition_exact.detach() - condition_soft.detach() + condition_soft
+        
         return condition * 1.0 + (1.0 - condition) * Z
 
     def subobject_classifier(self, X, Y):

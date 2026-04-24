@@ -40,10 +40,17 @@ class SubobjectClassifier(nn.Module):
         A > B ise sonuç B'nin kendisine eşit olur (Lukasiewicz gibi 1-A+B DEĞİL!).
         Bu, uzayın topolojik açık kümelerini (Open Sets) ifade eder.
         """
-        # PyTorch'ta diferansiyellenebilir (differentiable) Gödel Implication
-        # A <= B koşulunu kontrol et
-        condition = (A <= B).float()
-        # Eğer A <= B ise 1.0, değilse B
+        # Matematiksel olarak kesin koşul (İleri geçiş için)
+        condition_exact = (A <= B).float()
+        
+        # Geri yayılım (Backprop) için yumuşatılmış türevlenebilir yüzey
+        tau = 50.0
+        condition_soft = torch.sigmoid(tau * (B - A))
+        
+        # Straight-Through Estimator (STE)
+        # İleri geçişte KESİN (Exact) Mantık, Geri yayılımda YUMUŞAK (Soft) Türev!
+        condition = condition_exact.detach() - condition_soft.detach() + condition_soft
+        
         return condition * 1.0 + (1.0 - condition) * B
 
     def logical_not(self, A):
