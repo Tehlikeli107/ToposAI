@@ -28,7 +28,7 @@ class YonedaUniverse(nn.Module):
     def get_morphisms(self, X):
         """
         [THE HOM-FUNCTOR: Hom(A, X)]
-        X'in (Bilinmeyen Obje), evrendeki tüm Probe'lara (A) olan 
+        X'in (Bilinmeyen Obje), evrendeki tüm Probe'lara (A) olan
         Uzaklık / Benzerlik ilişkilerini (Morfizmalarını) çıkarır.
         X'in KENDİ ÖZELLİKLERİ SİLİNİR, geriye sadece "İlişki Ağı" kalır.
         """
@@ -52,12 +52,12 @@ class YonedaReconstructor(nn.Module):
     def forward(self, true_morphisms, universe: YonedaUniverse):
         """
         Tahmin edilen X'in morfizmalarını, Gerçek X'in morfizmalarıyla
-        kıyaslar. Eğer Morfizmalar eşitse (İzomorfik Functor), 
+        kıyaslar. Eğer Morfizmalar eşitse (İzomorfik Functor),
         Yoneda Lemma'ya göre OBJELER KESİNLİKLE EŞİT OLMALIDIR!
         """
         # Makinenin tahmin ettiği uydurma X'in Evrenle olan ilişkisi
         estimated_morphisms = universe.get_morphisms(self.estimated_X)
-        
+
         # Eğer bu iki ilişki ağı birbirine uyarsa, X'i kusursuz bulduk demektir!
         loss = torch.nn.functional.mse_loss(estimated_morphisms, true_morphisms)
         return loss, self.estimated_X

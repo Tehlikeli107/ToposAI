@@ -1,11 +1,11 @@
-import torch
 import numpy as np
+import torch
 
 # =====================================================================
 # CATEGORICAL SHEAF DATALOADER (YONEDA STREAMING)
 # Amacı: Terabaytlarca veriyi (Big Data) RAM'e veya GPU VRAM'ine
 # taşımak fiziksel bir darboğazdır (I/O Bottleneck).
-# Kategori Teorisinde bir Demet (Sheaf), global verinin lokal 
+# Kategori Teorisinde bir Demet (Sheaf), global verinin lokal
 # kesitlerden (Local Sections) kayıpsızca inşa edilebilmesidir.
 # Bu modül, veriyi diske hapseder. Yoneda Lemma'yı kullanarak,
 # devasa [N, 1_000_000] boyutlu ham veriyi diskin üzerinde okur
@@ -27,7 +27,7 @@ class SheafDataloader:
         self.feature_dim = feature_dim
         self.batch_size = batch_size
         self.num_probes = num_probes
-        
+
         # [THE YONEDA UNIVERSE ON CPU]
         # Evrenin referans noktaları CPU'da (veya Disk Controller'da) durur.
         # Boyut: [64, 100_000]
@@ -41,9 +41,9 @@ class SheafDataloader:
         [YONEDA FUNCTOR (Approximated via Gaussian Random Projection)]
         Devasa ham veriyi [Batch, 100_000] alır,
         Problara olan uzaklığını (İlişkisini) bulur.
-        (Not: Pratik hesaplanabilirlik için Yoneda Lemma'sı burada 
-        Johnson-Lindenstrauss teoremine dayalı Gaussian Random Probes 
-        ile simüle edilmiştir - S14 FIX. 64x1M'lik probe matrisi CPU RAM'de 
+        (Not: Pratik hesaplanabilirlik için Yoneda Lemma'sı burada
+        Johnson-Lindenstrauss teoremine dayalı Gaussian Random Probes
+        ile simüle edilmiştir - S14 FIX. 64x1M'lik probe matrisi CPU RAM'de
         tutulurken, asıl veri (Terabaytlar) mmap ile okunur.)
         Çıktı: [Batch, 64] boyutunda ufacık bir Topolojik Vektör!
         """
@@ -64,19 +64,19 @@ class SheafDataloader:
         """
         # Diskteki devasa dosyayı sanal olarak haritala (RAM'e yüklemez!)
         mmap_data = np.memmap(self.file_path, dtype='float32', mode='r', shape=(self.num_samples, self.feature_dim))
-        
+
         for start_idx in range(0, self.num_samples, self.batch_size):
             end_idx = min(start_idx + self.batch_size, self.num_samples)
-            
+
             # Sadece ilgili 32 satırı diskten RAM'e çek
             raw_chunk_np = mmap_data[start_idx:end_idx]
             raw_chunk_tensor = torch.tensor(raw_chunk_np, dtype=torch.float32)
-            
+
             # YONEDA SIKIŞTIRMASI (CPU'da, RAM patlamadan gerçekleşir)
             # 1 Milyon boyutlu veri, 64 boyuta düşer
             yoneda_morphism = self._get_morphism(raw_chunk_tensor)
-            
+
             # GPU'ya sadece 64 boyutlu bu ufacık "İlişki / Ruh" gider!
             gpu_tensor = yoneda_morphism.to(device)
-            
+
             yield gpu_tensor

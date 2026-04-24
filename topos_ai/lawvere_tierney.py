@@ -1,13 +1,14 @@
 import torch
 import torch.nn as nn
+
 from .logic import SubobjectClassifier
 
 # =====================================================================
 # LAWVERE-TIERNEY TOPOLOGIES (UNIVERSE CREATION / SUBTOPOSES)
 # Amacı: Bir Topos (Evren) içinde, farklı fiziksel/mantıksal kuralları
 # olan bir Alt-Evren (Subtopos) yaratmak.
-# j: Ω -> Ω bir Lawvere-Tierney operatörüdür. 
-# Yapay zeka, dış dünyanın bulanık veya çelişkili (Intuitionistic) 
+# j: Ω -> Ω bir Lawvere-Tierney operatörüdür.
+# Yapay zeka, dış dünyanın bulanık veya çelişkili (Intuitionistic)
 # verileriyle başa çıkamadığında, kendi bilincinde bir 'j' topolojisi
 # tanımlayarak o verileri izole bir Alt-Evren'e (Subtopos) hapseder
 # ve orada yepyeni bir mantıkla (Örn: Kesin Boolean) düşünür.
@@ -47,10 +48,11 @@ class LawvereTierneyTopology(nn.Module):
         şu 3 kuralı SIFIR HATA (0.0) ile sağlaması ŞARTTIR.
         """
         T = torch.ones_like(P)
-        
+
         # Eğer parametre isteyen bir topolojiyse (Closed Topology) onu ayarla
         if topology_func.__name__ == "closed_topology":
-            j = lambda x: topology_func(x, C)
+            def j(x):
+                return topology_func(x, C)
         else:
             j = topology_func
 
@@ -63,11 +65,11 @@ class LawvereTierneyTopology(nn.Module):
         # 3. AXIOM: j(p AND q) == j(p) AND j(q) (Kesişimler / Çarpımlar Korunur)
         P_and_Q = self.omega.logical_and(P, Q)
         left_side = j(P_and_Q)
-        
+
         j_P = j(P)
         j_Q = j(Q)
         right_side = self.omega.logical_and(j_P, j_Q)
-        
+
         ax3_diff = torch.abs(left_side - right_side).max().item()
 
         return ax1_diff, ax2_diff, ax3_diff

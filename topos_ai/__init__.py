@@ -17,30 +17,32 @@ Core modules:
     hott        - Homotopy type theory utilities
 """
 
+import logging
+
+from . import (
+    cohomology,
+    distributed,
+    generation,
+    hott,
+    kernels,
+    logic,
+    math,
+    models,
+    nn,
+    optim,
+    reasoning,
+    tokenization,
+    topology,
+    verification,
+    yoneda,
+)
+
 __version__ = "1.0.0"
 __author__ = "Salih Can Kurnaz"
 __email__ = "salihcankurnaz@gmail.com"
 __license__ = "MIT"
 
-import logging
-
 logging.getLogger(__name__).addHandler(logging.NullHandler())
-
-from . import math
-from . import nn
-from . import models
-from . import kernels
-from . import logic
-from . import generation
-from . import topology
-from . import cohomology
-from . import reasoning
-from . import verification
-from . import tokenization
-from . import distributed
-from . import optim
-from . import yoneda
-from . import hott
 
 __all__ = [
     "math",

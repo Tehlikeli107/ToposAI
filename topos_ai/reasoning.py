@@ -1,9 +1,11 @@
 import torch
-from .math import soft_godel_composition, lukasiewicz_composition
+
+from .math import lukasiewicz_composition, soft_godel_composition
+
 
 class DefeasibleReasoning:
     """
-    [AI YARGIÇ] Pozitif (Destek) ve Negatif (İptal / Defeater) okları 
+    [AI YARGIÇ] Pozitif (Destek) ve Negatif (İptal / Defeater) okları
     Kategori Teorisinde birleştirerek çelişki çözen Nöro-Sembolik Mantık.
     """
     def __init__(self, num_nodes):
@@ -20,23 +22,23 @@ class DefeasibleReasoning:
     def deliberate(self, iterations=3, start_node=0):
         """Topolojik Mahkeme Kararı: İptalleri Uygula ve Geçişlilik Yap."""
         filtered_pos = self.R_pos.clone()
-        
+
         # 1. Hangi düğümlerin olaya müdahil olduğu (Reachability)
         R_reach = self.R_pos.clone()
         for _ in range(iterations):
             R_reach = torch.max(R_reach, lukasiewicz_composition(R_reach, R_reach))
-            
+
         active_facts = R_reach[start_node, :]
-        active_facts[start_node] = 1.0 
-        
+        active_facts[start_node] = 1.0
+
         # 2. Topolojik Makas (İptalleri uygula - Vektörize)
         # Sadece aktif olan düğümlerden gelen negatif okları (Defeaters) al
         active_mask = (active_facts > 0).float().unsqueeze(1) # [N, 1]
         active_R_neg = self.R_neg * active_mask # [N, N]
-        
+
         # Her 'j' hedefi için gelen tüm aktif negatif okların (1 - güç) çarpanlarını bul ve çarp
         defeater_multipliers = torch.prod(1.0 - active_R_neg, dim=0) # [N]
-        
+
         # Filtrelenmiş pozitif matrise tüm çarpanları aynı anda (Broadcasting) uygula
         filtered_pos = filtered_pos * defeater_multipliers.unsqueeze(0)
 

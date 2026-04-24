@@ -36,7 +36,7 @@ class QuantumLogicGate(nn.Module):
     def quantum_and(self, P, Q):
         """
         [QUANTUM SEQUENTIAL MEASUREMENT (AND)]
-        Kuantum mantığında 'P ve ardından Q' (P THEN Q), 
+        Kuantum mantığında 'P ve ardından Q' (P THEN Q),
         dalga fonksiyonunun sırayla çökmesidir: Q * P
         (Klasik mantıkta bu P*Q == Q*P'dir, ama Kuantum'da asimetriktir).
         """

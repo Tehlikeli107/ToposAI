@@ -2,8 +2,8 @@ import torch
 
 # =====================================================================
 # CATEGORICAL CYBERNETICS (OPEN GAMES)
-# Amacı: Çoklu ajanların (Multi-Agent) bulunduğu ortamlarda, 
-# her bir ajanın stratejisini (Play) ve pişmanlığını (Coplay/Regret) 
+# Amacı: Çoklu ajanların (Multi-Agent) bulunduğu ortamlarda,
+# her bir ajanın stratejisini (Play) ve pişmanlığını (Coplay/Regret)
 # Kategori Teorisindeki 'Lens (Optic)' yapılarıyla modellemek.
 # Açık Oyunlar (Open Games), karmaşık oyunları devasa ağaçlarla
 # (Minimax) çözmek yerine, küçük oyunları Legolar gibi birbirine
@@ -25,7 +25,7 @@ class OpenGame:
         self.play_functor = play_functor
         # coplay_functor(X, Y, R, params) -> S, ve params_gradient (Öğrenme için Regret)
         self.coplay_functor = coplay_functor
-        
+
         # Ajanın stratejisini (Ağırlıklarını) belirleyen Kategori Değişkenleri
         self.params = params if params is not None else torch.tensor([0.5], requires_grad=False)
         self.history_X = None
@@ -41,17 +41,17 @@ class OpenGame:
     def coplay(self, R, lr=0.1):
         """
         Geri Yön (Pişmanlık ve Öğrenme).
-        Burada PyTorch Autograd kullanılmaz! Sadece lokal "Regret (Pişmanlık)" 
+        Burada PyTorch Autograd kullanılmaz! Sadece lokal "Regret (Pişmanlık)"
         sinyalleri Kategori kurallarına göre işlenir.
         """
         S, param_regret = self.coplay_functor(self.history_X, self.history_Y, R, self.params)
-        
+
         # Ajan stratejisini (parametresini) pişmanlığına göre günceller
         self.params = self.params + lr * param_regret
-        
+
         # Sınırlandırma (Topolojik Manifold Kuralları, örn: Olasılık [0, 1])
         self.params = torch.clamp(self.params, min=0.01, max=0.99)
-        
+
         return S
 
 class ComposedOpenGame:
