@@ -1,73 +1,158 @@
-# ToposAI: Experimental Explorations in Neuro-Symbolic AI & Category Theory
+# ToposAI: Neuro-Symbolic AI via Category Theory
 
 [![ToposAI CI](https://github.com/Tehlikeli107/ToposAI/actions/workflows/ci.yml/badge.svg)](https://github.com/Tehlikeli107/ToposAI/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
 
-**ToposAI** is an experimental open-source research framework aiming to bridge the gap between Continuous Deep Learning (PyTorch) and Formal Category Theory (Topos, Lukasiewicz Logic, Yoneda Lemma).
+**ToposAI** is an experimental open-source research framework bridging Continuous Deep Learning (PyTorch) with Formal Category Theory — Toposes, Lukasiewicz Logic, Heyting Algebra, and the Yoneda Lemma.
 
-While modern LLMs operate purely on statistical dot-products (frequently suffering from hallucination in long-horizon reasoning), this project investigates whether **Logical Truth Values** and **Morphism Computations** can be successfully embedded into neural architectures.
+Modern LLMs operate on statistical dot-products. This project investigates whether **logical truth values** and **morphism computations** can be embedded into differentiable neural architectures to produce more structured, verifiable reasoning.
 
 ---
 
-## 🎯 Research Scope and Key Implementations
+## Architecture at a Glance
 
-This repository serves as both a pip-installable framework (`topos_ai`) and a collection of 50+ proof-of-concept scripts (~39 applications, 10 benchmarks, ~40 experiments) validating category theory theorems on tensor operations, organized cleanly into modules:
+| Component | Classical DL | ToposAI |
+|-----------|-------------|---------|
+| Attention scoring | Softmax(QKᵀ / √d) | Lukasiewicz T-norm — dot-product free |
+| Weight space | ℝ, unconstrained | [0, 1] via sigmoid (morphism strength) |
+| Residual connection | x + f(x) | x + f(x) − x·f(x) (probabilistic T-conorm) |
+| Normalization | LayerNorm | Max-norm to [0, 1] |
+| Output projection | Linear classifier | Cosine similarity (topological reachability) |
+| Reasoning | Statistical next-token | Transitive closure via Gödel/Lukasiewicz |
+| Optimizer | AdamW (Euclidean) | ToposAdam (Fisher natural gradient) |
 
-### 🔬 Benchmarks (`benchmarks/`)
-*   **`benchmark_sota.py`**: Hardware scale tree search vs Dense Attention.
-*   **`scaling_laws_benchmark.py`**: VRAM measurement proving O(1) SRAM gradient accumulation within VRAM limits.
-*   **`babi_logic_benchmark.py`**: Meta bAbI Task 15 evaluation.
-*   **`real_world_ontology_benchmark.py`**: Asymmetry tests on NLTK WordNet vs Dot-Product.
+---
 
-### 🚀 Applications (`applications/`)
-*   **`app.py`**: Gradio Web Dashboard for interactive Neuro-Symbolic reasoning.
-*   **`real_world_medical_fact_checker.py`**: RAG-killer resolving Adverse Drug Reactions.
-*   **`real_world_solidity_auditor.py`**: Topological formal verification for Smart Contracts (Reentrancy).
-*   **`real_world_finance_topos.py`**: Systemic risk contagion using live S&P500 `yfinance` data.
-*   **`real_world_seismic_topos.py`**: Spatiotemporal causal discovery using USGS earthquake data.
-*   **`dynamic_ontology_nlp.py`**: Text-to-Topos builder and reasoner.
-
-### 🧪 Experiments (`experiments/`)
-*   Contains deeply theoretical simulations like **Homotopy Type Theory (`hott_concept_bender.py`)**, **Temporal Topoi (`temporal_topos_retrocausality.py`)**, **Gödel Incompleteness Engine**, and **Recursive Self-Improvement (Singularity)**.
-
-## ⚠️ Limitations & Honest Positioning
-
-As an early-stage research repository, ToposAI has notable limitations that must be acknowledged:
-
-*   **Trade-offs in Dense Retrieval Routing:** In large-scale vector similarity tests, ToposAI abandons computationally expensive dot-products for hierarchical tree search.
-*   **Heuristic Demos & Theoretical Claims:** Scripts within `experiments/` (e.g., Reversible Computing, Holographic Universe, Consciousness scores) and `applications/` (e.g., Cosmology, Epidemiology Minimum Cut, LLM Chat interfaces) are heavily narrative-driven *simulations* (Proof-of-Concepts) rather than production-ready empirical laws. They demonstrate *Categorical Tendencies* and *Heuristic Topologies* rather than deterministic zero-shot solutions. (e.g., "Zero-Joule AI" claims are strictly theoretical frameworks).
-*   **API Scaffolding:** Modules like `TopologicalTokenizer` and `Distributed FSDP` are currently at the scaffolding stage. While they compile and demonstrate Top-K MoE logic and causal emergence, they require substantial real-world data and multi-node hardware clusters to validate their "trillion-parameter" claims.
-
-## ⚙️ Installation
-
-ToposAI is fully compatible with standard PyTorch workflows. The `setup.py` automatically resolves heavy dependencies (transformers, datasets, yfinance, networkx).
+## Installation
 
 ```bash
+# Core library only
 pip install -e .
+
+# Full dependencies (Gradio, HuggingFace, yfinance, Triton, ...)
+pip install -e ".[full]"
+
+# Development (adds ruff, pytest-cov)
+pip install -e ".[dev]"
 ```
 
-## 🔬 Quick Start
+## Quick Start
 
 ```python
 import torch
 import topos_ai
 
-# Use the SRAM-optimized FlashTopos Kernel:
+# Topos Language Model (attention scoring is dot-product free)
+model = topos_ai.models.ToposTransformer(vocab_size=50000, d_model=256, num_universes=8)
+idx   = torch.randint(0, 50000, (1, 64))
+logits, kv_cache = model(idx)
+
+# FlashTopos kernel — Lukasiewicz implication, O(1) SRAM memory
 Q = torch.rand(1, 4096, 64).cuda()
 K = torch.rand(1, 4096, 64).cuda()
+attn = topos_ai.kernels.flash_topos_attention(Q, K)
 
-# Exact logical composition in milliseconds
-attention_matrix = topos_ai.kernels.flash_topos_attention(Q, K)
+# Sheaf consensus (two agents must agree within threshold)
+ok, global_truth = topos_ai.math.sheaf_gluing(truth_A, truth_B, threshold=0.05)
 
-# Consensus engine using Sheaf Condition
-is_compatible, global_truth = topos_ai.math.sheaf_gluing(Universe_A, Universe_B)
-
-# Using Zero-Embedding ToposTransformer
-model = topos_ai.models.ToposTransformer(vocab_size=50000)
+# Transitive closure via categorical composition
+R     = torch.rand(10, 10)
+R_inf = topos_ai.math.transitive_closure(R, max_steps=5)
 ```
 
-## 🌌 Future Work (The Ultimate Horizon)
-*   **Integration with Lean 4:** Leveraging the *Curry-Howard-Lambek correspondence* to train ToposAI as a formal Automated Theorem Prover on `Mathlib4`.
-*   **$\infty$-Topoi and Homotopy Type Theory (HoTT):** Extending the concept bender (`hott_concept_bender.py`) from discrete logits to continuous geometric manifolds for scientific discovery (e.g., Quantum Chemistry).
+---
 
-*Contributions, mathematical critiques, and pull requests are highly welcomed. The path to AGI requires rigorous, formal logic.*
+## Repository Structure
+
+```
+topos_ai/           # Core installable library
+  logic.py          #   Heyting algebra (smooth Gödel implication)
+  topology.py       #   Persistent homology — correct Betti numbers via boundary rank
+  nn.py             #   TopologicalLinear, TopologicalNorm, MoE attention
+  models.py         #   ToposTransformer end-to-end model
+  math.py           #   Lukasiewicz / Gödel composition, sheaf gluing
+  cohomology.py     #   Cech cohomology — H0 consensus, H1 obstruction
+  kernels.py        #   Triton CUDA kernel (FlashTopos fwd + bwd)
+  optim.py          #   ToposAdam (Fisher metric natural gradient)
+  generation.py     #   Topologically constrained decoding (no hallucination mask)
+  reasoning.py      #   Defeasible reasoning + autonomous theorem discovery
+  verification.py   #   Lean 4 proof transpiler (Curry-Howard-Lambek)
+  yoneda.py         #   Yoneda embedding & universe
+  hott.py           #   Homotopy type theory (Procrustes path finding)
+
+experiments/        # ~40 theoretical simulations (proof-of-concept)
+applications/       # ~39 domain demos (finance, NLP, bioinformatics, seismic...)
+benchmarks/         # Performance comparisons (tree search vs. attention, scaling laws)
+tests/              # pytest test suite
+docs/               # MkDocs documentation
+```
+
+---
+
+## Benchmarks
+
+| Script | What it measures |
+|--------|-----------------|
+| `benchmark_sota.py` | Ultrametric tree search vs. dense softmax attention |
+| `scaling_laws_benchmark.py` | VRAM vs. sequence length for SRAM gradient accumulation |
+| `babi_logic_benchmark.py` | bAbI Task 15 (logical reasoning) |
+| `real_world_ontology_benchmark.py` | WordNet asymmetry vs. dot-product symmetry |
+
+---
+
+## Limitations
+
+> This is an early-stage research framework. The following limitations apply:
+
+- **No perplexity benchmarks yet.** ToposTransformer has not been compared to standard Transformers on real corpora.
+- **MoE is simulated.** True sparse computation (only computing selected experts) requires a custom CUDA kernel. Current PyTorch implementation computes all experts, then masks — no actual FLOPs saving.
+- **`experiments/` are simulations.** Scripts like `holographic_ads_cft_universe.py`, `recursive_self_improvement.py`, or `artificial_consciousness_phi.py` are narrative-driven theoretical explorations, not empirical results.
+- **`TopologicalTokenizer` and `Distributed FSDP`** are scaffolding-stage. Multi-node training is not validated.
+- **Attention is dot-product free; the output head is not.** The vocabulary projection uses cosine similarity (which is mathematically a normalized dot-product).
+
+---
+
+## Running Tests
+
+```bash
+# Fast CPU tests (no GPU required)
+pytest tests/test_core.py tests/test_models.py -v -m "not cuda and not triton"
+
+# Full suite with coverage
+pytest --cov=topos_ai --cov-report=html
+```
+
+---
+
+## Future Work
+
+- **Lean 4 integration:** Training ToposAI as a formal theorem prover on Mathlib4 via the Curry-Howard-Lambek correspondence.
+- **Perplexity benchmarks:** Rigorous comparison against standard Transformers on standard corpora.
+- **True sparse MoE:** Custom CUDA kernel for genuine O(top-k / num_experts) compute.
+- **∞-Topoi / HoTT:** Extending from discrete logits to continuous geometric manifolds.
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, code style, and PR guidelines.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+## Citation
+
+If you use ToposAI in your research, please cite:
+
+```bibtex
+@software{toposai2024,
+  author  = {Kurnaz, Salih Can},
+  title   = {{ToposAI}: Neuro-Symbolic AI via Category Theory},
+  year    = {2024},
+  url     = {https://github.com/Tehlikeli107/ToposAI},
+  license = {MIT}
+}
+```

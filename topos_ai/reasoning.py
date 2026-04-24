@@ -17,7 +17,7 @@ class DefeasibleReasoning:
         else:
             self.R_pos[u, v] = weight
 
-    def deliberate(self, iterations=3):
+    def deliberate(self, iterations=3, start_node=0):
         """Topolojik Mahkeme Kararı: İptalleri Uygula ve Geçişlilik Yap."""
         filtered_pos = self.R_pos.clone()
         
@@ -26,8 +26,8 @@ class DefeasibleReasoning:
         for _ in range(iterations):
             R_reach = torch.max(R_reach, lukasiewicz_composition(R_reach, R_reach))
             
-        active_facts = R_reach[0, :]
-        active_facts[0] = 1.0 
+        active_facts = R_reach[start_node, :]
+        active_facts[start_node] = 1.0 
         
         # 2. Topolojik Makas (İptalleri uygula - Vektörize)
         # Sadece aktif olan düğümlerden gelen negatif okları (Defeaters) al

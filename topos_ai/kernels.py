@@ -15,7 +15,7 @@ if HAS_TRITON:
     @triton.jit
     def flash_topos_fwd_kernel_4d(
         q_ptr, k_ptr, out_ptr,
-        M, N, D,
+        M, N, D, H,
         stride_qb, stride_qh, stride_qm, stride_qd,
         stride_kb, stride_kh, stride_kn, stride_kd,
         stride_ob, stride_oh, stride_om, stride_on,
@@ -24,11 +24,11 @@ if HAS_TRITON:
         batch_head_id = tl.program_id(0)
         pid_m = tl.program_id(1)
         pid_n = tl.program_id(2)
-        
-        num_heads = stride_qb // stride_qh if stride_qh > 0 else 1
+
+        # S13 FIX: Num_heads stride'dan değil, dışarıdan (H) alınır (Robust for contiguous changes)
+        num_heads = H
         batch_id = batch_head_id // num_heads
         head_id = batch_head_id % num_heads
-    
         offs_m = pid_m * BLOCK_M + tl.arange(0, BLOCK_M)
         offs_n = pid_n * BLOCK_N + tl.arange(0, BLOCK_N)
         mask_m = offs_m < M
@@ -62,7 +62,7 @@ if HAS_TRITON:
     @triton.jit
     def flash_topos_bwd_kernel_dq(
         q_ptr, k_ptr, d_out_ptr, dq_ptr,
-        M, N, D,
+        M, N, D, H,
         stride_qb, stride_qh, stride_qm, stride_qd,
         stride_kb, stride_kh, stride_kn, stride_kd,
         stride_dob, stride_doh, stride_dom, stride_don,
@@ -74,8 +74,8 @@ if HAS_TRITON:
         """
         batch_head_id = tl.program_id(0)
         pid_m = tl.program_id(1)
-        
-        num_heads = stride_qb // stride_qh if stride_qh > 0 else 1
+
+        num_heads = H
         batch_id = batch_head_id // num_heads
         head_id = batch_head_id % num_heads
 
@@ -107,10 +107,10 @@ if HAS_TRITON:
 
             impl = 1.0 - q_val[:, None, :] + k_val[None, :, :]
             valid_mask = (impl > 0.0) & (impl < 1.0)
-            
+
             dout_expanded = dout_val[:, :, None]
             grad_q_3d = -dout_expanded * valid_mask / D
-            
+
             dq_acc += tl.sum(grad_q_3d, axis=1)
 
         dq_ptrs = dq_base + offs_m[:, None] * stride_qm + offs_d[None, :] * stride_qd
@@ -119,7 +119,7 @@ if HAS_TRITON:
     @triton.jit
     def flash_topos_bwd_kernel_dk(
         q_ptr, k_ptr, d_out_ptr, dk_ptr,
-        M, N, D,
+        M, N, D, H,
         stride_qb, stride_qh, stride_qm, stride_qd,
         stride_kb, stride_kh, stride_kn, stride_kd,
         stride_dob, stride_doh, stride_dom, stride_don,
@@ -131,8 +131,8 @@ if HAS_TRITON:
         """
         batch_head_id = tl.program_id(0)
         pid_n = tl.program_id(1)
-        
-        num_heads = stride_qb // stride_qh if stride_qh > 0 else 1
+
+        num_heads = H
         batch_id = batch_head_id // num_heads
         head_id = batch_head_id % num_heads
 
@@ -164,10 +164,10 @@ if HAS_TRITON:
 
             impl = 1.0 - q_val[:, None, :] + k_val[None, :, :]
             valid_mask = (impl > 0.0) & (impl < 1.0)
-            
+
             dout_expanded = dout_val[:, :, None]
             grad_k_3d = dout_expanded * valid_mask / D
-            
+
             dk_acc += tl.sum(grad_k_3d, axis=0)
 
         dk_ptrs = dk_base + offs_n[:, None] * stride_kn + offs_d[None, :] * stride_kd
@@ -181,48 +181,48 @@ if HAS_TRITON:
                 is_3d = True
                 q = q.unsqueeze(1) # [B, 1, M, D]
                 k = k.unsqueeze(1) # [B, 1, N, D]
-                
+
             B, H, M, D = q.shape
             _, _, N, _ = k.shape
-            
+
             out = torch.empty((B, H, M, N), device=q.device, dtype=torch.float32)
             BLOCK_M, BLOCK_N = 64, 64
-            
+
             grid = (B * H, triton.cdiv(M, BLOCK_M), triton.cdiv(N, BLOCK_N))
-            
+
             flash_topos_fwd_kernel_4d[grid](
-                q, k, out, M, N, D,
+                q, k, out, M, N, D, H,
                 q.stride(0), q.stride(1), q.stride(2), q.stride(3),
                 k.stride(0), k.stride(1), k.stride(2), k.stride(3),
                 out.stride(0), out.stride(1), out.stride(2), out.stride(3),
                 BLOCK_M=BLOCK_M, BLOCK_N=BLOCK_N
             )
-            
+
             ctx.save_for_backward(q, k)
             ctx.is_3d = is_3d
-            
+
             return out.squeeze(1) if is_3d else out
 
         @staticmethod
         def backward(ctx, grad_out):
             q, k = ctx.saved_tensors
             is_3d = ctx.is_3d
-            
+
             if is_3d:
                 grad_out = grad_out.unsqueeze(1)
-                
+
             B, H, M, D = q.shape
             _, _, N, _ = k.shape
-            
+
             dq = torch.empty_like(q)
             dk = torch.empty_like(k)
-            
+
             BLOCK_M, BLOCK_N, BLOCK_D = 64, 64, triton.next_power_of_2(D)
-            
+
             grid_dq = (B * H, triton.cdiv(M, BLOCK_M))
             flash_topos_bwd_kernel_dq[grid_dq](
                 q, k, grad_out, dq,
-                M, N, D,
+                M, N, D, H,
                 q.stride(0), q.stride(1), q.stride(2), q.stride(3),
                 k.stride(0), k.stride(1), k.stride(2), k.stride(3),
                 grad_out.stride(0), grad_out.stride(1), grad_out.stride(2), grad_out.stride(3),
@@ -232,13 +232,13 @@ if HAS_TRITON:
             grid_dk = (B * H, triton.cdiv(N, BLOCK_N))
             flash_topos_bwd_kernel_dk[grid_dk](
                 q, k, grad_out, dk,
-                M, N, D,
+                M, N, D, H,
                 q.stride(0), q.stride(1), q.stride(2), q.stride(3),
                 k.stride(0), k.stride(1), k.stride(2), k.stride(3),
                 grad_out.stride(0), grad_out.stride(1), grad_out.stride(2), grad_out.stride(3),
                 BLOCK_M=BLOCK_M, BLOCK_N=BLOCK_N, BLOCK_D=BLOCK_D
             )
-            
+
             if is_3d:
                 return dq.squeeze(1), dk.squeeze(1)
             return dq, dk

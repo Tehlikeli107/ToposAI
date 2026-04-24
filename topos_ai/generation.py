@@ -73,8 +73,13 @@ class ToposConstrainedDecoder:
             safe_logits[indices_to_remove] = float('-inf')
             
         probs = F.softmax(safe_logits, dim=-1)
-        
-        # Argmax (En mantıklı ve istatistiksel en yüksek olanı seç)
-        next_token = torch.argmax(probs).item()
-        
+
+        # S9 FIX: Sadece argmax alıp greedy decoding yapmak yerine gerçek Sampling.
+        # Eğer temperature 0'a çok yakınsa Greedy (argmax) yap.
+        if temperature < 1e-4:
+            next_token = torch.argmax(probs).item()
+        else:
+            # Gerçek İstatistiksel Örnekleme (Sampling)
+            next_token = torch.multinomial(probs, num_samples=1).item()
+
         return next_token

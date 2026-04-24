@@ -66,18 +66,20 @@ class ToposAdam(Optimizer):
                 # Ağırlıkların (w) Topos uzayındaki karşılığı p = sigmoid(w)
                 # Fisher Information Metric bağımsız Bernoulli'ler için: p * (1 - p)
                 # Düzeltilmiş (Natural) Gradient, klasik gradientin Fisher Metriğine bölünmesidir.
-                
+
                 # Mevcut ağırlığın olasılık uzayındaki izdüşümü
                 p_val = torch.sigmoid(p)
-                
+
                 # p*(1-p) değeri sınırlar (0 veya 1) yaklaştıkça küçülür (Gradyan ölür).
-                # Biz bunu tersine çevirerek (Bölerek) o ölü noktaları canlandırıyoruz (Curved Geometry)
-                fisher_metric = (p_val * (1.0 - p_val)).clamp(min=1e-4) # Sıfıra bölmeyi engelle
-                
+                # Biz bunu tersine çevirerek (Bölerek) o ölü noktaları canlandırıyoruz (Curved Geometry).
+                # S6 FIX: Ancak sıfıra çok yakın değerler 10000x amplifikasyona (patlamaya) yol açabilir.
+                fisher_metric = (p_val * (1.0 - p_val)).clamp(min=1e-4, max=0.25) 
+
                 # Natural Update
                 step_size = group['lr'] / bias_correction1
-                natural_update = (exp_avg / denom) / fisher_metric
 
+                # S6 FIX: Doğal eğim adımını -1.0 ile +1.0 arasına sıkıştırarak patlamayı önle.
+                natural_update = torch.clamp((exp_avg / denom) / fisher_metric, min=-1.0, max=1.0)
                 # Topological Weight Decay (Ağırlıkları yavaşça 0'a yani p=0.5 'Maksimum Belirsizliğe' çeker)
                 if group['top_wd'] > 0.0:
                     p.mul_(1 - group['lr'] * group['top_wd'])

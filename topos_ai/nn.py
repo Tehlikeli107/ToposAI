@@ -15,8 +15,9 @@ def precompute_freqs_cis(dim: int, end: int, theta: float = 10000.0):
     [ROTARY POSITION EMBEDDING (RoPE) - Kategori Teorisinde Functor]
     Kelimelerin cümledeki sırasını 'mutlak' bir sayı olarak değil, 
     kompleks düzlemde birbirlerine göre bir 'Açı (Rotasyon)' olarak kodlar.
-    Bu, ToposAI'ın 512 tokenlik sabit bağlam (Context) penceresini kırıp
-    sınırsız (Infinite Context) metin okuyabilmesini sağlar.
+    Bu, ToposAI'ın sabit bağlam (Context) penceresini kırıp çok daha uzun
+    metinleri okuyabilmesini (Uzun Bağlam - Long Context) sağlar.
+    (Not: RoPE tek başına 'Infinite Context' sağlamaz, S17 FIX).
     """
     freqs = 1.0 / (theta ** (torch.arange(0, dim, 2)[: (dim // 2)].float() / dim))
     t = torch.arange(end, device=freqs.device, dtype=torch.float32)
@@ -161,8 +162,8 @@ class TopologicalMoERouter(nn.Module):
 class MultiUniverseToposAttention(nn.Module):
     """
     [SPARSE TOPOS MoE ATTENTION]
-    Artık Dense (Tüm evrenlerin çalıştığı) bir yapı değil!
-    Topological Router'ın seçtiği sadece Top-2 Evren (Uzman) kelimeyi işler.
+    Teorik olarak Sparse (Seyrek) çalışan, ancak şu an donanım kernel 
+    eksikliğinden dolayı Dense hesaplanıp Sparse maskelenen MoE yapısı (S12 FIX).
     Kategori Teorisi'nin (Local Presheaves) donanım verimliliğine dönüşmüş halidir.
     """
     def __init__(self, d_model, num_universes, top_k=2):
@@ -270,7 +271,7 @@ class MultiUniverseToposAttention(nn.Module):
             mask_D[batch_indices, seq_indices, expert_idx, :] = expert_out * expert_weights
             final_out += mask_D.view(B, SeqLen, D)
 
-        return self.out_proj(final_out), kv_cache
+        return self.out_proj(final_out), new_kv_cache
 
 class YonedaEmbedding(nn.Module):
     """

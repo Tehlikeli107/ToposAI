@@ -19,8 +19,10 @@ class PersistentHomology:
         B2 = np.zeros((len(edges), len(triangles)))
         for col, tri in enumerate(triangles):
             u, v, w = sorted(tri)
-            for a, b in [(u,v), (v,w), (u,w)]:
-                B2[edge_idx[(a,b)], col] = 1.0
+            # Üçgenin sınırları: [v, w] - [u, w] + [u, v] (Alternating sum)
+            B2[edge_idx[(v,w)], col] = 1.0
+            B2[edge_idx[(u,w)], col] = -1.0
+            B2[edge_idx[(u,v)], col] = 1.0
         return int(np.linalg.matrix_rank(B2))
 
     def calculate_betti(self, distance_matrix, threshold):

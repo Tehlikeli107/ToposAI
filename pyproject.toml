@@ -1,0 +1,100 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "topos_ai"
+version = "1.0.0"
+description = "A neuro-symbolic AI framework bridging Category Theory (Toposes, Yoneda, Sheaves) with PyTorch"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Salih Can Kurnaz", email = "salihcankurnaz@gmail.com" }
+]
+keywords = ["category-theory", "topos", "neuro-symbolic", "AI", "heyting-algebra", "sheaf", "yoneda"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+dependencies = [
+    "torch>=2.0.0",
+    "networkx>=2.5",
+    "numpy>=1.21.0",
+    "matplotlib>=3.3.0",
+    "requests>=2.25.0",
+    "psutil>=5.8.0",
+]
+
+[project.optional-dependencies]
+full = [
+    "yfinance>=0.2.0",
+    "pandas>=1.3.0",
+    "nltk>=3.6.0",
+    "gradio>=3.0.0",
+    "transformers>=4.30.0",
+    "datasets>=2.10.0",
+    "tensorboard>=2.10.0",
+    "scikit-learn>=1.0.0",
+    "triton>=2.0.0",
+]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.4.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Tehlikeli107/ToposAI"
+Repository = "https://github.com/Tehlikeli107/ToposAI"
+Issues = "https://github.com/Tehlikeli107/ToposAI/issues"
+
+[project.scripts]
+topos-train = "train_custom_llm:train"
+topos-chat = "chat_custom_llm:chat_with_topos"
+topos-showcase = "topos_showcase:run_showcase"
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "F401",   # unused imports (intentional re-exports in __init__.py)
+    "E741",   # ambiguous variable names (e.g. 'l' in math)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"experiments/*" = ["F", "E"]
+"applications/*" = ["F", "E"]
+"benchmarks/*" = ["F", "E"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+markers = [
+    "cuda: marks tests that require a CUDA GPU (deselect with '-m not cuda')",
+    "slow: marks tests that take more than 10 seconds",
+    "triton: marks tests that require Triton",
+]
+
+[tool.coverage.run]
+source = ["topos_ai"]
+omit = ["tests/*", "experiments/*", "applications/*", "benchmarks/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "except ImportError",
+]

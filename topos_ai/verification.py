@@ -1,5 +1,6 @@
 import subprocess
 import tempfile
+import re
 
 class Lean4VerificationBridge:
     """
@@ -10,8 +11,16 @@ class Lean4VerificationBridge:
     (Compiler) çalıştırarak sonucun kanun hükmünde (Axiomatic) doğrulanmasını sağlar.
     """
     def __init__(self, entities):
-        # Lean değişken isimleri küçük harf ve boşluksuz (Underscore) olmalıdır.
-        self.entities = [e.replace(" ", "_").lower() for e in entities]
+        # S20 FIX: Lean değişken isimleri kesin (strict) identifier kurallarına uymalıdır.
+        # Sayı ile başlayamaz, tire veya özel karakter içeremez.
+        self.entities = []
+        for e in entities:
+            # Sadece harf, rakam ve alt çizgiye izin ver
+            cleaned = re.sub(r'[^a-zA-Z0-9_]', '_', e.lower())
+            # Sayı veya alt çizgi ile başlıyorsa başına 'v_' ekle (Lean geçerli isim)
+            if cleaned[0].isdigit() or cleaned[0] == '_':
+                cleaned = 'v_' + cleaned
+            self.entities.append(cleaned)
 
     def _generate_lean_code(self, chain, confidence):
         """Bulunan mantık zincirini Lean 4 'Theorem' metnine dönüştürür."""

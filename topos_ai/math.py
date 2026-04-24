@@ -41,13 +41,15 @@ def transitive_closure(R, max_steps=5):
     return R_closure
 
 def sheaf_gluing(truth_A, truth_B, threshold=0.2):
-    """Çelişen evrenleri izole eder, uyuşanları birleştirir (Sheaf Condition)."""
-    certainty_A = torch.abs(truth_A - 0.5) * 2.0
-    certainty_B = torch.abs(truth_B - 0.5) * 2.0
-    overlap = certainty_A * certainty_B
+    """
+    [STRICT SHEAF CONDITION]
+    Çelişen evrenleri izole eder, uyuşanları birleştirir (Sheaf Condition).
+    Gerçek Sheaf koşulu, lokal kesitlerin örtüşme bölgelerinde KESİN olarak
+    (veya çok düşük bir toleransla) eşit olmasını gerektirir.
+    """
     disagreement = torch.abs(truth_A - truth_B)
-    conflict_score = torch.sum(overlap * disagreement).item()
+    max_conflict = torch.max(disagreement).item()
     
-    if conflict_score > threshold:
+    if max_conflict > threshold:
         return False, None
     return True, torch.max(truth_A, truth_B)

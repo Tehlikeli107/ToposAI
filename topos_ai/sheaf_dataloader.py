@@ -38,9 +38,13 @@ class SheafDataloader:
 
     def _get_morphism(self, raw_chunk_tensor):
         """
-        [YONEDA FUNCTOR (Disk-Side)]
-        Devasa ham veriyi [Batch, 100_000] alır, 
+        [YONEDA FUNCTOR (Approximated via Gaussian Random Projection)]
+        Devasa ham veriyi [Batch, 100_000] alır,
         Problara olan uzaklığını (İlişkisini) bulur.
+        (Not: Pratik hesaplanabilirlik için Yoneda Lemma'sı burada 
+        Johnson-Lindenstrauss teoremine dayalı Gaussian Random Probes 
+        ile simüle edilmiştir - S14 FIX. 64x1M'lik probe matrisi CPU RAM'de 
+        tutulurken, asıl veri (Terabaytlar) mmap ile okunur.)
         Çıktı: [Batch, 64] boyutunda ufacık bir Topolojik Vektör!
         """
         # Disk tarafında matris çarpımı (veya L2 uzaklığı)
@@ -48,10 +52,9 @@ class SheafDataloader:
         # probes.t(): [feature_dim, num_probes]
         # Sonuç: [Batch, num_probes]
         morphisms = torch.matmul(raw_chunk_tensor, self.probes.t())
-        
+
         # Topolojik sınır [0, 1] (Reachability)
         return torch.sigmoid(morphisms)
-
     def stream_batches(self, device='cuda'):
         """
         [SHEAF LOCAL SECTIONS TO GLOBAL GPU]
