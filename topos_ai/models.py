@@ -37,7 +37,7 @@ class ToposTransformerBlock(nn.Module):
 
 class ToposTransformer(nn.Module):
     """
-    Uçtan uca eğitilebilir, Dikkat (attention) skorlaması Dot-Product Free (Lukasiewicz T-norm)
+    Uctan uca egitilebilir, attention skorlamasi dot-product-free Goedel-Heyting
     olan tam donanımlı Topos Dil Modeli. Çıkış projeksiyonu (Reachability) ise Cosine Similarity kullanır.
     Meta Llama-3 (RoPE, SwiGLU, KV-Cache) teknolojileriyle entegre edilmiştir.
     Klasik Classifier (fc_out) YERİNE, kelimelerin Yoneda uzayındaki yerlerine
@@ -94,13 +94,13 @@ class ToposTransformer(nn.Module):
         # Kosinüs Benzerliği (Cosine Similarity) SİMETRİKTİR ve yönü katleder.
         # Asimetriyi korumak için StrictGodelImplication kullanıyoruz: A <= B ise 1, değilse B
         from topos_ai.logic import StrictGodelImplication
-        
+
         x_exp = x_normalized.unsqueeze(2)           # [B, SeqLen, 1, d_model]
         vocab_exp = vocab_normalized.unsqueeze(0).unsqueeze(0) # [1, 1, vocab_size, d_model]
-        
+
         # Kelimeden (x) Hedefe (vocab) Topos İçsel Çıkarımı (Implication)
         implication = StrictGodelImplication.apply(x_exp, vocab_exp)
-        
+
         # Boyutlar üzerinden ortalama alarak [0, 1] arası Asimetrik Ulaşılabilirlik (Reachability) bul
         reachability_logits = implication.mean(dim=-1)
 

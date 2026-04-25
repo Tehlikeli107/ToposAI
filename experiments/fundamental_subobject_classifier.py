@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -20,7 +20,7 @@ from topos_ai.logic import SubobjectClassifier
 
 def run_subobject_classifier_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 56: THE SUBOBJECT CLASSIFIER (Ω) AXIOM ")
+    print(" ARAŞTIRMA DEMOSU 56: THE SUBOBJECT CLASSIFIER (Ω) AXIOM ")
     print(" İddia: Yapay Zekalar bugüne kadar Aristoteles (Boolean) mantığıyla")
     print(" (0 veya 1) eğitildi. Olasılık (0.5) ise sadece 'Cahilliğin' (Cehalet)")
     print(" ölçüsüydü. Kategori Teorisinde (Topos) ise 0.5, uzayın KENDİ ŞEKLİDİR.")

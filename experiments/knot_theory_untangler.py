@@ -1,11 +1,11 @@
-import torch
+﻿import torch
 
 # =====================================================================
 # KNOT THEORY AI (DÜĞÜM TEORİSİ VE ÖRGÜ KATEGORİLERİ - TQFT)
 # Model, karmaşık problemleri (Tedarik zinciri, Spagetti kod, Lojistik krizler)
 # birbirine dolanmış "İpler (Braids)" olarak görür.
 # Reidemeister Hamleleri (Matematiksel Düğüm Çözme Kuralları) ile 
-# o karmaşayı sıfır eforla "Dümdüz, Kusursuz Çizgilere (Unknot)" çevirir.
+# o karmaşayı sıfır eforla "Dümdüz, İdealize Çizgilere (Unknot)" çevirir.
 # =====================================================================
 
 class BraidToposEngine:
@@ -113,7 +113,7 @@ def run_knot_theory_experiment():
     if len(final_state) == 0:
         print("[+] MUAZZAM BAŞARI: DÜĞÜM TAMAMEN ÇÖZÜLDÜ! (The Unknot)")
         print("Yapay Zeka, sistemdeki o karmaşık 'Dolanmaların' aslında bir illüzyon olduğunu;")
-        print("A'dan Z'ye gitmek için o işlemlere HİÇ GEREK OLMADIĞINI matematiksel olarak kanıtladı.")
+        print("A'dan Z'ye gitmek için o işlemlere HİÇ GEREK OLMADIĞINI matematiksel olarak gösterdi.")
         print("Problem, çözülmek yerine tamamen ORTADAN KALDIRILDI!")
     else:
         print(f"[+] Düğüm basitleştirildi. En optimal hali: {final_state}")

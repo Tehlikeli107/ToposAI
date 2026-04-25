@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -15,7 +15,7 @@ from topos_ai.math import lukasiewicz_composition
 # (İptal Ediciler / Defeaters) da içeren bir Kategori Matrisi kurar.
 # Hukuki boşlukları (Loopholes) ve çelişen emsal kararları (Precedents)
 # "Sheaf Gluing" (Mantıksal Uyuşmazlık) veya "Defeasible Logic" üzerinden
-# sentezleyerek matematiksel olarak kusursuz bir "Yargı/Hüküm" (Verdict) verir.
+# sentezleyerek matematiksel olarak idealize bir "Yargı/Hüküm" (Verdict) verir.
 # =====================================================================
 
 class TopologicalJudge:
@@ -81,7 +81,7 @@ class TopologicalJudge:
 
 def run_legal_reasoning_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 19: TOPOLOGICAL LEGAL REASONING (AI JUDGE) ")
+    print(" ARAŞTIRMA DEMOSU 19: TOPOLOGICAL LEGAL REASONING (AI JUDGE) ")
     print(" İddia: LLM'ler var olmayan kanunları uydurarak (Hallucination) ")
     print(" avukatların barodan atılmasına sebep olmuştur. ToposAI ise")
     print(" 'Negatif Morfizmalar' (Defeaters / İptaller) kullanarak, bir kanunun")
@@ -135,7 +135,7 @@ def run_legal_reasoning_experiment():
         print("zincirine tutunarak (Pozitif Geometri) beraat etmeyi bekliyordu.")
         print("Ancak ToposAI, davanın 'Tehdit İçeriyor' parametresinin, İfade Özgürlüğü")
         print("düğümünü (Node) NEGATİF MORFİZMA ile %100 kestiğini (Topolojik İptal) gördü.")
-        print("Köprü yıkıldığı için beraat zinciri koptu. Hukuk kusursuz işlemiştir.")
+        print("Köprü yıkıldığı için beraat zinciri koptu. Hukuk idealize işlemiştir.")
     else:
         print("KARAR: BERAAT!")
         

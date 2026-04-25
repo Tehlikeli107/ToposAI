@@ -1,114 +1,91 @@
+﻿import os
 import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-if hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
+import time
 
 import torch
-import time
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
 from topos_ai.nn import MultiUniverseToposAttention, precompute_freqs_cis
 
-# =====================================================================
-# REAL-WORLD BENCHMARK: NEEDLE IN A HAYSTACK (32K+ CONTEXT WINDOW)
-# Problem: Klasik LLM'ler (GPT-4, Llama-3) 32K veya 128K token (kelime) 
-# uzunluğunda metin okuduklarında, ortalardaki bilgileri unuturlar
-# (Lost in the Middle problemi). Üstelik O(N^2) Softmax yüzünden VRAM 
-# (Ekran kartı belleği) tükenir (OOM).
-# Çözüm: ToposAI, Kategori Teorisindeki 'Fuzzy Intersection' ve Triton
-# C++ tabanlı donanım ivmelendirmesi sayesinde 32.000 kelimelik bir
-# 'Samanlıkta (Haystack)', gizlenmiş olan 'İğneyi (Needle)' sıfır 
-# halüsinasyonla ve %100 Doğrulukla saniyeler içinde bulur!
-# =====================================================================
+
+PERFECT_RECALL_THRESHOLD = 0.9999
+STRONG_RECALL_THRESHOLD = 0.99
+
 
 def run_needle_in_haystack(seq_len):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    
-    if device.type != 'cuda':
-        print(f"[UYARI] Cihaz {device}. Bu devasa benchmark için CUDA (GPU) şiddetle tavsiye edilir.")
-        # CPU'da çok uzun süreceği için sequence'i küçültelim
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    if device.type != "cuda":
+        print(f"[UYARI] Cihaz {device}. Uzun baglam benchmarki icin CUDA tavsiye edilir.")
         seq_len = min(seq_len, 2048)
 
-    print(f"\n--- [TEST]: {seq_len:,} Token Uzunluğunda 'Samanlıkta İğne' (Needle in a Haystack) ---")
-    
-    # 1. SAMANLIK (HAYSTACK) YARATILMASI
-    # Tüm kelimeler/tokenlar için rastgele (anlamsız) vektörler
+    print(f"\n--- [TEST]: {seq_len:,} token Needle-in-a-Haystack ---")
+
     dim = 64
     num_universes = 4
     haystack_x = torch.randn(1, seq_len, dim, device=device)
-    
-    # 2. İĞNE (NEEDLE) GİZLENMESİ
-    # Cümlenin tam ortasına (Veya zor bir yerine) kritik bir bilgi saklıyoruz
-    needle_position = int(seq_len * 0.73) # Metnin %73'lük kısmına (En çok unutulan bölge)
-    
-    # İğnenin topolojik imzası (Çok güçlü bir spesifik vektör)
-    secret_key = torch.ones(dim, device=device) * 5.0 
-    
-    # İğneyi samanlığa yerleştiriyoruz
+
+    needle_position = int(seq_len * 0.73)
+    secret_key = torch.ones(dim, device=device) * 5.0
     haystack_x[0, needle_position, :] = secret_key
-    
-    # 3. SORGULAMA (QUERY)
-    # Kullanıcı "Sır nedir?" diye soruyor. Soru, İğnenin anahtarıyla eşleşecek şekilde
-    query_pos = seq_len - 1 # En sondaki kelime soruyu sorar
+
+    query_pos = seq_len - 1
     haystack_x[0, query_pos, :] = secret_key
-    
-    # 4. TOPOS DİKKAT MOTORU (ATTENTION)
-    # MultiUniverseToposAttention, Softmax kullanmadan Kategori Teorisinin 
-    # Lukasiewicz T-Norm'u ile 32.000 kelimeyi tarayacak.
-    topos_attn = MultiUniverseToposAttention(d_model=dim, num_universes=num_universes).to(device)
+
+    topos_attn = MultiUniverseToposAttention(
+        d_model=dim,
+        num_universes=num_universes,
+    ).to(device)
     freqs_cis = precompute_freqs_cis(dim // num_universes, seq_len * 2)[:seq_len].to(device)
-    
-    # Tüm uzayı 0 ile 1 arasına çek (Olasılık Manifoldu)
+
     haystack_x = torch.sigmoid(haystack_x)
     secret_key = torch.sigmoid(secret_key)
-    
-    # Zaman tut
-    torch.cuda.synchronize() if device.type == 'cuda' else None
+
+    if device.type == "cuda":
+        torch.cuda.synchronize()
     t0 = time.time()
-    
-    # [O(1) Triton Kernel veya CPU Matrix Çarpımı]
+
     with torch.no_grad():
         output, _ = topos_attn(haystack_x, freqs_cis=freqs_cis)
-        
-    torch.cuda.synchronize() if device.type == 'cuda' else None
+
+    if device.type == "cuda":
+        torch.cuda.synchronize()
     t1 = time.time()
-    
-    # 5. KONTROL (EVALUATION)
-    # En sondaki sorgunun (Query) çıktısı, İğnenin değeri (Secret Key) ile aynı mı?
+
     query_result = output[0, query_pos, :]
-    
-    # 'V' matrisindeki gizli değer sigmoid'den geçmemiş saf değerdi (Vektör).
-    # Bizim Attention'ımız Fuzzy Logic ile V'lerin ağırlıklı toplamını alır.
-    # Eğer model hedefi %100 netlikte bulduysa, sonuç Secret Key'e çok yakın olmalıdır.
-    
-    # Cosine Similarity ile hedefi ne kadar tutturduğunu ölç
-    expected_value = secret_key
-    similarity = torch.nn.functional.cosine_similarity(query_result.unsqueeze(0), expected_value.unsqueeze(0)).item()
-    
-    time_taken = (t1 - t0) * 1000 # milisaniye
-    
-    print(f"  > Bağlam Boyutu (Context Size): {seq_len:,} Token")
-    print(f"  > İğne Pozisyonu (Needle Pos) : {needle_position:,}")
-    print(f"  > Okuma Süresi (Latency)      : {time_taken:.2f} ms")
-    print(f"  > Bulma Kesinliği (Recall)    : %{similarity * 100:.4f}")
-    
-    if similarity > 0.99:
-        print("  ✅ SONUÇ: KUSURSUZ (PERFECT RECALL)! Model on binlerce kelime arasından iğneyi hiç sapmadan çıkardı.")
+    similarity = torch.nn.functional.cosine_similarity(
+        query_result.unsqueeze(0),
+        secret_key.unsqueeze(0),
+    ).item()
+
+    time_taken = (t1 - t0) * 1000
+
+    print(f"  > Context size : {seq_len:,} tokens")
+    print(f"  > Needle pos   : {needle_position:,}")
+    print(f"  > Latency      : {time_taken:.2f} ms")
+    print(f"  > Recall       : %{similarity * 100:.4f}")
+
+    if similarity >= PERFECT_RECALL_THRESHOLD:
+        print("  SONUC: PERFECT RECALL.")
+    elif similarity >= STRONG_RECALL_THRESHOLD:
+        print("  SONUC: GUCLU AMA İDEALİZE DEGIL.")
     else:
-        print("  ❌ SONUÇ: BAŞARISIZ (LOST IN THE MIDDLE). Model dikkati dağıldığı için iğneyi bulamadı.")
-        
+        print("  SONUC: BASARISIZ / LOST-IN-THE-MIDDLE RISKI.")
+
     return similarity, time_taken
+
 
 def run_benchmark(context_sizes=None):
     if context_sizes is None:
         context_sizes = [4096, 8192, 16384, 32768]
-        
+
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 47: THE NEEDLE IN A HAYSTACK BENCHMARK ")
-    print(" İddia: Endüstrinin en zorlu testi olan 'Samanlıkta İğne', bir LLM'in")
-    print(" devasa bir kitap içinde geçen tek bir cümleyi ne kadar iyi hatırladığını")
-    print(" ölçer. Klasik Transformer'lar Softmax ezişmesi yüzünden metnin")
-    print(" 'Ortasındaki' bilgileri unuturlar. ToposAI, Lukasiewicz Mantığı")
-    print(" kullanarak bu bilgileri teorik olarak ezmeden korumayı hedefler.")
+    print(" NEEDLE-IN-A-HAYSTACK BENCHMARK")
+    print(" Bu benchmark, tek bir gizli vektoru uzun baglam icinden geri cagirma")
+    print(" davranisini olcer. Sonuc donanim sinirlariyla birlikte okunmalidir.")
     print("=========================================================================\n")
 
     results = []
@@ -118,31 +95,42 @@ def run_benchmark(context_sizes=None):
             results.append((size, acc, t))
         except RuntimeError as e:
             if "out of memory" in str(e).lower() or "oom" in str(e).lower():
-                print(f"  ❌ SONUÇ: OOM (VRAM TÜKENDİ)! {size} Token'da patladı. Daha büyük boyutlar atlanıyor.")
-                torch.cuda.empty_cache()
-                import gc; gc.collect()
-                results.append((size, "OOM", "OOM"))
-                break # OOM sonrası daha büyük boyutları denemeye gerek yok
-            else:
-                raise e
+                print(f"  SONUC: OOM. {size:,} token denemesi atlandi; daha buyuk boyutlar denenmeyecek.")
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+                import gc
 
-    print("\n--- 🏆 NİHAİ BİLANÇO (TOPOSAI LONG-CONTEXT PERFORMANCE) ---")
-    print(f"{'Bağlam (Token)':<15} | {'Hatırlama (Recall)':<20} | {'Süre (ms)':<15}")
+                gc.collect()
+                results.append((size, "OOM", "OOM"))
+                break
+            raise
+
+    print("\n--- NIHAI BILANCO (TOPOSAI LONG-CONTEXT PERFORMANCE) ---")
+    print(f"{'Context':<15} | {'Recall':<20} | {'Latency':<15}")
     print("-" * 55)
     for size, acc, t in results:
         if acc == "OOM":
-            print(f"{size:<15,} | {'OOM (VRAM Yetersiz)':<20} | {'-':<15}")
+            print(f"{size:<15,} | {'OOM':<20} | {'-':<15}")
         else:
-            print(f"{size:<15,} | %{acc*100:<19.4f} | {t:.2f} ms")
-        
-    print("\n[BİLİMSEL DEĞERLENDİRME]")
-    print("ToposAI, donanım izin verdiği ölçüde (örn. 4,096 kelime), bağlam")
-    print("içinde %73. bölgeye gizlenmiş olan spesifik bir şifreyi (İğneyi)")
-    print("KLASİK MODEL HASTALIĞI OLAN 'ORTADAKİLERİ UNUTMA (Lost in the Middle)'")
-    print("sendromuna yakalanmadan, %99.99'un üzerinde bir kesinlikle bulmuştur.")
-    print("Daha büyük bağlamlarda (8K, 32K) standart tüketici kartlarında VRAM")
-    print("yetersizliğinden OOM verse de, çalıştığı aralıkta Fuzzy Logic'in")
-    print("bilgiyi ezmeden (Zero-Sum) koruduğunu teorik ve pratik olarak ispatlar.")
+            print(f"{size:<15,} | %{acc * 100:<19.4f} | {t:.2f} ms")
+
+    numeric_results = [(size, acc, t) for size, acc, t in results if acc != "OOM"]
+    best = max(numeric_results, key=lambda item: item[1], default=None)
+
+    print("\n[BILIMSEL DEGERLENDIRME]")
+    if best is None:
+        print("Bu kosuda basarili bir needle olcumu uretilemedi; tum denemeler OOM oldu.")
+    else:
+        size, acc, _ = best
+        print(f"En iyi olculen recall: %{acc * 100:.4f} @ {size:,} token.")
+        if acc >= PERFECT_RECALL_THRESHOLD:
+            print("Calistigi baglam araliginda perfect-recall esigini gecti.")
+        elif acc >= STRONG_RECALL_THRESHOLD:
+            print("Guclu recall var, fakat perfect-recall iddiasi icin yeterli degil.")
+        else:
+            print("Perfect-recall iddiasi desteklenmedi; sonuc basarisiz/karisik okunmali.")
+    print("OOM satirlari algoritmik basari degil, donanim siniri olarak raporlanir.")
+
 
 if __name__ == "__main__":
     run_benchmark()

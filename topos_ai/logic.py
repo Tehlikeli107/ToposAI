@@ -2,40 +2,42 @@ import torch
 import torch.nn as nn
 
 
+def godel_implication(A, B):
+    """Exact Goedel-Heyting implication on the unit interval."""
+    return torch.where(A <= B, torch.ones_like(B), B)
+
+
 class StrictGodelImplication(torch.autograd.Function):
     @staticmethod
     def forward(ctx, A, B, hardness=50.0):
         ctx.save_for_backward(A, B)
         ctx.hardness = hardness
-        
-        # [KESİN/STRICT İLERİ YÖN - TOPOS TEORİSİ (A -> B)]
-        return torch.where(A <= B, torch.tensor(1.0, dtype=A.dtype, device=A.device), B)
+        return godel_implication(A, B)
 
     @staticmethod
     def backward(ctx, grad_output):
-        # [YUMUŞAK/SOFT GERİ YÖN] 
         A, B = ctx.saved_tensors
         hardness = ctx.hardness
-        
+
         with torch.enable_grad():
             A_soft = A.detach().requires_grad_(True)
             B_soft = B.detach().requires_grad_(True)
-            
+
             sigma = torch.sigmoid((B_soft - A_soft) * hardness)
             soft_impl = sigma + (1.0 - sigma) * B_soft
-            
+
             soft_impl.backward(grad_output)
-            
+
         return A_soft.grad, B_soft.grad, None
 
 
 class SubobjectClassifier(nn.Module):
     """
-    Fuzzy truth-value operations inspired by Heyting algebras.
+    Tensor proxy for truth values in a Goedel-Heyting algebra.
 
-    The methods operate on tensors and return differentiable approximations of
-    meet, join, implication, and negation. They are numerical operators, not a
-    formal proof engine for internal topos logic.
+    Meet is min, join is max, implication is the Heyting residual for min, and
+    negation is the pseudocomplement A => false. These are numerical operators
+    for experiments, not a proof assistant for arbitrary topoi.
     """
 
     def __init__(self):
@@ -44,36 +46,29 @@ class SubobjectClassifier(nn.Module):
         self.false_morphism = 0.0
 
     def logical_and(self, A, B):
-        """Meet proxy: min(A, B)."""
+        """Meet: min(A, B)."""
         return torch.minimum(A, B)
 
     def logical_or(self, A, B):
-        """Join proxy: max(A, B)."""
+        """Join: max(A, B)."""
         return torch.maximum(A, B)
 
     def implies(self, A, B, hardness=50.0):
         """
-        Strict Goedel-style implication with Hybrid Autograd.
+        Goedel-Heyting implication with exact forward values.
 
-        The hard operator is 1 when A <= B and B otherwise (Zero Modus Ponens Violation).
-        The soft formulation is used purely for gradients.
+        The custom backward uses a smooth boundary approximation so neural
+        experiments are trainable around A ~= B.
         """
         return StrictGodelImplication.apply(A, B, hardness)
 
     def logical_not(self, A, hardness=50.0):
-        """
-        [STRICT TOPOLOGICAL NEGATION]
-        Eski bulanık 'sigmoid(0.5 - A)' yaklaşımı silinmiştir.
-        Lawvere-Tierney topolojisindeki İdempotent aksiyomunu (j(j(p)) == j(p))
-        sağlayabilmek için katı bir tamamlayıcı (1.0 - A) gereklidir.
-        """
-        return 1.0 - A
+        """Heyting pseudocomplement: not A is A => false."""
+        return self.implies(A, torch.zeros_like(A), hardness)
 
 
 class HeytingNeuralLayer(nn.Module):
-    """
-    Linear-like layer built from the fuzzy implication proxy.
-    """
+    """Linear-like layer built from Goedel-Heyting implication."""
 
     def __init__(self, in_features, out_features):
         super().__init__()

@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -67,7 +67,7 @@ class GodelParadoxSolver:
 
 def run_godel_incompleteness_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 29: GÖDEL'S INCOMPLETENESS & LIAR'S PARADOX ")
+    print(" ARAŞTIRMA DEMOSU 29: GÖDEL'S INCOMPLETENESS & LIAR'S PARADOX ")
     print(" İddia: Matematiksel sistemler kendi içlerindeki paradoksları kendi")
     print(" kurallarıyla (Aksiyomlar) ispatlayamazlar. Bir YZ (ToposAI) döngüsel ")
     print(" bir Yalancı Paradoksuna (A -> NOT A) sokulduğunda, makinenin çökmesi")

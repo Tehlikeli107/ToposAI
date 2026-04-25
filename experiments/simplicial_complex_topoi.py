@@ -1,4 +1,4 @@
-import torch
+﻿import torch
 import sys
 import os
 
@@ -12,7 +12,7 @@ from topos_ai.math import lukasiewicz_composition
 # İddia: Karmaşık sistemlerde (Kimya, Sosyoloji, Ekonomi) gerçekler sadece 
 # iki varlık arasında (1D Edge) değil, bir grup (2D Face / Simplex) 
 # arasında gizlidir. Bu modül, ikili bağların yetmediği yerde 
-# "Simplicial Boundary Operators" mantığıyla grup sinerjisini kanıtlar.
+# "Simplicial Boundary Operators" mantığıyla grup sinerjisini gösterir.
 # =====================================================================
 
 class SimplicialToposEngine:

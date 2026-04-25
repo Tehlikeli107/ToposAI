@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -97,7 +97,7 @@ class ComposedLensNetwork:
 
 def run_lens_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 51: CATEGORICAL LENSES (BACKPROP-FREE LEARNING) ")
+    print(" ARAŞTIRMA DEMOSU 51: CATEGORICAL LENSES (BACKPROP-FREE LEARNING) ")
     print(" İddia: Modern Yapay Zeka, 'Backpropagation' (Geri Yayılım) adlı ")
     print(" global ve hantal bir grafiğe muhtaçtır. Hafızayı (VRAM) tüketir.")
     print(" ToposAI, Kategori Teorisindeki 'Lens (Optic)' yapılarını kullanarak")

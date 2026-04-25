@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use ToposAI in research, please cite this software."
+title: "ToposAI: Neuro-Symbolic AI via Category-Theory-Inspired Operators"
+version: "1.0.0"
+date-released: "2026-04-24"
+license: "MIT"
+repository-code: "https://github.com/Tehlikeli107/ToposAI"
+abstract: "Experimental PyTorch components for neuro-symbolic research inspired by category theory, fuzzy logic, sheaf-style consistency, and differentiable reconstruction."
+authors:
+  - name: "ToposAI contributors"

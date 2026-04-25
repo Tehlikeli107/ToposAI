@@ -33,17 +33,17 @@ class LeftKanExtension(nn.Module):
         """
         Kc = self.K(source)  # [num_source, dim_e]
         Fc = self.F(source)  # [num_source, dim_d]
-        
+
         # [STRICT COLIMIT (SUPREMUM) FOR LEFT KAN]
         # Softmax yerine Kategori teorisindeki Universal Colimit (En Büyük Alt Sınır) kullanılır.
         sim = target @ Kc.T * self.scale  # [batch, num_source]
-        
+
         # Olasılık/ağırlıklarımızı 0 ile 1 arasına Sigmoid ile sıkıştırıyoruz (Colimit ağırlığı)
         weights = torch.sigmoid(sim)  # [batch, num_source]
-        
+
         # Tensör çarpımı (Softmax gibi ortalama DEĞİL, her bir elemanı ağırlıklandır)
         weighted_Fc = weights.unsqueeze(-1) * Fc.unsqueeze(0)  # [batch, num_source, dim_d]
-        
+
         # Colimit: Tüm kaynaklardan gelen (weighted_Fc) bileşenlerin SUPREMUM'unu (MAX) al.
         # Böylece evrensellik aksiyomu korunur.
         supremum, _ = torch.max(weighted_Fc, dim=1)  # [batch, dim_d]

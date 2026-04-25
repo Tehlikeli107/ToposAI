@@ -1,4 +1,4 @@
-import torch
+﻿import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -114,7 +114,7 @@ def run_emergence_experiment():
         print("makro-yapılar (Oscillators/Gliders) oluştu.")
         print("Bu, 'Öğrenmenin' sadece Gradient Descent ile değil, Kategori Teorisinin")
         print("basit lokal kurallarının (Morphism) global bir sisteme yayılmasıyla da (Self-Organization)")
-        print("mümkün olduğunun matematiksel ispatıdır.")
+        print("mümkün olduğunun matematiksel demosudır.")
     else:
         print("[-] Evren ısı ölümüne (Heat Death) ulaştı. Yapılar tutunamadı.")
 

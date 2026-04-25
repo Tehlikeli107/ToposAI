@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -47,7 +47,7 @@ class RealWorldYonedaStreamer:
 
 def run_huggingface_sheaf_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 66: THE INFINITE SHEAF STREAMER (HUGGINGFACE BIG DATA) ")
+    print(" ARAŞTIRMA DEMOSU 66: THE INFINITE SHEAF STREAMER (HUGGINGFACE BIG DATA) ")
     print(" İddia: Klasik YZ, 20 Gigabaytlık bir Wikipedia verisini işlemek için")
     print(" muazzam RAM ve VRAM donanımına ihtiyaç duyar. ")
     print(" ToposAI, Grothendieck'in Demet (Sheaf) Teorisini kullanarak HuggingFace")
@@ -153,11 +153,11 @@ def run_huggingface_sheaf_experiment():
             ram_diff = current_ram - initial_ram
             vram_diff = current_vram - initial_vram
             
-            print(f"{total_articles_processed:<15,} | {ram_diff:>10.1f} MB Ekstra | {vram_diff:>10.1f} MB Ekstra | Streaming (O(1))")
+            print(f"{total_articles_processed:<15,} | {ram_diff:>10.1f} MB Ekstra | {vram_diff:>10.1f} MB Ekstra | Streaming state")
 
     t1 = time.time()
     
-    print("\n[BİLİMSEL SONUÇ: THE YONEDA CLOUD STREAMING SINGULARITY]")
+    print("\n[ÖLÇÜLEN SONUÇ: THE YONEDA CLOUD STREAMING SINGULARITY]")
     print(f"Toplam Okuma Süresi: {t1 - t0:.2f} saniye.")
     print("Normalde 20+ GB boyutundaki bu Wikipedia veri setini 50.000 kelimelik")
     print("vektörlerle GPU'ya basmak, PCIe köprüsünü tıkar ve OOM hatası verirdi.")

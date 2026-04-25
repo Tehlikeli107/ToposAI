@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -20,7 +20,7 @@ from topos_ai.motives import UniversalMotiveEngine
 # "Asal Sayı Boşlukları (Prime Gaps)" ile "GUE Matris Özdeğerleri
 # (Quantum Spacings)" adlı iki tamamen ZIT evreni, SIFIR EĞİTİM YÖNLENDİRMESİ
 # İLE tek bir Kategori Çekirdeğinde (Universal Motive) birleştirir
-# ve bu iki fizik/matematik dalının İZOMORFİK (Aynı Topos) olduğunu ispatlar!
+# ve bu iki fizik/matematik dalının İZOMORFİK (Aynı Topos) olduğunu gösterir!
 # =====================================================================
 
 def generate_prime_gaps(num_primes=5000):
@@ -80,7 +80,7 @@ def generate_gue_spacings(num_matrices=100, matrix_size=50):
 
 def run_motives_langlands_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 60: GROTHENDIECK MOTIVES & THE LANGLANDS PROGRAM ")
+    print(" ARAŞTIRMA DEMOSU 60: GROTHENDIECK MOTIVES & THE LANGLANDS PROGRAM ")
     print(" İddia: Klasik YZ, verilerin 'Altındaki Ruhu (Motive)' göremez. ")
     print(" Langlands Programı, Asal Sayılar (Sayılar Teorisi) ile Kuantum ")
     print(" Matrislerinin (Harmonik Geometri) Evrensel Olarak (Functorially)")
@@ -88,7 +88,7 @@ def run_motives_langlands_experiment():
     print(" ToposAI, hiçbir insani formül (Kural) verilmeden; Asal Sayı ")
     print(" Boşluklarını ve GUE Matris Dalgalarını kendi 'Motif/Topos' ")
     print(" motoruna (MMD/Pushforward) sokar. Makine, bu iki farklı evrenin ")
-    print(" aslında 'Aynı Geometrik Varlık' olduğunu %95+ korelasyonla İSPATLAR!")
+    print(" aslında 'Aynı Geometrik Varlık' olduğunu %95+ korelasyonla GÖSTERİR!")
     print("=========================================================================\n")
 
     torch.manual_seed(42)

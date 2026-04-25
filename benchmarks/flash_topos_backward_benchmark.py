@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -13,7 +13,7 @@ from topos_ai.kernels import flash_topos_attention
 # İddia: ToposAI'ın asıl devrimi ileri yönde (Forward) değil, Geri
 # Yönde (Backward) gizlidir. Kategori matrisleri (M x N x D) normalde
 # O(N^2 * D) hafıza tüketerek GPU'yu patlatır. Bizim Triton kernelimiz
-# (flash_topos_attention) SRAM üzerinde O(1) hafıza ile gradyanları
+# (flash_topos_attention) SRAM üzerinde blockwise intermediate-memory ile gradyanları
 # toplar ve PyTorch'u ezip geçer.
 # =====================================================================
 
@@ -88,12 +88,12 @@ def benchmark_backward_pass(B=4, H=8, M=4096, N=4096, D=64):
 
 def run_all_benchmarks():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 48: THE BACKWARD PASS SINGULARITY (TRITON KERNEL) ")
+    print(" ARAŞTIRMA DEMOSU 48: THE BACKWARD PASS SINGULARITY (TRITON KERNEL) ")
     print(" İddia: Yapay zekayı asıl yavaşlatan ve VRAM'i patlatan şey İleri (Forward)")
     print(" değil, Geriye Yayılım (Backward) adımıdır. Klasik PyTorch, ara matrisleri")
     print(" (M x N x D) kaydettiği için O(N^2 * D) hafıza yakar. FlashTopos çekirdeğimiz")
     print(" ise Gradyanları doğrudan GPU SRAM içinde toplayarak VRAM kullanımını")
-    print(" O(1) seviyesinde tutar ve %100 hızlanma sağlar.")
+    print(" ölçülen seviyede tutar ve %100 hızlanma sağlar.")
     print("=========================================================================\n")
     
     benchmark_backward_pass(M=1024, N=1024)

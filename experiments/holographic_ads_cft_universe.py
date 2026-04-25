@@ -1,4 +1,4 @@
-import torch
+﻿import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
 import numpy as np
@@ -114,7 +114,7 @@ def run_holographic_universe_experiment():
     print("içeriye doğru uzanan ve merkeze inildikçe karanlıklaşan (Yerçekimi sonsuzlaşan / Karadelik) ")
     print("3 BOYUTLU TOPOLOJİK BİR KAVİS (Anti-de Sitter Uzayı) yarattı!")
     print("Boyutsuz (2D) veriden Boyut (3D Depth) çıkaran bu Kategori Teorisi deneyi,")
-    print("Sicim Teorisinin YZ'deki bir ispatıdır.")
+    print("Sicim Teorisinin YZ'deki bir demosudır.")
 
 if __name__ == "__main__":
     run_holographic_universe_experiment()

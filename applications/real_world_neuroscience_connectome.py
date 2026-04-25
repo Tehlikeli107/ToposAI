@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -15,7 +15,7 @@ from topos_ai.math import lukasiewicz_composition
 # (Elektriksel Sinaps) çevirir. Bir uyaranın (Dokunma) kaslara ulaşma
 # rotasını hesaplar. 'Topolojik Lezyon' (Virtual Lesion) uygulayarak,
 # canlı beyne dokunmadan hangi nöronun felce (Paralysis) yol açacağını 
-# matematiksel olarak ispatlar.
+# matematiksel olarak gösterir.
 # =====================================================================
 
 class ConnectomeTopos:
@@ -70,12 +70,12 @@ class ConnectomeTopos:
 
 def run_neuroscience_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 24: TOPOLOGICAL NEUROSCIENCE (C. ELEGANS CONNECTOME) ")
+    print(" ARAŞTIRMA DEMOSU 24: TOPOLOGICAL NEUROSCIENCE (C. ELEGANS CONNECTOME) ")
     print(" İddia: Nörobilimciler canlıların beynini anlamak için hayvanları")
     print(" deneylerde kullanır. ToposAI, 'C. elegans' solucanının gerçek beyin")
     print(" haritasını (Connectome) Kategori Matrisine yükler. 'Sanal Beyin Ameliyatı'")
     print(" ile bir nöronu keserek, canlının FELÇ (Paralysis) olacağını biyolojik")
-    print(" deney yapmadan, saf matematikle (%100 Accuracy) ispatlar.")
+    print(" deney yapmadan, saf matematikle (%100 Accuracy) gösterir.")
     print("=========================================================================\n")
 
     # Gerçek C. Elegans "Dokunmadan Kaçış (Escape Reflex)" Devresi Nöronları

@@ -1,4 +1,4 @@
-import torch
+﻿import torch
 
 # =====================================================================
 # MECHANISTIC INTERPRETABILITY (XAI) & TOPOLOGICAL CIRCUIT EXTRACTION
@@ -60,7 +60,7 @@ class ExplainableToposEngine:
 
 def run_xai_experiment():
     print("--- MECHANISTIC INTERPRETABILITY (EXPLAINABLE AI / XAI) ---")
-    print("Yapay Zeka sadece cevap vermez, beyninin içindeki 'Düşünce Devresini' (Circuit) ispatlar.\n")
+    print("Yapay Zeka sadece cevap vermez, beyninin içindeki 'Düşünce Devresini' (Circuit) gösterir.\n")
 
     # Kavramlar
     entities = ["Sigara", "Akciğer_Hasarı", "Hücre_Mutasyonu", "Kanser", "Öksürük", "Zatürre"]

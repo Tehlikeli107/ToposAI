@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -74,7 +74,7 @@ class HigherCategoryNetwork(nn.Module):
 
 def run_2category_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 52: HIGHER CATEGORY THEORY (2-MORPHISMS & HYPERNETS) ")
+    print(" ARAŞTIRMA DEMOSU 52: HIGHER CATEGORY THEORY (2-MORPHISMS & HYPERNETS) ")
     print(" İddia: Klasik Yapay Zekalar (1-Kategori), tek bir görev için sabit")
     print(" ağırlıklar (Morfizmalar) öğrenir. İki tamamen zıt görevi aynı")
     print(" anda öğrenemezler (Catastrophic Interference).")
@@ -175,15 +175,14 @@ def run_2category_experiment():
     print(f"  > Bağlam A (Fiyat Tahmini) Nihai Hata : {final_A_loss:.4f}")
     print(f"  > Bağlam B (Yaş Tahmini) Nihai Hata   : {final_B_loss:.4f}")
 
-    print("\n[BİLİMSEL SONUÇ: THE 2-CATEGORY HYPER-INTELLIGENCE]")
+    print("\n[ÖLÇÜLEN SONUÇ: 2-CATEGORY-INSPIRED HYPERNETWORK]")
     print("Aynı veri (X) üzerinden iki tamamen farklı hedefi (Fiyat ve Yaş)")
     print("öğrenmek, klasik YZ'nin 'Ağırlıklarını (1-Morphism)' kaosa sürükler.")
     print("ToposAI, 2-Kategori Teorisini kullanarak, 'Bağlama (Context)' bakıp o anki")
     print("duruma özel yepyeni bir Nöral Ağ Ağırlığı İCAT ETMİŞTİR.")
     print("Bu sayede aynı veriyi bağlama göre tamamen farklı yorumlamayı")
-    print("başarmıştır. Bu, AGI'ın bir uzmandan ziyade, o anki ihtiyaca göre")
-    print("gerekli uzmanı BEYNİNDE YARATAN bir Şekil Değiştirici (Shape-Shifter)")
-    print("olduğunun en derin ve GERÇEK DÜNYA verileriyle kanıtıdır!")
+    print("başarmıştır. Bu, bağlama göre ağırlık üreten hypernetwork fikrinin")
+    print("küçük ölçekli bir demosudur; genel zeka iddiası değildir.")
 
 if __name__ == "__main__":
     run_2category_experiment()

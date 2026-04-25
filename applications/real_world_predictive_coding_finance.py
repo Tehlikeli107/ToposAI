@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -58,7 +58,7 @@ def fetch_historical_stock_data():
 
 def run_real_world_predictive_coding():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 8: REAL-WORLD BIOLOGICAL AI (ZERO-GRADIENT ADAPTATION)")
+    print(" ARAŞTIRMA DEMOSU 8: REAL-WORLD BIOLOGICAL AI (ZERO-GRADIENT ADAPTATION)")
     print(" S&P 500 Piyasası çeşitli makro şoklarda (Ticaret savaşları, COVID vs.) karakter değiştirecek.")
     print(" ToposAI beyni, sıfır geriyayılım (No Backprop) ile bu 'Sürprizi' (Şoku)")
     print(" emecek ve anında yeni dünya düzenine uyum sağlayacaktır.")
@@ -108,7 +108,7 @@ def run_real_world_predictive_coding():
         if day % 100 == 0 and not shock_detected:
             print(f"  Tarih: {current_date} | Piyasa Stabil. Beynin Sürpriz (Hata) Seviyesi: {surprise:.4f}")
 
-    print("\n[BİLİMSEL SONUÇ: GÜÇLÜ BİR SEZGİSEL MODEL (STRONG HEURISTIC)]")
+    print("\n[ÖLÇÜLEN SONUÇ: GÜÇLÜ BİR SEZGİSEL MODEL (STRONG HEURISTIC)]")
     print("Normalde bir Finansal Yapay Zeka modeli, büyük makro-şoklar anında")
     print("tüm eski ezberleri yıkıldığı için (Catastrophic Forgetting) devasa ")
     print("GPU kümelerinde haftalarca yeniden eğitilmek zorundadır.")

@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import torch
@@ -62,7 +62,7 @@ def test_dynamic_ontology():
     
     print("\n--- SIFIR-EZBER ÇIKARIM TESTİ (RAG VS TOPOS) ---")
     print("Normal LLM 'Alice veriyi çaldı mı?' sorusunu ezberden veya Cosine Similarity ile arar.")
-    print("Topos AI ise kurduğu matriste A->D yolunu matematiksel olarak KANITLAR.")
+    print("Topos AI ise kurduğu matriste A->D yolunu matematiksel olarak GÖSTERİR.")
     
     queries = [
         ("alice", "gizli_veriyi"), # Beklenen: 1.0 (Zincirleme bağlantı)

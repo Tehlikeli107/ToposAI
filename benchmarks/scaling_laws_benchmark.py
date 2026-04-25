@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -10,7 +10,8 @@ from topos_ai.kernels import flash_topos_attention
 # =====================================================================
 # HARDWARE SCALING LAWS BENCHMARK (VRAM ÖLÇÜMÜ)
 # İddia: Standart PyTorch (O(N^2)) uzun bağlamlarda VRAM'i patlatır.
-# FlashTopos (Triton) ise O(1) ek bellek ile sonsuz bağlamı destekler.
+# FlashTopos (Triton) uses blockwise SRAM computation to reduce intermediate
+# memory. The materialized output matrix still scales with sequence length.
 # =====================================================================
 
 def get_vram_mb():
@@ -22,7 +23,7 @@ def run_scaling_benchmark(seq_lengths=None):
         print("CUDA bulunamadı. Bu donanım testi GPU gerektirir.")
         return
 
-    print("--- 1. BİLİMSEL KANIT: DONANIM ÖLÇEKLENME YASALARI (SCALING LAWS) ---")
+    print("--- 1. ARAŞTIRMA DEMOSU: DONANIM ÖLÇEKLENME YASALARI (SCALING LAWS) ---")
     print("PyTorch vs FlashTopos (Triton) VRAM Tüketim Analizi\n")
 
     # Test edilecek Bağlam Uzunlukları (Context Length - N)

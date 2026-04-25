@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -101,13 +101,13 @@ class BitcoinToposRadar:
 
 def run_bitcoin_alpha_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 36: TOPOLOGICAL LIMIT CYCLES (BITCOIN ALPHA GENERATOR) ")
+    print(" ARAŞTIRMA DEMOSU 36: TOPOLOGICAL LIMIT CYCLES (BITCOIN ALPHA GENERATOR) ")
     print(" İddia: Klasik Trade Botları 'Geçmiş' mum çubuklarına bakar (Gecikmeli).")
     print(" ToposAI, Orderbook'taki (Emir Defteri) Kuantum/Kaos dalgalanmalarını")
     print(" anlık olarak bir Kategori Matrisine gömer. Sistemin 'Limit Döngülerini'")
     print(" ve 'Çekim Alanlarını' (Attractor Basins) Transitive Closure ile bularak")
     print(" fiyatın hangi yöne bükülmek (Bifurcation) ZORUNDA OLDUĞUNU (Sıfır")
-    print(" gecikmeyle / Zero-Lag) matematiksel olarak ispatlar ve Sinyal üretir.")
+    print(" gecikmeyle / Zero-Lag) matematiksel olarak gösterir ve Sinyal üretir.")
     print("=========================================================================\n")
 
     radar = BitcoinToposRadar()
@@ -150,7 +150,7 @@ def run_bitcoin_alpha_experiment():
             
         time.sleep(2) # API Rate Limit'e takılmamak için 2 saniye bekle
 
-    print("\n[BİLİMSEL SONUÇ: THE TOPOLOGICAL QUANT]")
+    print("\n[ÖLÇÜLEN SONUÇ: THE TOPOLOGICAL QUANT]")
     print("Eğer bir insan, sadece 28 Dolar ile, devasa balinaların ve borsa")
     print("komisyonlarının (Slippage) olduğu bir okyanusta para kazanmak istiyorsa;")
     print("Geçmişi (RSI, MACD, LSTM) kullanan tüm araçları ÇÖPE ATMALIDIR.")

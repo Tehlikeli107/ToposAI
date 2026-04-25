@@ -4,6 +4,23 @@ import torch
 
 logger = logging.getLogger(__name__)
 
+
+def _godel_heyting_attention_torch(q, k):
+    """PyTorch reference path for Goedel-Heyting internal-hom scores."""
+    is_3d = False
+    if q.dim() == 3:
+        is_3d = True
+        q = q.unsqueeze(1)
+        k = k.unsqueeze(1)
+
+    q_exp = q.unsqueeze(3)
+    k_exp = k.unsqueeze(2)
+    impl = torch.where(q_exp <= k_exp, torch.ones_like(k_exp), k_exp)
+    out = impl.mean(dim=-1)
+
+    return out.squeeze(1) if is_3d else out
+
+
 HAS_TRITON = False
 try:
     import triton
@@ -67,7 +84,7 @@ if HAS_TRITON:
             k_val = tl.load(k_ptrs, mask=mask_n, other=0.0)
 
             # [STRICT GODEL IMPLICATION - KATEGORİ TEORİSİ]
-            # Eskiden olan Lukasiewicz T-Norm (1.0 - Q + K) yerine,
+            # Goedel-Heyting internal hom: q => k is 1 when q <= k, else k.
             # Topos teorisine %100 uyan katı (strict) kural uygulandı.
             impl = tl.where(q_val[:, None] <= k_val[None, :], 1.0, k_val[None, :])
             acc += impl
@@ -125,33 +142,9 @@ if HAS_TRITON:
         mask_m = offs_m < M
         mask_d = offs_d < D
 
-        q_base = q_ptr + batch_id * stride_qb + head_id * stride_qh
-        k_base = k_ptr + batch_id * stride_kb + head_id * stride_kh
         dq_base = dq_ptr + batch_id * stride_qb + head_id * stride_qh
-        dout_base = d_out_ptr + batch_id * stride_dob + head_id * stride_doh
-
-        q_ptrs = q_base + offs_m[:, None] * stride_qm + offs_d[None, :] * stride_qd
-        q_val = tl.load(q_ptrs, mask=mask_m[:, None] & mask_d[None, :], other=0.0)
 
         dq_acc = tl.zeros((BLOCK_M, BLOCK_D), dtype=tl.float32)
-
-        for start_n in range(0, N, BLOCK_N):
-            offs_n = start_n + tl.arange(0, BLOCK_N)
-            mask_n = offs_n < N
-
-            k_ptrs = k_base + offs_n[:, None] * stride_kn + offs_d[None, :] * stride_kd
-            dout_ptrs = dout_base + offs_m[:, None] * stride_dom + offs_n[None, :] * stride_don
-
-            k_val = tl.load(k_ptrs, mask=mask_n[:, None] & mask_d[None, :], other=0.0)
-            dout_val = tl.load(dout_ptrs, mask=mask_m[:, None] & mask_n[None, :], other=0.0)
-
-            impl = 1.0 - q_val[:, None, :] + k_val[None, :, :]
-            valid_mask = (impl >= 0.0) & (impl <= 1.0)
-
-            dout_expanded = dout_val[:, :, None]
-            grad_q_3d = -dout_expanded * valid_mask / D
-
-            dq_acc += tl.sum(grad_q_3d, axis=1)
 
         dq_ptrs = dq_base + offs_m[:, None] * stride_qm + offs_d[None, :] * stride_qd
         tl.store(dq_ptrs, dq_acc, mask=mask_m[:, None] & mask_d[None, :])
@@ -223,11 +216,10 @@ if HAS_TRITON:
             q_val = tl.load(q_ptrs, mask=mask_m[:, None] & mask_d[None, :], other=0.0)
             dout_val = tl.load(dout_ptrs, mask=mask_m[:, None] & mask_n[None, :], other=0.0)
 
-            impl = 1.0 - q_val[:, None, :] + k_val[None, :, :]
-            valid_mask = (impl >= 0.0) & (impl <= 1.0)
+            active_k = q_val[:, None, :] > k_val[None, :, :]
 
             dout_expanded = dout_val[:, :, None]
-            grad_k_3d = dout_expanded * valid_mask / D
+            grad_k_3d = dout_expanded * active_k / D
 
             dk_acc += tl.sum(grad_k_3d, axis=0)
 
@@ -355,12 +347,15 @@ if HAS_TRITON:
             return dq, dk
 
     def flash_topos_attention(q, k):
+        if not q.is_cuda or not k.is_cuda:
+            return _godel_heyting_attention_torch(q, k)
+
         return FlashToposFunction.apply(q, k)
 
 else:
-    from topos_ai.logic import StrictGodelImplication
-
     def flash_topos_attention(q, k):
+        return _godel_heyting_attention_torch(q, k)
+
         is_3d = False
         if q.dim() == 3:
             is_3d = True
@@ -369,13 +364,13 @@ else:
 
         q_exp = q.unsqueeze(3)
         k_exp = k.unsqueeze(2)
-        
+
         # [CPU/FALLBACK İÇİN KATI TOPOS MANTIĞI VE ÖZEL TÜREV]
         # Eskisi: impl = torch.clamp(1.0 - q_exp + k_exp, min=0.0, max=1.0)
         # Yenisi: Kategori Teorisine (Modus Ponens) %100 uyan,
         # ancak eğitimde geriye 'Straight-Through Estimator' gönderen sınıf.
-        impl = StrictGodelImplication.apply(q_exp, k_exp)
-        
+        impl = torch.clamp(1.0 - q_exp + k_exp, min=0.0, max=1.0)
+
         out = impl.mean(dim=-1)
 
         return out.squeeze(1) if is_3d else out

@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -14,7 +14,7 @@ import json
 # Yapay Zeka, kanserli protein ağını canlı olarak indirir ve hücrenin 
 # topolojik haritasını (Kategori Teorisini) kurar. Transitive Closure ile 
 # mutasyonun yayılımını izler ve "İlaç için En İyi Hedef Proteini" 
-# (Drug Target) matematiksel olarak kanıtlar.
+# (Drug Target) matematiksel olarak gösterir.
 # =====================================================================
 
 def godel_composition(R1, R2):
@@ -70,7 +70,7 @@ def fetch_string_db_cancer_network():
 
 def run_bioinformatics_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 9: BIOINFORMATICS & TOPOLOGICAL DRUG TARGET DISCOVERY")
+    print(" ARAŞTIRMA DEMOSU 9: BIOINFORMATICS & TOPOLOGICAL DRUG TARGET DISCOVERY")
     print(" Kanser bir hücre ağının (Graph) bozulmasıdır. ToposAI, gerçek")
     print(" protein verilerini (STRING-DB) kullanarak, hücre içindeki zincirleme")
     print(" mutasyon yayılımını hesaplar ve 'İlacın Nereye Vurması Gerektiğini'")
@@ -123,9 +123,9 @@ def run_bioinformatics_experiment():
     print("\n[DEĞERLENDİRME]")
     print("Milyarlarca dolarlık ilaç şirketleri (Pharma), Graph Neural Network (GNN) kullanarak")
     print("hedef protein bulmaya çalışır ve Over-smoothing (Düzleşme) yüzünden yanılırlar.")
-    print("ToposAI ise Gödel Mantığı kullanarak hücrenin kusursuz Kategori Teorisini çıkardı")
+    print("ToposAI ise Gödel Mantığı kullanarak hücrenin idealize Kategori Teorisini çıkardı")
     print("ve 'İlacın bağlanması gereken' (Docking Target) anahtar proteini SIFIR DENEY ile,")
-    print("sadece matematiksel geçişlilik (Transitivity) üzerinden ispatladı.")
+    print("sadece matematiksel geçişlilik (Transitivity) üzerinden gösterdi.")
 
 if __name__ == "__main__":
     run_bioinformatics_experiment()

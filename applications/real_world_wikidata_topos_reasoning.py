@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -72,7 +72,7 @@ def fetch_wikidata_medical_knowledge():
 
 def run_wikidata_knowledge_discovery():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 4: WIKIDATA ÜZERİNDE MULTI-HOP KNOWLEDGE DISCOVERY")
+    print(" ARAŞTIRMA DEMOSU 4: WIKIDATA ÜZERİNDE MULTI-HOP KNOWLEDGE DISCOVERY")
     print(" Klasik YZ, internette 'A ilacı C semptomuna iyi gelir' cümlesini arar.")
     print(" ToposAI ise dağınık verileri birleştirerek 'A -> B' ve 'B -> C' üzerinden")
     print(" A'nın C'ye iyi geldiğini Matematiksel olarak Topolojik Bir Sentez (Heuristic) şeklinde İCAT EDER.")
@@ -117,7 +117,7 @@ def run_wikidata_knowledge_discovery():
     # 4. BİLİMSEL KEŞİFLERİ YAZDIR (ŞEFFAF DEVRE)
     print("\n--- SIFIR-EZBER (ZERO-SHOT) TIBBİ ÇIKARIMLAR ---")
     print("Aşağıdaki ilişkiler Wikidata'dan doğrudan ÇEKİLMEDİ.")
-    print("ToposAI bu bilgileri dağınık verileri üst üste koyarak KANITLADI:\n")
+    print("ToposAI bu bilgileri dağınık verileri üst üste koyarak GÖSTERDİ:\n")
     
     discovery_count = 0
     for drug, disease in treats_relations:
@@ -141,7 +141,7 @@ def run_wikidata_knowledge_discovery():
             break
 
     print(f"\n[TOPLAM {torch.sum(R_cures_symptom > 0.8).item():.0f} YENİ TIBBİ BİLGİ SENTEZLENDİ!]")
-    print("\n[BİLİMSEL SONUÇ]:")
+    print("\n[ÖLÇÜLEN SONUÇ]:")
     print("Normal LLM'ler 'Multi-Hop QA' (Çok adımlı soru cevaplama) görevlerinde")
     print("dikkat dağınıklığı yaşayıp halüsinasyon görürler. ")
     print("ToposAI ise dünyadaki dağınık gerçek verileri (Wikidata SPARQL) alıp,")

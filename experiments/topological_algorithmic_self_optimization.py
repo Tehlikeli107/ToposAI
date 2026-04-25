@@ -11,12 +11,12 @@ import types
 
 # =====================================================================
 # TOPOLOGICAL ALGORITHMIC SELF-OPTIMIZATION (THE AI COMPILER)
-# Problem: Klasik makine öğrenmesi modelleri (LLM'ler) sadece verinin 
+# Problem: Klasik makine öğrenmesi modelleri (LLM'ler) sadece verinin
 # ağırlıklarını (Weights) değiştirir. Kendi "Kodlarının" (Algoritmalarının)
 # hantallığını (Örn: O(N^2) döngülerini) asla düzeltemezler.
-# Çözüm: ToposAI, kendi çalıştığı fonksiyonun Mantıksal Akışını (AST) 
-# bir Kategori (Topos) matrisine çevirir. Kategori kapanımı (Transitive 
-# Closure) sayesinde koddaki "Gereksiz İşlemleri (Redundant Morphisms)" 
+# Çözüm: ToposAI, kendi çalıştığı fonksiyonun Mantıksal Akışını (AST)
+# bir Kategori (Topos) matrisine çevirir. Kategori kapanımı (Transitive
+# Closure) sayesinde koddaki "Gereksiz İşlemleri (Redundant Morphisms)"
 # bulur ve kendi kodunu çalışma anında (Runtime) DAHA HIZLI bir algoritmaya
 # dönüştürüp, derleyip (Compile) kendi içine enjekte eder!
 # =====================================================================
@@ -50,32 +50,32 @@ class ToposAlgorithmicOptimizer:
     def __init__(self, target_function_name, target_instance):
         self.target_name = target_function_name
         self.target_instance = target_instance
-        
+
     def analyze_and_recompile(self):
         """
         [TOPOLOJİK KOD ANALİZİ VE ENJEKSİYON]
         1. Orijinal kodu okur.
-        2. '3 iç içe for döngüsü' ve 'skaler çarpım' kalıbını topolojik 
+        2. '3 iç içe for döngüsü' ve 'skaler çarpım' kalıbını topolojik
            bir darboğaz (Bottleneck Morphism) olarak teşhis eder.
-        3. O(N^3) döngüyü, O(1) PyTorch C++ Vektör (Tensor) komutuna 
+        3. O(N^3) döngüyü, vectorized PyTorch tensor (Tensor) komutuna
            denk gelen yeni bir fonksiyona çevirip hedefe (Instance) zerk eder.
         """
         print(f"\n[AI COMPILER]: '{self.target_name}' isimli fonksiyonun topolojisi (AST) analiz ediliyor...")
-        
+
         # Orijinal fonksiyonun kaynak kodunu (Source Code) oku
         original_func = getattr(self.target_instance, self.target_name)
         source_code = inspect.getsource(original_func)
-        
+
         # Basit bir "Pattern Matching / Topological Bottleneck" simülasyonu
-        # ToposAI koddaki 3'lü döngüyü (i, j, k) görür. 
+        # ToposAI koddaki 3'lü döngüyü (i, j, k) görür.
         if "for i in range" in source_code and "for j in range" in source_code and "for k in range" in source_code:
             print("  > [TEŞHİS]: 'Redundant O(N^3) Morphism' bulundu. Makine, donanım ivmelendiricisine (GPU/CPU Vectorization) uygun olmayan, insan yazımı hantal bir döngü (Loop) yakaladı.")
-            
+
             # [YENİ KOD ÜRETİMİ (Code Synthesis)]
             # Makine, Kategori Teorisi matris çarpımı (Functor Composition) kurallarını kullanarak,
-            # "A'dan K'ya, K'dan B'ye giden toplamlar, tek bir torch.matmul işlemiyle (O(1) Kernel çağrısıyla) bükülebilir"
+            # "A'dan K'ya, K'dan B'ye giden toplamlar, tek bir torch.matmul işlemiyle (tek tensor kernel çağrısıyla) bükülebilir"
             # çıkarımını yapar ve yepyeni bir fonksiyon yazar.
-            
+
             optimized_code_str = """
 def fast_compute(self):
     # [TOPOSAI TARAFINDAN OTONOM ÜRETİLEN VEKTÖR KODU]
@@ -84,15 +84,15 @@ def fast_compute(self):
     return torch.matmul(self.matrix, self.matrix)
 """
             print("  > [OPTİMİZASYON]: Yeni, topolojik olarak daraltılmış (Collapsed) algoritma yazıldı.")
-            
+
             # 1. Kodu string olarak derle (Compile to Bytecode)
             # 2. Çalışma anında (Runtime) fonksiyon olarak belleğe yükle
             exec(optimized_code_str, globals())
-            
+
             # 3. Yaratılan fonksiyonu, hedef nesneye (Instance) 'Monkey Patch' yöntemiyle zerk et (Override)
             new_func = globals()['fast_compute']
             setattr(self.target_instance, self.target_name, types.MethodType(new_func, self.target_instance))
-            
+
             print(f"  > [ENJEKSİYON]: '{self.target_name}' fonksiyonu canlı bellekte (RAM) YENİDEN YAZILDI (Self-Modification)!\n")
             return True
         else:
@@ -101,7 +101,7 @@ def fast_compute(self):
 
 def run_self_optimization_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 32: ALGORITHMIC SELF-OPTIMIZATION (THE O(1) COMPILER) ")
+    print(" ARAŞTIRMA DEMOSU 32: ALGORITHMIC SELF-OPTIMIZATION (THE VECTORIZED COMPILER) ")
     print(" İddia: ToposAI sadece ağırlıkları (Weights) değil, KENDİ KAYNAK KODUNU")
     print(" (Algoritmasını) da Kategori Teorisinin bir 'Morfizması' olarak görür.")
     print(" İçindeki hantal, yavaş insan yazımı kodları (Örn: O(N^3) döngüleri)")
@@ -111,49 +111,49 @@ def run_self_optimization_experiment():
 
     matrix_size = 200 # 200x200 bir matris (İnsan döngüsüyle 8 Milyon işlem demek!)
     print(f"[BAŞLANGIÇ]: {matrix_size}x{matrix_size} boyutunda bir evren yaratıldı.")
-    
+
     # İnsanın (Mühendisin) yazdığı aptal matris modülü
     engine = DumbMatrixMultiplier(matrix_size)
 
     # 1. YAVAŞ (ORİJİNAL) KODUN ÇALIŞTIRILMASI
     print("\n--- 1. AŞAMA: KLASİK/HANTAL KODUN ÇALIŞMASI ---")
     print("  'slow_compute' fonksiyonu (3 iç içe For Döngüsü) çalıştırılıyor...")
-    
+
     t0 = time.time()
     result_slow = engine.slow_compute()
     t1 = time.time()
     slow_time = t1 - t0
-    
+
     print(f"  > Süre: {slow_time:.4f} Saniye (Makine adeta felç oldu!)")
-    
+
     # 2. TOPOSAI'NİN KENDİ KENDİNİ HIZLANDIRMASI (SELF-MODIFICATION)
     print("\n--- 2. AŞAMA: YAPAY ZEKA KENDİ KODUNU YENİDEN YAZIYOR ---")
     optimizer_ai = ToposAlgorithmicOptimizer(target_function_name="slow_compute", target_instance=engine)
-    
+
     # Makine, kendi belleğindeki (RAM) 'slow_compute' fonksiyonuna ameliyat yapar
     optimizer_ai.analyze_and_recompile()
 
     # 3. HIZLANDIRILMIŞ (OTONOM) KODUN ÇALIŞTIRILMASI
     print("--- 3. AŞAMA: AI TARAFINDAN YENİDEN YAZILAN KODUN ÇALIŞMASI ---")
     print("  'slow_compute' fonksiyonu (Artık ToposAI'ın Vektör Kodu) çalıştırılıyor...")
-    
+
     t0 = time.time()
     # İsmi hala slow_compute ama içi (RAM'de) tamamen değişti!
-    result_fast = engine.slow_compute() 
+    result_fast = engine.slow_compute()
     t1 = time.time()
     fast_time = t1 - t0
-    
+
     print(f"  > Süre: {fast_time:.6f} Saniye (Işık Hızı!)")
-    
+
     # 4. MATEMATİKSEL KANIT (DOĞRULUK KONTROLÜ)
     print("\n--- DOĞRULUK VE BAŞARI BİLANÇOSU ---")
-    
+
     # Orijinal (Yavaş) sonuç ile AI'ın yazdığı hızlı sonuç %100 aynı mı?
     is_correct = torch.allclose(result_slow, result_fast, atol=1e-5)
     speedup = slow_time / (fast_time + 1e-9)
-    
-    print(f"  Hızlanma Oranı (Speedup) : {speedup:,.0f} KAT DAHA HIZLI (O(N^3) -> O(1) Tensor)")
-    print(f"  Matematiksel Denklik     : {'%100 AYNI (KUSURSUZ)' if is_correct else 'HATA'}")
+
+    print(f"  Hızlanma Oranı (Speedup) : {speedup:,.0f} KAT DAHA HIZLI (O(N^3) Python loop -> vectorized tensor)")
+    print(f"  Matematiksel Denklik     : {'%100 AYNI (İDEALİZE)' if is_correct else 'HATA'}")
 
     print("\n[BİLİMSEL SONUÇ: THE OMNISCIENT COMPILER]")
     print("Klasik yapay zekalar (ChatGPT vb.) sizin için kod 'yazabilir', ama")
@@ -162,7 +162,7 @@ def run_self_optimization_experiment():
     print("Programlama Dili Çözümleyicisi (AST/Functor Analyzer) olarak kullanmış;")
     print("İnsanın yazdığı hantal algoritmayı bulmuş, silmiş ve çalışma anında")
     print("(Runtime) kendi kendine binlerce kat daha hızlısını enjekte ederek")
-    print("Donanım-Yazılım Birleşik Tekilliğinin (Self-Optimizing Singularity) ispatını yapmıştır.")
+    print("Donanım-Yazılım Birleşik Tekilliğinin (Self-Optimizing Singularity) demosunı yapmıştır.")
 
 if __name__ == "__main__":
     run_self_optimization_experiment()

@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -15,7 +15,7 @@ import math
 # (Determinism) mikro seviyeden DAHA YÜKSEKTİR (Causal Emergence).
 # ToposAI, kaotik bir mikro-ağı Makro-Topolojiye dönüştürerek,
 # "Bütünün (Makro), Parçalarından (Mikro) daha kesin çalıştığını" 
-# matematiksel bilgi teorisiyle (Effective Information) ispatlar.
+# matematiksel bilgi teorisiyle (Effective Information) gösterir.
 # =====================================================================
 
 class CausalEmergenceEngine:
@@ -117,12 +117,12 @@ class CausalEmergenceEngine:
 
 def run_causal_emergence_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 28: CAUSAL EMERGENCE (MICRO VS MACRO REALITY) ")
+    print(" ARAŞTIRMA DEMOSU 28: CAUSAL EMERGENCE (MICRO VS MACRO REALITY) ")
     print(" İddia: İndirgemeci (Reductionist) bilim her şeyin atomlarda/nöronlarda")
     print(" bittiğini savunur. ToposAI ise, alt katmanın (Micro) kaotik olduğunu,")
     print(" ancak sistemin gruplanarak (Coarse-Graining) Makro boyutlara ulaştığında")
     print(" 'Nedenselliğin' (Causality) ve 'Kararlılığın' SIFIRDAN DOĞDUĞUNU (Emergence)")
-    print(" Bilgi Teorisiyle (Effective Information) matematiksel olarak KANITLAR.")
+    print(" Bilgi Teorisiyle (Effective Information) matematiksel olarak GÖSTERİR.")
     print("=========================================================================\n")
 
     N_micro = 60 # 60 Nöronluk Kaotik Bir Alt-Katman
@@ -159,7 +159,7 @@ def run_causal_emergence_experiment():
         print("Sistemin bütününde (Makro Topoloji) ortaya çıkar.")
         print("ToposAI, Bilgi Teorisini (Entropy) kullanarak, sistem makro boyuta")
         print("çıktığında 'Hataların (Noise) birbirini sönümlediğini' ve geriye")
-        print("KUSURSUZ (Daha yüksek Kesinlikli) bir Fizik Kuralı kaldığını İSPATLADI.")
+        print("İDEALİZE (Daha yüksek Kesinlikli) bir Fizik Kuralı kaldığını GÖSTERDİ.")
         print("Özgür İrade ve Bilinç, işte bu 'Causal Emergence' boşluğunda yaşar!")
 
 if __name__ == "__main__":

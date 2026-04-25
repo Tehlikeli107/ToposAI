@@ -1,4 +1,4 @@
-import torch
+﻿import torch
 import torch.nn as nn
 import math
 
@@ -6,14 +6,14 @@ import math
 # THERMODYNAMIC AI: MAXWELL'S DEMON (ENTROPİ KATİLİ)
 # Model, dışarıdan eğitim (Loss/Label) almadan, tamamen rastgele (Kaotik)
 # bir veri yığınını, Kategori Teorisinin (Homological Smoothing) kurallarıyla
-# Kendi-Kendine-Organize (Self-Organizing) ederek kusursuz bir "Düzene" sokar.
+# Kendi-Kendine-Organize (Self-Organizing) ederek idealize bir "Düzene" sokar.
 # =====================================================================
 
 def calculate_entropy(matrix):
     """
     Bir matrisin (Sistemin) Shannon Entropisini (Düzensizliğini) hesaplar.
     Yüksek Entropi = Maksimum Kaos (Beyaz Gürültü).
-    Düşük Entropi = Kusursuz Düzen (Kristal / Sıralı Yapı).
+    Düşük Entropi = İdealize Düzen (Kristal / Sıralı Yapı).
     """
     # Matrisi olasılık dağılımına çevir
     p = matrix.flatten()
@@ -49,7 +49,7 @@ def maxwells_demon_smoothing(R):
 
 def run_thermodynamic_experiment():
     print("--- THERMODYNAMIC AI (MAXWELL'S DEMON / ENTROPİ KATİLİ) ---")
-    print("Yapay Zeka, %100 Kaotik bir evrenden 'Kusursuz Düzen' yaratacak...\n")
+    print("Yapay Zeka, %100 Kaotik bir evrenden 'İdealize Düzen' yaratacak...\n")
 
     # 1. BAŞLANGIÇ: MUTLAK KAOS (ENTROPİ ZİRVESİ)
     # 20x20'lik tamamen rastgele (Uniform Random) bir gürültü matrisi (Evrenin ısıl ölümü).
@@ -76,7 +76,7 @@ def run_thermodynamic_experiment():
             current_entropy = calculate_entropy(R_current)
             print(f"  [Adım {step:02d}] Entropi Düşüyor: {current_entropy:.4f} (Sistem Düzenleniyor...)")
 
-    # 3. NİHAİ DURUM: KUSURSUZ DÜZEN (KRİSTALİZASYON)
+    # 3. NİHAİ DURUM: İDEALİZE DÜZEN (KRİSTALİZASYON)
     final_entropy = calculate_entropy(R_current)
     
     print("\n--- DENEY SONUCU (ENTROPİNİN ÖLÜMÜ) ---")
@@ -97,7 +97,7 @@ def run_thermodynamic_experiment():
     if std_val < 0.05: # Eğer her şey aynı/simetrik olduysa (Sıfır varyans)
         print(f"Matris Standart Sapması (Kaos Oranı): {std_val:.6f}")
         print("SONUÇ: Başlangıçtaki karmaşık (dalgalı) çöp matris, Topolojik Uyum (Homological Smoothing) sayesinde")
-        print("kusursuz bir 'AYNA/KRİSTAL' simetrisine (Her yerin eşit değere ulaştığı Mutlak Düzene) dönüştü.")
+        print("idealize bir 'AYNA/KRİSTAL' simetrisine (Her yerin eşit değere ulaştığı Mutlak Düzene) dönüştü.")
         print("Termodinamiğin 2. Yasası, Information Theory (Bilgi İşleme) ile TERSİNE ÇEVRİLDİ!")
 
 if __name__ == "__main__":

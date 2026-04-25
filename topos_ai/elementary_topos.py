@@ -1,75 +1,52 @@
 import torch
 import torch.nn as nn
 
-# =====================================================================
-# THE ELEMENTARY TOPOS AXIOMS (CARTESIAN CLOSED CATEGORY)
-# Amacı: Bir uzayın "Topos" olabilmesi için 3 temel şartı sağlaması
-# gerekir: Sonlu Limitler (Çarpım), Üstel Objeler (Exponentials) ve
-# Subobject Classifier (Ω).
-# Bu modül, PyTorch tensörlerini birer 'Topos Objesi' olarak kabul
-# ederek, klasik matris çarpımları yerine Kategorik Çarpım (Product),
-# Kategorik Toplam (Coproduct) ve Üstel Obje (Internal Hom) operasyonlarını
-# Heyting Mantığı (Gödel T-Norm) ile tanımlar.
-# =====================================================================
+from .logic import godel_implication
+
 
 class ElementaryTopos(nn.Module):
+    """
+    Tensor-level proxy for a few elementary-topos operations.
+
+    The implementation models products, coproducts, exponentials, and a
+    subobject-classifier-style inclusion score with fuzzy logic on tensors in
+    [0, 1]. It is useful as a differentiable teaching/experimentation layer,
+    not as a certification that an arbitrary tensor space is an elementary
+    topos.
+    """
+
     def __init__(self, dim):
         super().__init__()
         self.dim = dim
-
-        # 1. INITIAL OBJECT (0) - 'Big Bang' veya 'Kesin Yanlış'
-        # Her objeye ondan sadece TEK BİR ok (Morphism) gider.
         self.initial_object = torch.zeros(dim)
-
-        # 2. TERMINAL OBJECT (1) - 'Kara Delik' veya 'Kesin Doğru'
-        # Her objeden ona sadece TEK BİR ok gider.
         self.terminal_object = torch.ones(dim)
 
     def product(self, X, Y):
-        """
-        [CATEGORICAL PRODUCT: X × Y]
-        Mantıksal karşılığı: X AND Y.
-        Topolojik karşılığı: Kesişim (Greatest Lower Bound).
-        Gödel T-Norm (Min) ile modellenir.
-        """
+        """Fuzzy product/meet proxy: min(X, Y)."""
         return torch.minimum(X, Y)
 
     def coproduct(self, X, Y):
-        """
-        [CATEGORICAL COPRODUCT: X + Y]
-        Mantıksal karşılığı: X OR Y.
-        Topolojik karşılığı: Birleşim (Least Upper Bound).
-        Gödel T-Conorm (Max) ile modellenir.
-        """
+        """Fuzzy coproduct/join proxy: max(X, Y)."""
         return torch.maximum(X, Y)
 
     def exponential(self, Y, Z):
         """
-        [EXPONENTIAL OBJECT: Z^Y (Internal Hom)]
-        Bir Topos'un en güçlü özelliğidir (Cartesian Closed).
-        Fonksiyonların/Okların (Y -> Z) KENDİSİNİN DE BİR OBJE OLMASIDIR!
-        Mantıksal karşılığı: Y => Z (Y, Z'yi gerektirir).
-        Heyting Cebirindeki Implication ile modellenir:
-        Eğer Y <= Z ise 1.0 (Kesin doğru), değilse Z.
+        Goedel-Heyting internal hom on the unit interval.
+
+        This is the residual of meet/min: Y => Z is 1 when Y <= Z and Z
+        otherwise.
         """
-        # Smooth Sigmoid Yaklaşımı (İleri ve geri geçişte pürüzsüz türev)
-        sigma = torch.sigmoid(50.0 * (Z - Y))
-        return sigma + (1.0 - sigma) * Z
+        return godel_implication(Y, Z)
 
     def subobject_classifier(self, X, Y):
-        """
-        [SUBOBJECT CLASSIFIER (Ω): X -> Ω]
-        X'in Y'ye ne kadar 'Dahil (Subobject)' olduğunu ölçen morfizma.
-        Kısmi kapsama (Fuzzy Subsethood).
-        """
-        # X <= Y ise 1.0, değilse Y
+        """Return the fuzzy inclusion score X => Y."""
         return self.exponential(X, Y)
 
     def check_morphism(self, A, B):
         """
-        [CATEGORICAL MORPHISM: A -> B]
-        A'dan B'ye yasal bir ok (Morfizma) var mı?
-        Heyting Mantığında (A <= B) durumu morfizmanın varlığını ispatlar.
+        Return whether A is pointwise below B in this tensor proxy.
+
+        This is a concrete order check on tensors, not a categorical proof
+        search over an arbitrary category.
         """
-        # A, B'den küçük eşitse (Topolojik kapsama), aralarında 1.0'lık (Kesin) bir Ok vardır.
         return torch.all(A <= B).item()

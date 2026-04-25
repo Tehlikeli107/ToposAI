@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -8,13 +8,13 @@ import torch
 import math
 
 # =====================================================================
-# TOPOLOGICAL REVERSIBLE COMPUTING (BEATING THE LANDAUER LIMIT)
+# TOPOLOGICAL REVERSIBLE COMPUTING (LANDAUER-STYLE TOY MODEL)
 # Problem: Klasik mantık (AND, OR, Softmax, FC Layers) bilgiyi siler 
 # (Irreversible). Landauer Prensibine göre silinen her bit evrene ısı yayar.
 # Çözüm: ToposAI, geçişliliği (Morphism) bilgi kaybetmeyecek şekilde,
 # "Tersinir (Reversible)" Functor'lar (Toffoli/Fredkin Kapıları) üzerinden
-# kurar. Çıktıdan girdiye %100 dönülebildiği için entropi artmaz. Bu,
-# 'Sıfır Enerji Tüketen (0 Joule)' Kuantum AGI donanımlarının temelidir.
+# kurar. Bu oyuncak model, bilgi silme maliyetini temsili bir entropy
+# hesabıyla anlatır; donanım enerji iddiaları ayrıca ölçülmelidir.
 # =====================================================================
 
 class ClassicalLogicGate:
@@ -52,12 +52,12 @@ class TopologicalReversibleGate:
 
 def run_thermodynamic_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 31: TOPOLOGICAL REVERSIBLE COMPUTING (LANDAUER LIMIT) ")
+    print(" ARAŞTIRMA DEMOSU 31: TOPOLOGICAL REVERSIBLE COMPUTING (LANDAUER LIMIT) ")
     print(" İddia: Modern yapay zekalar hesaplama yaparken bilgiyi ezer (Softmax, ReLU)")
     print(" ve devasa bir elektrik tüketip (Isı) evrenin Entropisini artırırlar.")
     print(" ToposAI, 'Tersinir (Reversible) Kategori Kapıları' kullanarak hiçbir")
     print(" bilgiyi silmeden düşünür. Çıktıdan girdiye matematiksel olarak dönebilir.")
-    print(" Bu nedenle 'Sıfır Termodinamik Isı (0 Joule)' yaydığını kanıtlar.")
+    print(" Bu nedenle temsili entropy hesabında bilgi-silme maliyetini azaltır.")
     print("=========================================================================\n")
 
     # Başlangıç durumu

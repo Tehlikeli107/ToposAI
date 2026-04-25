@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -10,7 +10,7 @@ import torch
 # Model, klasik RAG (Vektör Arama) yerine Tıbbi metinleri (PDF/Knowledge Base)
 # okur ve "Mantıksal Etkileşim Grafına (Topos)" çevirir.
 # Birden fazla ilaç bir araya geldiğinde oluşan Çelişkileri (Adverse Drug Reactions)
-# "Sheaf Gluing" ve "Transitive Closure" matematikleriyle %100 kesinlikle kanıtlar.
+# "Sheaf Gluing" ve "Transitive Closure" matematikleriyle %100 kesinlikle gösterir.
 # Halüsinasyon (Ölümcül Hata) yapması imkansızdır.
 # =====================================================================
 

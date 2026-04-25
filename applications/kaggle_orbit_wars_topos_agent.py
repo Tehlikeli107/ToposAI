@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 
 try:
@@ -24,7 +24,7 @@ import time
 # ve gezegen yörüngelerini "Fibrations (Liflenmeler)" olarak modeller.
 # Euclidean (Düz) mesafe yerine, zamanın büküldüğü 'Topolojik Kesişim
 # Noktalarını (Intersection Morphisms)' hesaplayarak, rakibin ve 
-# gezegenlerin gelecekteki rotalarına kusursuz pusu kurar!
+# gezegenlerin gelecekteki rotalarına idealize pusu kurar!
 # =====================================================================
 
 class OrbitWarsToposAgent:
@@ -56,7 +56,7 @@ class OrbitWarsToposAgent:
     def topological_target_selector(self, obs):
         """
         [SHEAF COHOMOLOGY TARGETING]
-        Hangi gezegene filoları yollayacağımızı O(1) Topolojik Hacim ile seçer.
+        Hangi gezegene filoları yollayacağımızı topolojik hacim proxy ile seçer.
         """
         player = obs.get("player", self.agent_id)
         raw_planets = obs.get("planets", [])
@@ -115,14 +115,14 @@ class OrbitWarsToposAgent:
 
 def simulate_kaggle_orbit_wars():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 68: KAGGLE ORBIT WARS (TOPOLOGICAL RTS AI) ")
+    print(" ARAŞTIRMA DEMOSU 68: KAGGLE ORBIT WARS (TOPOLOGICAL RTS AI) ")
     print(" İddia: Nisan 2026'da başlayan 50.000$ ödüllü Kaggle 'Orbit Wars'")
     print(" yarışması, sürekli (continuous) uzayda hareket eden yörüngelerdeki")
     print(" gezegenleri fethetme oyunudur. Klasik (Greedy) botlar gezegenin ")
     print(" 'şu anki' konumuna gemi yollar ve ıskalarlar.")
     print(" ToposAI, uzayı 'Fibrations' ve Zamanı 'Topolojik Kesişim' olarak")
     print(" modellediği için, gezegenlerin gelecekteki yörünge eğrilerini")
-    print(" hesaplayıp filolarını kusursuz pusu rotalarına fırlatır!")
+    print(" hesaplayıp filolarını idealize pusu rotalarına fırlatır!")
     print("=========================================================================\n")
 
     # KAGGLE RESMİ OBS FORMATI (README.md'den alındığı gibi)
@@ -208,7 +208,7 @@ def simulate_kaggle_orbit_wars():
         print(f"  > FARK: ToposAI, uzayın {obs_topos['angular_velocity']} rad/turn hızıyla döndüğünü bildiği için,")
         print(f"    Öklidyen (Düz) hedefe DEĞİL; hedefin Gelecekteki Topolojik Kesişim (Fibration) Noktasına nişan aldı!")
         
-    print("\n[BİLİMSEL SONUÇ: THE ORBITAL SUPREMACY]")
+    print("\n[ÖLÇÜLEN SONUÇ: THE ORBITAL SUPREMACY]")
     print("Kaggle'ın kendi verdiği resmi bot (Baseline), evreni sabit sanıp hedefin")
     print("'Şu Anki (T=0)' konumuna mermi ateşler. Gezegen yörüngede döndüğü için o mermi")
     print("uzayın derinliklerinde kaybolur (Iska geçer).")

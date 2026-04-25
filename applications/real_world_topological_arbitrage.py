@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -14,7 +14,7 @@ import time
 # etmeye çalışır ve yanılır. ToposAI ise borsanın anlık durumunu bir 
 # "Kategori Uzayı" olarak modeller. Max-Product Semiring (Çarpımsal 
 # Geçişlilik) kullanarak N-Boyutlu Arbitraj (Risksiz Kazanç) döngülerini
-# GPU üzerinde milisaniyeler içinde matematiksel olarak ispatlar.
+# GPU üzerinde milisaniyeler içinde matematiksel olarak gösterir.
 # =====================================================================
 
 def max_product_composition(R1, R2):
@@ -146,11 +146,11 @@ class TopologicalArbitrageEngine:
 
 def run_arbitrage_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 23: TOPOLOGICAL ARBITRAGE (QUANTITATIVE FINANCE) ")
+    print(" ARAŞTIRMA DEMOSU 23: TOPOLOGICAL ARBITRAGE (QUANTITATIVE FINANCE) ")
     print(" İddia: Piyasada binlerce döviz kuru vardır. Klasik botlar bunları")
     print(" tek tek hesaplar ve yavaş kalır. ToposAI, Kripto piyasasını bir")
     print(" 'Kategori' olarak algılar ve Max-Product (Çarpımsal Kapanım) ile")
-    print(" tüm ağın Arbitraj (Risksiz Kâr) boşluklarını O(1) sürede ispatlar.")
+    print(" tüm ağın Arbitraj (Risksiz Kâr) boşluklarını tek analitik adımda gösterir.")
     print("=========================================================================\n")
 
     engine = TopologicalArbitrageEngine()
@@ -161,7 +161,7 @@ def run_arbitrage_experiment():
         # Ama botumuz Topoloji üzerinden saniyesinde aramasını yapar!
         engine.discover_arbitrage(max_hops=4)
         
-        print("\n[BİLİMSEL SONUÇ (Heuristic/Algorithmic Trading)]")
+        print("\n[ÖLÇÜLEN SONUÇ (Heuristic/Algorithmic Trading)]")
         print("Algoritmik ticarette (HFT), hız her şeydir. ToposAI, finansal")
         print("pariteleri (BTC/USDT vb.) birer yönlü 'Ok' (Morphism) kabul edip,")
         print("tüm küresel piyasayı GPU üzerinde tek bir Matris Çarpımında birleştirir.")

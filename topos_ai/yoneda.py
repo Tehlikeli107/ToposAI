@@ -1,35 +1,24 @@
 import torch
 import torch.nn as nn
-from topos_ai.logic import StrictGodelImplication
+
 
 class YonedaUniverse(nn.Module):
     """
-    [GERÇEK YONEDA UZAYI (Strict Asymmetric Yoneda)]
-    
-    Bir nesneyi (Object) anlamak için, ondan çıkan (Covariant) ve 
-    ona gelen (Contravariant) okların bütününe bakılır. Öklid uzaklığı kullanılamaz.
-    Bunun yerine Yönlü İçsel Hom (StrictGodelImplication) kullanılmalıdır.
+    Yoneda-inspired probe universe.
+
+    This module does not implement the categorical Yoneda lemma directly.
+    It stores reference probes and represents an object by its squared
+    Euclidean distances to those probes. That makes it a useful
+    relation-vector reconstruction toy model, not a proof of Yoneda.
     """
 
     def __init__(self, num_probes, dim):
         super().__init__()
-        # Yoneda Probları, "Evrensel Referans Nesneleri" (Representable Functors) gibi çalışır.
-        self.probes = nn.Parameter(torch.rand(num_probes, dim))
+        self.probes = nn.Parameter(torch.randn(num_probes, dim))
 
     def get_morphisms(self, X):
-        """
-        Return the Contravariant Hom-functor values: Hom(Probe, X).
-        Eğer Probe <= X ise (Modus Ponens), ok gücü 1.0 olur. Değilse X'in gücü.
-        (Öklid uzaklığı silinmiş, yönlü Asimetri kurulmuştur)
-        """
-        X_exp = X.unsqueeze(1)               # [Batch, 1, Dim]
-        probes_exp = self.probes.unsqueeze(0) # [1, Probes, Dim]
-        
-        # Probe'dan X'e doğru "Katı Çıkarım" (Implication) gücü
-        implication = StrictGodelImplication.apply(probes_exp, X_exp)
-        
-        # Her probe için boyut ortalaması (veya supremum/infimum) alarak nihai Yoneda skorunu çıkar
-        return implication.mean(dim=-1)
+        """Return squared distances from X to every probe."""
+        return torch.cdist(X, self.probes, p=2) ** 2
 
 
 class YonedaReconstructor(nn.Module):

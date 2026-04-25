@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -11,7 +11,7 @@ import psutil
 from topos_ai.sheaf_dataloader import SheafDataloader
 
 # =====================================================================
-# CATEGORICAL SHEAF DATALOADERS (O(1) I/O BOTTLENECK BYPASS)
+# CATEGORICAL SHEAF DATALOADERS (STREAMING I/O BOTTLENECK DEMO)
 # Senaryo: Elimizde devasa (Örn: Sanal olarak 1 Gigabyte) bir Genom/Video 
 # veri seti var (10.000 hasta, 25.000 özellik).
 # Klasik YZ, bu veriyi `torch.load()` ile okur; RAM dolar, SSD boğulur
@@ -30,13 +30,13 @@ def get_ram_mb():
 
 def run_sheaf_dataloader_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 65: CATEGORICAL SHEAF DATALOADERS (YONEDA I/O BYPASS) ")
+    print(" ARAŞTIRMA DEMOSU 65: CATEGORICAL SHEAF DATALOADERS (YONEDA I/O BYPASS) ")
     print(" İddia: Klasik Yapay Zekalar (Deep Learning), SSD'den RAM'e, RAM'den ")
     print(" GPU'ya terabaytlarca veri taşırken (I/O Bottleneck) kilitlenir.")
     print(" ToposAI, Grothendieck'in 'Demet (Sheaf)' Teorisini kullanarak veriyi")
     print(" (X) Diskte Bırakır. Numpy 'mmap' ile yerel kesitlerden (Local Sections)")
     print(" geçerek, verinin evrene olan 64-boyutlu 'İlişkisini' (Yoneda Functor)")
-    print(" hesaplar ve GPU'ya O(1) boyutta gönderir. Bu, I/O darboğazının ve")
+    print(" hesaplar ve GPU'ya özet boyutta gönderir. Bu, I/O darboğazının ve")
     print(" RAM (OOM) çökmesinin matematiksel ölüm fermanıdır!")
     print("=========================================================================\n")
 

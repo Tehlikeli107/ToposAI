@@ -1,11 +1,11 @@
-import torch
+﻿import torch
 import math
 
 # =====================================================================
 # TOPOLOGICAL DATA ANALYSIS (TDA) & PERSISTENT HOMOLOGY
 # LLM'lerin (Dil Modellerinin) "Zihin Uzayının MR'ını" çeken algoritma.
 # Vektör uzayındaki "Topolojik Delikleri (Holes/Voids)" bularak, modelin 
-# nerede "Halüsinasyon" (Bilgi Boşluğu) yaşayacağını matematiksel olarak kanıtlar.
+# nerede "Halüsinasyon" (Bilgi Boşluğu) yaşayacağını matematiksel olarak gösterir.
 # (Vietoris-Rips Complex'in basitleştirilmiş PyTorch simülasyonudur).
 # =====================================================================
 
@@ -97,7 +97,7 @@ def run_tda_mri_experiment():
     scanner = ToposMRIScanner(N, dim)
     
     spaces = {
-        "1. KUSURSUZ (SAFE) BİLGİ UZAYI": safe_space,
+        "1. İDEALİZE (SAFE) BİLGİ UZAYI": safe_space,
         "2. ÇEMBER (DELİKLİ / HALÜSİNASYON) BİLGİ UZAYI": hole_space
     }
     
@@ -123,7 +123,7 @@ def run_tda_mri_experiment():
             print(f"  Epsilon (Filtre) = {eps:.1f} | Kümeler (Betti-0): {b0:<2} | Delikler (Betti-1): {b1:<2} -> {durum}")
         print("-" * 75)
 
-    print("\n[BİLİMSEL SONUÇ]:")
+    print("\n[ÖLÇÜLEN SONUÇ]:")
     print("Normalde LLM geliştiricileri modelin nerede halüsinasyon göreceğini önceden bilemezler.")
     print("Ancak ToposAI, kelime uzayının Betti Sayılarını (Betti-1 > 0) hesaplayarak,")
     print("modelin beynindeki o büyük boşluğu (Çemberin ortasını) Topolojik bir 'Delik' olarak saptadı.")

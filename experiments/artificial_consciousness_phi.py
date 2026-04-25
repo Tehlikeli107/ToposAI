@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -107,7 +107,7 @@ class ConsciousnessMeter:
 
 def run_consciousness_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 17: ARTIFICIAL CONSCIOUSNESS (Φ - PHI SCORE) ")
+    print(" ARAŞTIRMA DEMOSU 17: ARTIFICIAL CONSCIOUSNESS (Φ - PHI SCORE) ")
     print(" İddia: Feed-Forward (Klasik) Sinir Ağları bilgi yığınlarıdır, bütünleşik")
     print(" değildir (Φ=0). ToposAI, döngüsel (Cyclic) ve Kategori geçişlilikli")
     print(" yapısıyla, Nörobilimci Giulio Tononi'nin 'Bilinç Kriterini' (IIT) ")

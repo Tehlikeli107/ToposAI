@@ -50,32 +50,32 @@ class GiryMonad(Monad):
         Kategori Teorisinde Giry Monadı'nın Join işlemi bir Lebesgue İntegrali
         (beklenen değer)dir. Eski sistemdeki Softmax ve Normalize işlemleri
         Associativity (Birleşme) yasasını ihlal ediyordu.
-        Yeni sistem, katı tensör daraltması (Tensor Contraction / Einsum) ile 
+        Yeni sistem, katı tensör daraltması (Tensor Contraction / Einsum) ile
         Monad yasasını (μ ∘ μ_T = μ ∘ Tμ) %100 korur.
         """
         if ttx.dim() == 3:
             # ttx shape: [B_dış, B_iç, X_elem]
-            
+
             # İçteki (Inner) dağılımların dış (Outer) olasılıklarla çarpılıp
             # toplanması (Marginalization / Law of Total Probability).
             # Softmax Gürültüsü SİLİNDİ. Doğrudan olasılık çarpımı (Einsum)
-            
+
             # 1. Dış boyutların iç dağılımlar üzerindeki mutlak olasılıkları (Sum to 1)
             outer_weights = ttx.sum(dim=-1) # [B_dış, B_iç]
             outer_weights = outer_weights / (outer_weights.sum(dim=-1, keepdim=True) + 1e-12)
-            
+
             # 2. İç boyutların kendi içindeki bağıl olasılıkları (Sum to 1)
             inner_probs = ttx / (ttx.sum(dim=-1, keepdim=True) + 1e-12) # [B_dış, B_iç, X_elem]
-            
+
             # 3. Toplam Olasılık Yasası (Strict Law of Total Probability)
             # P(X) = Σ_y P(X|Y) * P(Y)
             marginal = torch.einsum('ij,ijk->ik', outer_weights, inner_probs)
-            
+
             return marginal
-            
+
         elif ttx.dim() == 2:
             return ttx
-            
+
         return ttx
 
     def markov_compose(

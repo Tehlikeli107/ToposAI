@@ -257,10 +257,10 @@ class MultiUniverseToposAttention(nn.Module):
         K_all = torch.sigmoid(K_all).transpose(1, 2).contiguous()  # [B, U, Cache_Seq, D_u]
         V_all = V_all.transpose(1, 2).contiguous()
 
-        # 3. Topos Mantığı (Lukasiewicz Implication)
+        # 3. Goedel-Heyting internal hom.
         Q_exp = Q_all.unsqueeze(3)  # [B, U, Seq, 1, D_u]
         K_exp = K_all.unsqueeze(2)  # [B, U, 1, Cache_Seq, D_u]
-        implication = torch.clamp(1.0 - Q_exp + K_exp, min=0.0, max=1.0)
+        implication = torch.where(Q_exp <= K_exp, torch.ones_like(K_exp), K_exp)
         truth_matrix = implication.mean(dim=-1)  # [B, U, Seq, Cache_Seq]
 
         if mask is not None:

@@ -1,4 +1,4 @@
-import gc
+﻿import gc
 gc.collect()
 
 import torch
@@ -58,12 +58,12 @@ def create_galois_universe(primes):
 
 def create_automorphic_universe(num_harmonics, N_points):
     """
-    [EVREN B]: HARMONİK ANALİZ (Kusursuz Geometrik Düzen)
+    [EVREN B]: HARMONİK ANALİZ (İdealize Geometrik Düzen)
     Farklı frekanslardaki (Örn: sin(2x), cos(3x)) pürüzsüz dalgalar.
     """
     x = torch.linspace(0, 2 * math.pi, N_points)
     waves = []
-    # 5 farklı "Kusursuz Geometrik Dalga" (Frekansları 1, 2, 3, 4, 5)
+    # 5 farklı "İdealize Geometrik Dalga" (Frekansları 1, 2, 3, 4, 5)
     for f in range(1, num_harmonics + 1):
         wave = torch.sin(f * x) + torch.cos((f + 1) * x)
         waves.append(wave)
@@ -131,11 +131,11 @@ def run_langlands_program():
         frekans = best_harmonic_idx + 1 
         print(f"  Asal Sayı [{prime:2d}] ===> Geometrik Frekans: {frekans} Hz (Eminlik: %{confidence:.1f})")
 
-    print("\n[BİLİMSEL ZAFER]")
+    print("\n[ÖLÇÜLEN SONUÇ]")
     print("Model, dışarıdan anlamsız (kaotik) görünen Asal Sayılar kümesinin (Galois Evreni),")
-    print("aslında kusursuz, pürüzsüz ve periyodik sinüs dalgalarının (Automorphic Evren) ")
+    print("aslında idealize, pürüzsüz ve periyodik sinüs dalgalarının (Automorphic Evren) ")
     print("gizli bir izdüşümü (Functor'ı) olduğunu MATEMATİKSEL OLARAK EŞLEŞTİRDİ.")
-    print("İnsanoğlunun 'Rastgele' dediği şeyin, yüksek boyutta 'Kusursuz Bir Senfoni/Geometri'")
+    print("İnsanoğlunun 'Rastgele' dediği şeyin, yüksek boyutta 'İdealize Bir Senfoni/Geometri'")
     print("olduğu ToposAI (Neuro-Symbolic) motoru ile saniyeler içinde ispatlandı!")
 
 if __name__ == "__main__":

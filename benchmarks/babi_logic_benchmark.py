@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -59,7 +59,7 @@ def generate_babi_samples(num_samples=10):
     return dataset
 
 def run_babi_logic_benchmark():
-    print("--- 2. BİLİMSEL KANIT: META (bAbI) TASK 15 MANTIK BENCHMARK'I ---")
+    print("--- 2. ARAŞTIRMA DEMOSU: META (bAbI) TASK 15 MANTIK BENCHMARK'I ---")
     print("İddia: ToposAI (Kategori Teorisi) %100 Zero-Shot Accuracy ile NLP mantık \nproblemlerini halüsinasyon görmeden çözebilir.\n")
     
     dataset = generate_babi_samples(num_samples=100) # 100 Farklı sentetik senaryo (400 Soru)
@@ -110,7 +110,7 @@ def run_babi_logic_benchmark():
     print(f"[BENCHMARK SONUCU]: ToposAI Zero-Shot Accuracy: %{accuracy:.2f}")
     
     if accuracy == 100.0:
-        print("\n[+] BİLİMSEL ZAFER: Model NLP mantık testini %100 kusursuzlukla geçti!")
+        print("\n[+] ÖLÇÜLEN SONUÇ: Model NLP mantık testini %100 idealizelukla geçti!")
         print("Model kelimeleri istatistiksel (LLM) olarak değil, saf Kategori Teorisi matrisi (Graph)")
         print("olarak bağladığı için, kendisine öğretilmeyen veya mantıksal bağı olmayan hiçbir şeye")
         print("('Yırtıcı Xeloptan korkar' gibi ters oklara) EVET demedi.")

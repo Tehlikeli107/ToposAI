@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -30,13 +30,13 @@ def get_ram_mb():
 
 def run_offline_1gb_sheaf_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 67: THE OFFLINE 1-GB SHEAF (LOCAL SSD I/O BOTTLENECK) ")
+    print(" ARAŞTIRMA DEMOSU 67: THE OFFLINE 1-GB SHEAF (LOCAL SSD I/O BOTTLENECK) ")
     print(" İddia: Klasik Yapay Zekalar (PyTorch), yerel SSD'deki 1 GB'lık bir ")
     print(" tensörü okurken RAM'i kilitler (I/O Darboğazı).")
     print(" ToposAI, Grothendieck'in 'Demet (Sheaf)' Teorisini kullanarak veriyi")
     print(" (X) Diskte Bırakır. Numpy 'mmap' ile yerel kesitlerden (Local Sections)")
     print(" geçerek, verinin evrene olan 64-boyutlu 'İlişkisini' (Yoneda Functor)")
-    print(" hesaplar ve GPU'ya O(1) boyutta gönderir. Bu, Yerel Disk darboğazının")
+    print(" hesaplar ve GPU'ya özet boyutta gönderir. Bu, Yerel Disk darboğazının")
     print(" ve RAM çökmesinin matematiksel ölüm fermanıdır!")
     print("=========================================================================\n")
 

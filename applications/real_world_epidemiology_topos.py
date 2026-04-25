@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -15,7 +15,7 @@ from topos_ai.math import lukasiewicz_composition
 # Çözüm: ToposAI, Küresel Havacılık Ağındaki bulaş riskini (Transitivity)
 # hesaplar. Sonra "Olası tüm kesiklerin (Ablation)" ağ kapanımı üzerindeki
 # etkisini tarar ve dünyayı kurtaracak "En İyi Karantina (Uçuş İptali) 
-# Kararını" matematiksel olarak ispatlar.
+# Kararını" matematiksel olarak gösterir.
 # =====================================================================
 
 import itertools
@@ -105,7 +105,7 @@ class TopologicalEpidemiologist:
 
 def run_epidemiology_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 20: TOPOLOGICAL EPIDEMIOLOGY (AI AS POLICY MAKER) ")
+    print(" ARAŞTIRMA DEMOSU 20: TOPOLOGICAL EPIDEMIOLOGY (AI AS POLICY MAKER) ")
     print(" İddia: Bir pandemide tüm sınırları kapatmak (Tam Kapanma) bilgisizliktir.")
     print(" ToposAI, Küresel Havacılık Ağının Topolojisini okur ve 'Bütün uçuşları")
     print(" durdurmak yerine SADECE ŞU 1 ROTA'YI kesin!' diyerek virüsü hapseden ")
@@ -168,7 +168,7 @@ def run_epidemiology_experiment():
     print(f"  KURTARILAN ŞEHİRLER: {', '.join(saved_cities)} 🎉")
     print(f"  Yeni Risk Skoru   : {new_global_risk:.2f} (Büyük Düşüş!)")
 
-    print("\n[BİLİMSEL SONUÇ: YZ İLE HAYAT KURTARMAK]")
+    print("\n[ÖLÇÜLEN SONUÇ: YZ İLE HAYAT KURTARMAK]")
     print("Normalde politikacılar korkuyla sınırları tamamen kapatır (Ekonomik Çöküş).")
     print("ToposAI ise ağı 'Transitive Closure' ile analiz etti. Wuhan'dan çıkan virüsün")
     print("Avrupa ve Amerika'ya ulaşmak için 'Bangkok-Dubai' transit köprüsünü KULLANMAK ")

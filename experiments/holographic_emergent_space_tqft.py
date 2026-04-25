@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -16,7 +16,7 @@ from topos_ai.math import lukasiewicz_composition
 # türeyen (Emergent) birer Hologramdır. (It from Qubit).
 # ToposAI, 1 Boyutlu bir Spin Zincirindeki (Sınır) kuantum bağlarını,
 # Kategori Geçişliliğiyle hesaplayıp 2 Boyutlu yepyeni bir "Hiperbolik 
-# Uzay" (Bulk Geometry / AdS) yarattığını ispatlar.
+# Uzay" (Bulk Geometry / AdS) yarattığını gösterir.
 # =====================================================================
 
 def max_product_composition(R1, R2):
@@ -73,7 +73,7 @@ class HolographicToposUniverse:
 
 def run_holographic_universe_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 27: TQFT & HOLOGRAPHIC EMERGENT SPACE (AdS/CFT) ")
+    print(" ARAŞTIRMA DEMOSU 27: TQFT & HOLOGRAPHIC EMERGENT SPACE (AdS/CFT) ")
     print(" İddia: Uzay ve Zaman gerçek değildir. Onlar, düşük boyutlu bir ")
     print(" sınır (Boundary) üzerindeki Kuantum Dolanıklığından (Entanglement)")
     print(" doğan (Emergent) birer illüzyondur (Hologram). ToposAI, 1 Boyutlu ")
@@ -87,7 +87,7 @@ def run_holographic_universe_experiment():
     
     universe = HolographicToposUniverse(boundary_qubits=N_qubits)
     
-    print(">>> HOLOGRAFİK İZDÜŞÜM HESAPLANIYOR (RYU-TAKAYANAGI KANUNU) <<<")
+    print(">>> HOLOGRAFİK İZDÜŞÜM HESAPLANIYOR (RT-STYLE PROXY) <<<")
     print("ToposAI, sınır boyunca dolanıklığı (Transitive Closure) hesaplıyor...")
     
     entanglement_matrix, bulk_geometry = universe.calculate_bulk_geometry()

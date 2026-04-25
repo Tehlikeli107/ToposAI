@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -111,7 +111,7 @@ class TopologicalPairsTrader:
 
 def run_topological_alpha_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 37: TOPOLOGICAL PAIRS TRADING (BEATING THE MARKET) ")
+    print(" ARAŞTIRMA DEMOSU 37: TOPOLOGICAL PAIRS TRADING (BEATING THE MARKET) ")
     print(" İddia: Piyasayı Hızla (HFT) yenemezsiniz. Ancak Kategori Teorisi ")
     print(" (Yoneda Lemma) ile varlıklar arasındaki 'Asimetrik Lider-Takipçi' ")
     print(" (Lead-Lag) ağını çıkarabilirsiniz. Eğer SOL yükseldiğinde AVAX 1 ")
@@ -168,7 +168,7 @@ def run_topological_alpha_experiment():
     
     final_wallet = wallet + total_profit
     
-    print("\n[BİLİMSEL SONUÇ: TOPOLOGICAL PAIRS TRADING (THEORETICAL ALPHA)]")
+    print("\n[ÖLÇÜLEN SONUÇ: TOPOLOGICAL PAIRS TRADING (THEORETICAL ALPHA)]")
     print(f"  Başlangıç Bakiyesi : ${wallet:.2f}")
     print(f"  Kazanılan Net Kâr  : ${total_profit:.2f} ({trades} İşlem, Komisyonlar Ödendi)")
     print(f"  Nihai Bakiye       : ${final_wallet:.2f} (Büyüme: %{(final_wallet-wallet)/wallet*100:.1f})")

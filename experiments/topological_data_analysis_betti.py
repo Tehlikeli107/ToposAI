@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -58,7 +58,7 @@ class TopologicalHomologyAnalyzer:
 
 def run_tda_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 18: TOPOLOGICAL DATA ANALYSIS (BETTI NUMBERS) ")
+    print(" ARAŞTIRMA DEMOSU 18: TOPOLOGICAL DATA ANALYSIS (BETTI NUMBERS) ")
     print(" İddia: LLM'ler bilgi eksikliğinde halüsinasyon görür. ToposAI ise")
     print(" kendi matrisinin Betti Sayılarını (β) hesaplayarak, bilgisindeki")
     print(" 'Delikleri' (Paradokslar / Eksik Bağlantılar) matematiksel olarak")

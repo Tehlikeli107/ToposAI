@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -45,7 +45,7 @@ class TopologicalClassifier(nn.Module):
 
 def run_infinity_category_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 59: INFINITY-CATEGORIES & HIGHER TOPOS THEORY ")
+    print(" ARAŞTIRMA DEMOSU 59: INFINITY-CATEGORIES & HIGHER TOPOS THEORY ")
     print(" İddia: Klasik Graf Nöral Ağları (GNN'ler) 1-Kategoridir. Dünyayı sadece")
     print(" 'Noktalar (0-Morphism)' ve 'Çizgiler (1-Morphism)' olarak görürler.")
     print(" Bu yüzden uzaydaki 'Boşlukları (Holes/Tears)' fark edemezler.")

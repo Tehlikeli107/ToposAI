@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -140,12 +140,12 @@ class RealWorldBinancePairsTrader:
 
 def run_real_world_backtest():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 38: TRUE REAL-WORLD BACKTEST (BINANCE LIVE K-LINES) ")
+    print(" ARAŞTIRMA DEMOSU 38: TRUE REAL-WORLD BACKTEST (BINANCE LIVE K-LINES) ")
     print(" İddia: Sentetik veya hileli (Leak) veriyle her bot para kazanır.")
     print(" Gerçek bilim, 'Görülmemiş Gerçek Veri' (Out-of-Sample) ile test ")
     print(" edilmelidir. ToposAI, Binance'den son 500 dakikanın gerçek mumlarını")
     print(" indirir, %80'i ile 'Yoneda Liderlik Ağını' eğitir ve son %20'sinde")
-    print(" o 28 Doların borsa komisyonlarına ezilip ezilmeyeceğini dürüstçe ispatlar!")
+    print(" o 28 Doların borsa komisyonlarına ezilip ezilmeyeceğini dürüstçe gösterir!")
     print("=========================================================================\n")
 
     assets = ["BTC", "ETH", "SOL", "AVAX", "DOGE", "LINK"]
@@ -175,7 +175,7 @@ def run_real_world_backtest():
     
     final_wallet = wallet + profit
     
-    print("\n[BİLİMSEL SONUÇ: ACI GERÇEKLER (THE REALITY CHECK)]")
+    print("\n[ÖLÇÜLEN SONUÇ: ACI GERÇEKLER (THE REALITY CHECK)]")
     print(f"  Başlangıç Bakiyesi : ${wallet:.2f}")
     print(f"  Kazanılan Net Kâr  : ${profit:.2f} ({trades} İşlem yapıldı, Komisyonlar Ödendi)")
     print(f"  Nihai Bakiye       : ${final_wallet:.2f} (Büyüme: %{(final_wallet-wallet)/wallet*100:.1f})")

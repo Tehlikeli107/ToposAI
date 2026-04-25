@@ -14,11 +14,22 @@ pip install -e ".[dev,full]"
 ## Running Tests
 
 ```bash
-# Core unit tests (fast, CPU-only)
-pytest tests/test_core.py tests/test_models.py -v
+# Fast CPU suite used by CI
+pytest \
+  tests/test_core.py \
+  tests/test_models.py \
+  tests/test_generation.py \
+  tests/test_category_core.py \
+  tests/test_claim_hygiene.py \
+  tests/test_runtime.py \
+  -m "not cuda and not triton and not slow" \
+  -v --tb=short
 
 # Full test suite (skips CUDA/Triton tests if no GPU)
 pytest -m "not cuda and not triton" -v
+
+# Syntax/import safety check
+python -m compileall -q topos_ai tests experiments benchmarks
 
 # With coverage
 pytest --cov=topos_ai --cov-report=html
@@ -34,6 +45,21 @@ ruff check topos_ai/ --fix    # auto-fix
 ```
 
 All pull requests must pass `ruff check topos_ai/` before merging.
+
+## Claim Hygiene
+
+ToposAI contains many research demos, so wording matters. Avoid presenting
+toy experiments as formal proofs, product guarantees, or production-grade
+benchmarks unless the repository contains the corresponding evidence.
+
+Before opening a PR, run:
+
+```bash
+pytest tests/test_claim_hygiene.py -q
+```
+
+Prefer language like "research demo", "proxy", "measured on this benchmark",
+or "inspired by" when a module is not a formal mathematical construction.
 
 ## Project Structure
 

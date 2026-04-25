@@ -31,17 +31,14 @@ class CechCohomology:
 
     def _strict_topological_rank(self, matrix, tol=1e-4):
         """
-        [MATEMATİKSEL SAĞLAMLIK]
-        Klasik PyTorch matrix_rank (SVD), FP32 ağ gürültüleri (1e-6) yüzünden
-        Betti sayılarında Halüsinasyon (Topolojik Yıkım) yaratır. 
-        Bu fonksiyon, gerçek bir Cebirsel Topoloji Sınır (Boundary) Operatörünün
-        sahip olması gereken katı (Strict) Sıfır Uzayını (Kernel) korur.
+        Rank with an explicit numerical tolerance.
+
+        Boundary matrices in these demos are exact small tensors, but using an
+        explicit tolerance makes the Betti diagnostics stable under small
+        floating-point perturbations.
         """
-        # SVD (Singular Value Decomposition) ile tekil değerleri bul
-        U, S, Vh = torch.linalg.svd(matrix, full_matrices=False)
-        # Sadece bizim belirlediğimiz "Topolojik Gürültü Eşiğinden" büyük olanları Rank (Boyut) say
-        rank = torch.sum(S > tol).item()
-        return rank
+        _, singular_values, _ = torch.linalg.svd(matrix, full_matrices=False)
+        return torch.sum(singular_values > tol).item()
 
     def compute_H0_consensus(self, local_sections):
         """
@@ -54,7 +51,6 @@ class CechCohomology:
         disagreements = torch.matmul(self.d0, local_sections)
         total_disagreement = torch.norm(disagreements).item()
 
-        # DÜZELTME: SVD Gürültü ve Halüsinasyon Bariyeri (Strict Rank)
         rank_d0 = self._strict_topological_rank(self.d0)
         betti_0 = self.num_nodes - rank_d0
 
@@ -70,7 +66,6 @@ class CechCohomology:
         """
         edge_flows = edge_flows.view(self.num_edges, -1)
 
-        # DÜZELTME: Gürültüyü ezen stabil Pseudo-Inverse (rcond)
         d0_pinv = torch.linalg.pinv(self.d0, rcond=1e-4)
         best_fit_potentials = torch.matmul(d0_pinv, edge_flows)
         projected_flows = torch.matmul(self.d0, best_fit_potentials)
@@ -78,7 +73,6 @@ class CechCohomology:
         obstruction_vector = edge_flows - projected_flows
         obstruction_magnitude = torch.norm(obstruction_vector).item()
 
-        # DÜZELTME: SVD Gürültü ve Halüsinasyon Bariyeri (Strict Rank)
         rank_d0 = self._strict_topological_rank(self.d0)
         betti_1 = self.num_edges - rank_d0
 

@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -45,14 +45,14 @@ def evaluate_model(model, data, targets, name):
 
 def run_hott_merging_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 54: HOMOTOPY TYPE THEORY (MODEL MERGING) ")
+    print(" ARAŞTIRMA DEMOSU 54: HOMOTOPY TYPE THEORY (MODEL MERGING) ")
     print(" İddia: Klasik YZ araştırmacıları iki uzman modeli birleştirirken")
     print(" (Federated Learning) ağırlıkların 'Sayısal Ortalamasını' alırlar.")
     print(" Bu, birbirine göre dönmüş (Rotated) iki uzayı çarpıştırarak aklı")
     print(" YOK EDER. ToposAI, Vladimir Voevodsky'nin 'Homotopi Tip Teorisini'")
     print(" (HoTT) kullanarak iki uzay arasındaki 'Sürekli Yolu (Homotopy Path)'")
     print(" SVD/Procrustes ile bulur. Modellerden birini diğerinin evrenine")
-    print(" SIFIR ZEKA KAYBIYLA taşıyarak (Transport) kusursuzca birleştirir!")
+    print(" SIFIR ZEKA KAYBIYLA taşıyarak (Transport) ölçülen koşulda birleştirir!")
     print("=========================================================================\n")
 
     torch.manual_seed(107) # Matrix simülasyonu için özel tohum
@@ -172,7 +172,7 @@ def run_hott_merging_experiment():
         
     hott_acc = evaluate_model(model_hott, X_test, Y_test, "HoTT Merged Model")
     
-    print("\n[BİLİMSEL SONUÇ: THE UNIVALENT SINGULARITY]")
+    print("\n[ÖLÇÜLEN SONUÇ: THE UNIVALENT SINGULARITY]")
     print(f"Klasik Ortalama (Naive) Başarısı  : %{naive_acc*100:.1f}")
     print(f"ToposAI (HoTT) Başarısı           : %{hott_acc*100:.1f}")
     

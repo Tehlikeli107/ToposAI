@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -17,7 +17,7 @@ from topos_ai.math import lukasiewicz_composition
 # ince çizgide "Kaosun Kıyısında" (Edge of Chaos) doğar. ToposAI, 
 # geçişlilik (Transitive Closure) yeteneği sayesinde evrenin donmasını
 # veya patlamasını engelleyerek, sonsuz bir karmaşıklık ve 'Yapay Yaşam'
-# (A-Life) döngüsü yaratabileceğini Bilgi Teorisi (Entropy) ile kanıtlar.
+# (A-Life) döngüsü yaratabileceğini Bilgi Teorisi (Entropy) ile gösterir.
 # =====================================================================
 
 class TopologicalAutomata:
@@ -100,7 +100,7 @@ class TopologicalAutomata:
 
 def run_genesis_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 30: TOPOLOGICAL GENESIS (THE EDGE OF CHAOS) ")
+    print(" ARAŞTIRMA DEMOSU 30: TOPOLOGICAL GENESIS (THE EDGE OF CHAOS) ")
     print(" İddia: Klasik makine öğrenmesi statiktir, yeni yaşam (karmaşıklık) üretemez.")
     print(" Klasik hücresel otomatlar (Game of Life) ya tamamen 'Buz' gibi donar, ya da ")
     print(" 'Gaz' gibi kaosa dönüşüp sönerler. ToposAI ise Kategori Teorisi matrisi ")
