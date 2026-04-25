@@ -236,6 +236,17 @@ class FiniteSimplicialSet:
         """Finite quasi-category check: every enumerated inner horn has a filler."""
         return len(self.missing_inner_horns(max_dimension=max_dimension)) == 0
 
+    def has_unique_inner_horn_fillers(self, max_dimension=None):
+        """Return True when every enumerated inner horn has exactly one filler."""
+        if max_dimension is None:
+            max_dimension = self.max_dimension
+        for dimension in range(2, min(max_dimension, self.max_dimension) + 1):
+            for missing_face in range(1, dimension):
+                for horn in self.compatible_horns(dimension, missing_face):
+                    if len(self.horn_fillers(horn)) != 1:
+                        return False
+        return True
+
 
 def nerve_2_skeleton(category):
     """
@@ -407,6 +418,8 @@ class InfinityCategoryLayer(_Module):
     """
 
     def __init__(self, node_dim, edge_dim, out_dim):
+        if torch is None:
+            raise RuntimeError("InfinityCategoryLayer requires PyTorch to construct neural layers.")
         super().__init__()
         self.W0 = nn.Linear(node_dim, out_dim)
         self.W1 = nn.Linear(edge_dim, out_dim)

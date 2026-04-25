@@ -7,12 +7,12 @@ ToposAI has two kinds of modules: formal finite mathematics and neural or proxy 
 | Module | Contract | Main limitations |
 |--------|----------|------------------|
 | `topos_ai.formal_category.FiniteCategory` | Explicit finite category with typed morphisms, identities, composition, identity laws, and associativity validation. | Finite categories only. No enriched, large, or higher categories. |
-| `topos_ai.formal_category.PresheafTopos` | Finite fragment of `Set^(C^op)` with finite limits, colimits, exponentials, subobject classifier, Heyting operations, Kripke-Joyal forcing, quantifiers, sheafification, Lawvere-Tierney operators, and Yoneda density reconstruction. | Computes finite presheaf topoi. It is not a general theorem prover for arbitrary Grothendieck topoi. |
+| `topos_ai.formal_category.PresheafTopos` | Finite fragment of `Set^(C^op)` with finite limits, colimits, exponentials, subobject classifier, Heyting operations, Kripke-Joyal forcing, quantifiers, sheafification, Lawvere-Tierney operators, Kan adjunction witnesses, universal-property validators, exactness validators, and Yoneda density reconstruction. | Computes finite presheaf topoi. It is not a general theorem prover for arbitrary Grothendieck topoi. |
 | `topos_ai.formal_category.GrothendieckTopology` | Finite Grothendieck topology with maximal-sieve, pullback-stability, and transitivity checks. | Covering data must be explicitly finite. |
 | `topos_ai.infinity_categories.FiniteSimplicialSet` | Finite simplicial-set skeleton with face identities, optional degeneracy identities, horn enumeration, and finite inner-Kan checks. | Skeleton-limited. It checks enumerated finite horns up to supplied dimension. |
-| `topos_ai.infinity_categories.nerve_3_skeleton` | Builds the 3-skeleton of the nerve of a finite category, including 2-horn composition and 3-simplex associativity coherence. | Not a complete infinity-category implementation beyond the represented skeleton. |
+| `topos_ai.infinity_categories.nerve_3_skeleton` | Builds the 3-skeleton of the nerve of a finite category, including 2-horn composition, unique inner-horn fillers, and 3-simplex associativity coherence. | Not a complete infinity-category implementation beyond the represented skeleton. |
 | `topos_ai.hott.FinitePathGroupoid` | 1-truncated HoTT identity-type semantics as a finite groupoid with reflexivity, inverse paths, composition, and associativity. | Models groupoid semantics. It is not a dependent type checker. |
-| `topos_ai.hott.PathFamily` | Dependent family over a finite path groupoid with functorial transport validation. | Transport maps are finite and explicit. |
+| `topos_ai.hott.PathFamily` | Dependent family over a finite path groupoid with functorial transport validation and inverse-path transport equivalence checks. | Transport maps are finite and explicit. |
 
 ## Neural and proxy research components
 

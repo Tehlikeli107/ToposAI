@@ -8,58 +8,25 @@ docstrings state a stricter mathematical contract.
 """
 
 import logging
+from importlib import import_module
 
-try:
-    from . import (
-        adjoint,
-        cohomology,
-        distributed,
-        elementary_topos,
-        formal_category,
-        generation,
-        hott,
-        infinity_categories,
-        kan,
-        kernels,
-        lawvere_tierney,
-        logic,
-        mamba,
-        math,
-        models,
-        monad,
-        motives,
-        nn,
-        optics,
-        optim,
-        polynomial_functors,
-        quantum_logic,
-        reasoning,
-        rl_killer,
-        sheaf_dataloader,
-        tame_geometry,
-        tokenization,
-        topology,
-        verification,
-        yoneda,
-    )
-except ImportError:
-    # Allow pure Python formal mathematics imports when neural dependencies (e.g. PyTorch) are not installed.
-    pass
+from .formal_category import FiniteCategory, FiniteFunctor, Presheaf, PresheafTopos
+from .lazy.free_category import FreeCategoryGenerator
+from .storage.cql_database import CategoricalDatabase
+from .topology.sheaf_computer import ToposSheafComputer
 
-__version__ = "1.0.0"
-__license__ = "MIT"
+_FORMAL_MODULES = (
+    "formal_category",
+    "hott",
+    "infinity_categories",
+)
 
-logging.getLogger(__name__).addHandler(logging.NullHandler())
-
-__all__ = [
+_TORCH_BACKED_MODULES = (
     "adjoint",
     "cohomology",
     "distributed",
     "elementary_topos",
-    "formal_category",
     "generation",
-    "hott",
-    "infinity_categories",
     "kan",
     "kernels",
     "lawvere_tierney",
@@ -82,4 +49,37 @@ __all__ = [
     "topology",
     "verification",
     "yoneda",
+)
+
+
+def _has_dependency(name):
+    try:
+        import_module(name)
+        return True
+    except (ImportError, OSError):
+        return False
+
+
+for _module_name in _FORMAL_MODULES:
+    globals()[_module_name] = import_module(f"{__name__}.{_module_name}")
+
+if _has_dependency("torch"):
+    for _module_name in _TORCH_BACKED_MODULES:
+        globals()[_module_name] = import_module(f"{__name__}.{_module_name}")
+
+__version__ = "1.0.0"
+__license__ = "MIT"
+
+logging.getLogger(__name__).addHandler(logging.NullHandler())
+
+__all__ = [
+    *_FORMAL_MODULES,
+    *(name for name in _TORCH_BACKED_MODULES if name in globals()),
+    "CategoricalDatabase",
+    "FiniteCategory",
+    "FiniteFunctor",
+    "FreeCategoryGenerator",
+    "Presheaf",
+    "PresheafTopos",
+    "ToposSheafComputer",
 ]

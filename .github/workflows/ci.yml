@@ -30,8 +30,8 @@ jobs:
       - name: Install ruff
         run: pip install ruff
 
-      - name: Run ruff (core library only)
-        run: ruff check topos_ai/
+      - name: Run ruff
+        run: ruff check topos_ai tests examples
 
   test:
     name: Tests (CPU)
@@ -79,6 +79,11 @@ jobs:
             -m "not cuda and not triton and not slow" \
             --cov=topos_ai --cov-report=term-missing --cov-fail-under=85
 
+      - name: Build documentation
+        run: |
+          python -m pip install "mkdocs-material<9.7"
+          mkdocs build --strict
+
   package:
     name: Package build
     runs-on: ubuntu-latest
@@ -112,11 +117,11 @@ jobs:
           idx = torch.randint(0, 32, (1, 8))
           logits, _ = model(idx)
           assert logits.shape == (1, 8, 32)
-          
+
           from topos_ai.formal_category import FiniteCategory, Presheaf, yoneda_density_colimit
           from topos_ai.infinity_categories import nerve_3_skeleton
           from topos_ai.hott import FinitePathGroupoid
-          
+
           category = FiniteCategory(
               objects=("*",),
               morphisms={"id": ("*", "*")},
@@ -133,8 +138,50 @@ jobs:
               inverses={"id": "id"},
               composition={("id", "id"): "id"},
           ).validate_groupoid_laws()
-          
+
           print("wheel smoke passed", topos_ai.__version__)
+          PY
+
+      - name: Install wheel without dependencies for formal core
+        run: |
+          python -m venv .venv-formal
+          . .venv-formal/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install --no-deps dist/*.whl
+          python - <<'PY'
+          import topos_ai
+          from topos_ai.formal_category import FiniteCategory, Presheaf, yoneda_density_colimit
+          from topos_ai.hott import FinitePathGroupoid
+          from topos_ai.infinity_categories import InfinityCategoryLayer, nerve_3_skeleton
+
+          assert hasattr(topos_ai, "formal_category")
+          assert hasattr(topos_ai, "hott")
+          assert hasattr(topos_ai, "infinity_categories")
+
+          category = FiniteCategory(
+              objects=("*",),
+              morphisms={"id": ("*", "*")},
+              identities={"*": "id"},
+              composition={("id", "id"): "id"},
+          )
+          presheaf = Presheaf(category, sets={"*": {"x"}}, restrictions={"id": {"x": "x"}})
+          assert yoneda_density_colimit(presheaf)[0].sets["*"]
+          assert nerve_3_skeleton(category).is_inner_kan(max_dimension=3)
+          assert FinitePathGroupoid(
+              objects=("*",),
+              paths={"id": ("*", "*")},
+              identities={"*": "id"},
+              inverses={"id": "id"},
+              composition={("id", "id"): "id"},
+          ).validate_groupoid_laws()
+          try:
+              InfinityCategoryLayer(1, 1, 1)
+          except RuntimeError as exc:
+              assert "requires PyTorch" in str(exc)
+          else:
+              raise AssertionError("InfinityCategoryLayer should require PyTorch in no-deps formal smoke.")
+
+          print("formal no-deps wheel smoke passed", topos_ai.__version__)
           PY
 
   lean-verify:

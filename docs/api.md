@@ -95,11 +95,30 @@ It also implements finite elementary-topos structure:
 - `terminal_presheaf()` - terminal object, pointwise singleton.
 - `product_presheaf(F, G)` - pointwise product with both projections.
 - `coproduct_presheaf(F, G)` - pointwise tagged coproduct with injections.
+- `validate_product_universal_property(F, G, X)` /
+  `validate_coproduct_universal_property(F, G, X)` - finite hom-set
+  bijection checks for binary products and coproducts.
+- `validate_pullback_universal_property(alpha, beta, X)` /
+  `validate_equalizer_universal_property(alpha, beta, X)` /
+  `validate_coequalizer_universal_property(alpha, beta, X)` - finite
+  universal-property checks for pullbacks, equalizers, and coequalizers.
 - `reindex_presheaf(u, F)` / `reindex_transformation(u, alpha)` - inverse
   image of presheaves and natural transformations along a finite functor
   `u: C -> D`.
 - `left_kan_extension_presheaf(u, F)` / `right_kan_extension_presheaf(u, F)` -
   finite Kan extensions giving the adjoint triple `Sigma_u -| u* -| Pi_u`.
+- `left_kan_transpose(u, F, G, alpha)` /
+  `left_kan_untranspose(u, F, G, beta)` - the hom-set bijection
+  `Nat(Sigma_u F, G) ~= Nat(F, u*G)`.
+- `right_kan_transpose(u, G, F, alpha)` /
+  `right_kan_untranspose(u, G, F, beta)` - the hom-set bijection
+  `Nat(u*G, F) ~= Nat(G, Pi_u F)`.
+- `left_kan_unit(u, F)` / `left_kan_counit(u, G)` and
+  `right_kan_unit(u, G)` / `right_kan_counit(u, F)` - unit and counit
+  witnesses for the two finite Kan adjunctions.
+- `validate_left_kan_adjunction(u, F, G)` /
+  `validate_right_kan_adjunction(u, G, F)` - finite hom-bijection round-trip
+  and triangle-identity checks for `Sigma_u -| u* -| Pi_u`.
 - `compose_transformations(beta, alpha)` - natural transformation composition
   `beta o alpha`.
 - `is_monomorphism(alpha)` / `is_epimorphism(alpha)` - objectwise mono/epi
@@ -160,15 +179,27 @@ It also implements finite elementary-topos structure:
 - `evaluation_map(F, G)` - evaluation morphism `G^F x F -> G`.
 - `transpose(alpha, H, F, G)` - curries `alpha: H x F -> G` into
   `H -> G^F`.
+- `untranspose(beta, H, F, G)` - uncurries `beta: H -> G^F` into
+  `H x F -> G`.
+- `validate_exponential_adjunction(H, F, G)` - finite check of the
+  cartesian-closed adjunction `Hom(H x F, G) ~= Hom(H, G^F)`.
 - `power_object(F)` - power object `P(F) = Omega^F`.
 - `membership_relation(F)` - internal membership subobject `in <= F x P(F)`.
 - `truth_map()` - truth morphism `1 -> Omega`, selecting maximal sieves.
 - `name_subobject(S)` / `extension_of_name(F, name)` - subobject classifier
   naming and extension round-trip.
+- `validate_subobject_classifier_universal_property(F)` - finite check of
+  the classifying bijection `Sub(F) ~= Hom(F, Omega)`.
 - `image(alpha)` - image subpresheaf of a natural transformation.
 - `image_factorization(alpha)` - factor `alpha` as epi followed by mono.
+- `validate_regular_image_factorization(alpha)` - finite regular-category
+  check that the image factorization recomposes, has epi/mono legs, and has an
+  effective epi part.
 - `kernel_pair(alpha)` - pullback of a map along itself.
 - `coequalizer(alpha, beta)` - pointwise quotient of parallel transformations.
+- `effective_epimorphism_comparison(alpha)` /
+  `validate_effective_epimorphism(alpha)` - finite exactness checks that an
+  epi is the coequalizer of its kernel pair.
 - `subobject_meet(A, B)` / `subobject_join(A, B)` - subobject lattice operations.
 - `subobject_implication(A, B)` / `subobject_negation(A)` - Heyting implication
   and pseudocomplement for subobjects.
@@ -250,6 +281,11 @@ middle faces that compare the two parenthesizations.
 Finite quasi-category check: enumerates inner horns up to the requested
 dimension and verifies that each has at least one filler.
 
+### `FiniteSimplicialSet.has_unique_inner_horn_fillers(max_dimension=None)`
+
+Strict nerve-style check: enumerates inner horns up to the requested dimension
+and verifies that each has exactly one filler.
+
 ### `SimplicialComplexBuilder`, `HodgeLaplacianEngine`, `InfinityCategoryLayer`
 
 Point-cloud simplicial-complex and Hodge message-passing utilities. These are
@@ -271,6 +307,10 @@ against identity, inverse, and associativity laws.
 Dependent family over a finite path groupoid. Transport maps are checked as a
 functor from the path groupoid into finite sets, including identity transport
 and composition preservation.
+
+`transport_equivalence(path)` returns the forward and inverse transport maps
+witnessed by a path and its inverse. `validate_transport_equivalences()` checks
+that every path transport is a bijection with inverse-path transport.
 
 ### `HomotopyEquivalence`
 

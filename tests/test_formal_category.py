@@ -429,6 +429,8 @@ def test_image_factorization_truth_and_inverse_image_are_categorical():
     assert topos.is_epimorphism(epi) is True
     assert topos.is_monomorphism(mono) is True
     assert recomposed.components == collapse_to_a.components
+    assert topos.validate_regular_image_factorization(collapse_to_a) is True
+    assert topos.validate_effective_epimorphism(epi) is True
 
 
 def test_exponential_evaluation_and_transpose_are_cartesian_closed():
@@ -465,6 +467,32 @@ def test_exponential_evaluation_and_transpose_are_cartesian_closed():
 
     assert transposed_alpha_1.apply("1", ("id1", terminal_1)) == "u"
     assert same_eval.apply("1", (transposed_alpha_1, terminal_1)) == "u"
+
+
+def test_finite_elementary_topos_universal_property_validators():
+    category = walking_arrow_category()
+    presheaf = walking_arrow_presheaf(category)
+    topos = PresheafTopos(category)
+    terminal = topos.terminal_presheaf()
+    identity = topos.identity_transformation(presheaf)
+    collapse_to_a = topos.natural_transformation(
+        source=presheaf,
+        target=presheaf,
+        components={
+            "0": {"a": "a", "b": "a"},
+            "1": {"u": "u"},
+        },
+    )
+
+    assert topos.validate_product_universal_property(presheaf, terminal, presheaf) is True
+    assert topos.validate_pullback_universal_property(identity, collapse_to_a, presheaf) is True
+    assert topos.validate_equalizer_universal_property(identity, collapse_to_a, terminal) is True
+    assert topos.validate_coproduct_universal_property(presheaf, terminal, presheaf) is True
+
+    kernel_pair, first_projection, second_projection = topos.kernel_pair(collapse_to_a)
+    assert topos.validate_coequalizer_universal_property(first_projection, second_projection, terminal) is True
+    assert topos.validate_exponential_adjunction(terminal, terminal, presheaf) is True
+    assert topos.validate_subobject_classifier_universal_property(presheaf) is True
 
 
 def test_grothendieck_topology_and_sheaf_condition_use_covering_sieves():
@@ -820,3 +848,71 @@ def test_finite_kan_extensions_are_adjoints_to_reindexing():
     assert len(pi.sets["*"]) == 1
     assert len(natural_transformations(sigma, colors)) == len(natural_transformations(presheaf, reindexed_colors))
     assert len(natural_transformations(reindexed_colors, presheaf)) == len(natural_transformations(colors, pi))
+
+
+def test_finite_kan_extensions_expose_adjunction_witnesses():
+    walking = walking_arrow_category()
+    terminal = terminal_category()
+    functor = FiniteFunctor(
+        source=walking,
+        target=terminal,
+        object_map={"0": "*", "1": "*"},
+        morphism_map={"id0": "id*", "id1": "id*", "up": "id*"},
+    )
+    presheaf = walking_arrow_presheaf(walking)
+    colors = Presheaf(
+        category=terminal,
+        sets={"*": {"red", "blue"}},
+        restrictions={"id*": {"red": "red", "blue": "blue"}},
+    )
+    walking_topos = PresheafTopos(walking)
+    terminal_topos = PresheafTopos(terminal)
+
+    sigma = terminal_topos.left_kan_extension_presheaf(functor, presheaf)
+    reindexed_colors = walking_topos.reindex_presheaf(functor, colors)
+    ordered_sigma_values = sorted(sigma.sets["*"], key=repr)
+    alpha = terminal_topos.natural_transformation(
+        source=sigma,
+        target=colors,
+        components={"*": {ordered_sigma_values[0]: "red", ordered_sigma_values[1]: "blue"}},
+    )
+    beta = walking_topos.natural_transformation(
+        source=presheaf,
+        target=reindexed_colors,
+        components={"0": {"a": "red", "b": "blue"}, "1": {"u": "red"}},
+    )
+
+    transposed_alpha = terminal_topos.left_kan_transpose(functor, presheaf, colors, alpha)
+    untransposed_beta = terminal_topos.left_kan_untranspose(functor, presheaf, colors, beta)
+
+    assert terminal_topos.left_kan_untranspose(functor, presheaf, colors, transposed_alpha).components == alpha.components
+    assert terminal_topos.left_kan_transpose(functor, presheaf, colors, untransposed_beta).components == beta.components
+    assert terminal_topos.left_kan_unit(functor, presheaf).source is presheaf
+    assert terminal_topos.left_kan_counit(functor, colors).target is colors
+    assert terminal_topos.validate_left_kan_adjunction(functor, presheaf, colors) is True
+
+    pi = terminal_topos.right_kan_extension_presheaf(functor, presheaf)
+    right_alpha = walking_topos.natural_transformation(
+        source=reindexed_colors,
+        target=presheaf,
+        components={"0": {"red": "a", "blue": "a"}, "1": {"red": "u", "blue": "u"}},
+    )
+    only_pi_value = next(iter(pi.sets["*"]))
+    right_beta = terminal_topos.natural_transformation(
+        source=colors,
+        target=pi,
+        components={"*": {"red": only_pi_value, "blue": only_pi_value}},
+    )
+
+    right_transposed_alpha = terminal_topos.right_kan_transpose(functor, colors, presheaf, right_alpha)
+    right_untransposed_beta = terminal_topos.right_kan_untranspose(functor, colors, presheaf, right_beta)
+
+    assert terminal_topos.right_kan_untranspose(functor, colors, presheaf, right_transposed_alpha).components == (
+        right_alpha.components
+    )
+    assert terminal_topos.right_kan_transpose(functor, colors, presheaf, right_untransposed_beta).components == (
+        right_beta.components
+    )
+    assert terminal_topos.right_kan_unit(functor, colors).source is colors
+    assert terminal_topos.right_kan_counit(functor, presheaf).target is presheaf
+    assert terminal_topos.validate_right_kan_adjunction(functor, colors, presheaf) is True

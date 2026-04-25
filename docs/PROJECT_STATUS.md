@@ -47,9 +47,9 @@ Recommended manual checks:
 
 | Area | Status | Evidence |
 |------|--------|----------|
-| Formal finite category/topos core | Research-library prototype | Law tests, Yoneda density tests, sheafification tests, quantifier tests |
-| Finite quasi-category skeletons | Research-library prototype | Inner horn filler tests, degeneracy identity tests, 3-simplex associativity coherence tests |
-| HoTT finite groupoid semantics | Research-library prototype | Identity type, inverse path, composition, and transport functoriality tests |
+| Formal finite category/topos core | Research-library prototype | Law tests, Yoneda density tests, sheafification tests, quantifier tests, Kan adjunction witness tests, finite universal-property tests, exactness tests |
+| Finite quasi-category skeletons | Research-library prototype | Inner horn filler tests, unique inner horn filler tests, degeneracy identity tests, 3-simplex associativity coherence tests |
+| HoTT finite groupoid semantics | Research-library prototype | Identity type, inverse path, composition, transport functoriality, and transport-equivalence tests |
 | Neural/proxy modules | Experimental | Shape, boundedness, runtime, and smoke tests |
 | Benchmarks | Experimental | Reproducibility docs required before publication |
 | GPU/Triton kernels | Experimental | CPU fallback tested; dedicated GPU CI still needed |
@@ -61,6 +61,6 @@ The repository is ready to be presented as a research-library prototype when the
 - mathematical contracts exist and are linked from API docs
 - public API contract exists and names stable formal symbols
 - examples run without network access
-- formal property tests cover Yoneda density, Heyting adjunction, inverse image laws, and finite inner-Kan checks
+- formal property tests cover Yoneda density, Heyting adjunction, inverse image laws, Kan adjunction witnesses, finite universal properties, exactness, HoTT transport equivalences, and finite inner-Kan checks
 - documentation builds in CI
 - wheel smoke imports formal category, quasi-category, and HoTT APIs

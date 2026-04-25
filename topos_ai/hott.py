@@ -159,6 +159,35 @@ class PathFamily:
 
         return True
 
+    def transport_equivalence(self, path):
+        """Return the forward and inverse transport maps witnessed by a path."""
+        inverse = self.base.inverse(path)
+        return dict(self.transports[path]), dict(self.transports[inverse])
+
+    def validate_transport_equivalences(self):
+        """Check every path transport is a bijection with inverse-path transport."""
+        self.validate_functorial_transport()
+        for path in self.base.paths:
+            forward, backward = self.transport_equivalence(path)
+            src = self.base.source(path)
+            dst = self.base.target(path)
+
+            if set(forward) != set(self.fibers[src]) or set(backward) != set(self.fibers[dst]):
+                return False
+            if set(forward.values()) != set(self.fibers[dst]):
+                return False
+            if set(backward.values()) != set(self.fibers[src]):
+                return False
+
+            for value in self.fibers[src]:
+                if backward[forward[value]] != value:
+                    return False
+            for value in self.fibers[dst]:
+                if forward[backward[value]] != value:
+                    return False
+
+        return True
+
 
 class HomotopyEquivalence:
     """

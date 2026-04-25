@@ -616,20 +616,22 @@ class PresheafTopos:
                     if self.category.compose(functor.map_morphism(morphism), restricted_arrow) == arrow:
                         yield source_obj, arrow, restricted_obj, restricted_arrow, morphism
 
-    def left_kan_extension_presheaf(self, functor: FiniteFunctor, presheaf: Presheaf):
-        """
-        Left adjoint to reindexing, computed as finite left Kan extension.
+    def _presheaf_data_matches(self, left: Presheaf, right: Presheaf):
+        return (
+            left.category is right.category
+            and left.sets == right.sets
+            and left.restrictions == right.restrictions
+        )
 
-        For `u: C -> D` and `F: C^op -> FinSet`, this computes
-        `Lan_{u^op}(F): D^op -> FinSet` by quotienting matching comma-indexed
-        elements under the colimit identifications.
-        """
+    def _transformation_key(self, transformation: NaturalTransformation):
+        return _freeze_components(transformation.source.category, transformation.components)
+
+    def _left_kan_extension_data(self, functor: FiniteFunctor, presheaf: Presheaf):
         if functor.target is not self.category:
             raise ValueError("Left Kan extension must be called on the functor target topos.")
         if presheaf.category is not functor.source:
             raise ValueError("Presheaf must live on the functor source category.")
 
-        raw_by_obj = {}
         class_maps = {}
         sets = {}
         for obj in self.category.objects:
@@ -639,7 +641,10 @@ class PresheafTopos:
                 for element in presheaf.sets[source_obj]
             )
             generators = []
-            for source_obj, arrow, restricted_obj, restricted_arrow, morphism in self._left_kan_index_morphisms(functor, obj):
+            for source_obj, arrow, restricted_obj, restricted_arrow, morphism in self._left_kan_index_morphisms(
+                functor,
+                obj,
+            ):
                 for element in presheaf.sets[source_obj]:
                     generators.append(
                         (
@@ -647,7 +652,6 @@ class PresheafTopos:
                             (restricted_obj, restricted_arrow, presheaf.restrict(morphism, element)),
                         )
                     )
-            raw_by_obj[obj] = raw_elements
             class_maps[obj] = _equivalence_class_map(raw_elements, generators)
             sets[obj] = frozenset(class_maps[obj].values())
 
@@ -664,7 +668,17 @@ class PresheafTopos:
                 mapping[equivalence_class] = next(iter(restricted_classes))
             restrictions[morphism] = mapping
 
-        return Presheaf(category=self.category, sets=sets, restrictions=restrictions)
+        return Presheaf(category=self.category, sets=sets, restrictions=restrictions), class_maps
+
+    def left_kan_extension_presheaf(self, functor: FiniteFunctor, presheaf: Presheaf):
+        """
+        Left adjoint to reindexing, computed as finite left Kan extension.
+
+        For `u: C -> D` and `F: C^op -> FinSet`, this computes
+        `Lan_{u^op}(F): D^op -> FinSet` by quotienting matching comma-indexed
+        elements under the colimit identifications.
+        """
+        return self._left_kan_extension_data(functor, presheaf)[0]
 
     def _right_kan_index(self, functor: FiniteFunctor, target_obj):
         return tuple(
@@ -721,6 +735,323 @@ class PresheafTopos:
             restrictions[morphism] = mapping
 
         return Presheaf(category=self.category, sets=sets, restrictions=restrictions)
+
+    def left_kan_extension_transformation(self, functor: FiniteFunctor, transformation: NaturalTransformation):
+        """Map a natural transformation `F -> G` to `Sigma_u F -> Sigma_u G`."""
+        if transformation.source.category is not functor.source or transformation.target.category is not functor.source:
+            raise ValueError("Left Kan extension of a transformation requires source-side presheaves.")
+
+        source_sigma, _source_classes = self._left_kan_extension_data(functor, transformation.source)
+        target_sigma, target_classes = self._left_kan_extension_data(functor, transformation.target)
+        components = {}
+        for obj in self.category.objects:
+            mapping = {}
+            for equivalence_class in source_sigma.sets[obj]:
+                images = {
+                    target_classes[obj][(source_obj, arrow, transformation.apply(source_obj, element))]
+                    for source_obj, arrow, element in equivalence_class
+                }
+                if len(images) != 1:
+                    raise ValueError("Left Kan extension of transformation is not well-defined.")
+                mapping[equivalence_class] = next(iter(images))
+            components[obj] = mapping
+
+        return self.natural_transformation(source=source_sigma, target=target_sigma, components=components)
+
+    def left_kan_transpose(
+        self,
+        functor: FiniteFunctor,
+        source_presheaf: Presheaf,
+        target_presheaf: Presheaf,
+        transformation: NaturalTransformation,
+    ):
+        """Transpose `Sigma_u F -> G` to `F -> u*G` for the finite adjunction `Sigma_u -| u*`."""
+        sigma, sigma_classes = self._left_kan_extension_data(functor, source_presheaf)
+        if target_presheaf.category is not functor.target:
+            raise ValueError("Left Kan transpose target must live on the functor target category.")
+        if not self._presheaf_data_matches(transformation.source, sigma) or transformation.target is not target_presheaf:
+            raise ValueError("Transformation must have type Sigma_u(F) -> G.")
+
+        source_topos = PresheafTopos(functor.source)
+        reindexed_target = source_topos.reindex_presheaf(functor, target_presheaf)
+        components = {}
+        for source_obj in functor.source.objects:
+            target_obj = functor.map_object(source_obj)
+            identity = self.category.identities[target_obj]
+            components[source_obj] = {
+                element: transformation.apply(
+                    target_obj,
+                    sigma_classes[target_obj][(source_obj, identity, element)],
+                )
+                for element in source_presheaf.sets[source_obj]
+            }
+
+        return source_topos.natural_transformation(
+            source=source_presheaf,
+            target=reindexed_target,
+            components=components,
+        )
+
+    def left_kan_untranspose(
+        self,
+        functor: FiniteFunctor,
+        source_presheaf: Presheaf,
+        target_presheaf: Presheaf,
+        transformation: NaturalTransformation,
+    ):
+        """Transpose `F -> u*G` back to `Sigma_u F -> G`."""
+        sigma, _sigma_classes = self._left_kan_extension_data(functor, source_presheaf)
+        if target_presheaf.category is not functor.target:
+            raise ValueError("Left Kan untranspose target must live on the functor target category.")
+
+        source_topos = PresheafTopos(functor.source)
+        expected_target = source_topos.reindex_presheaf(functor, target_presheaf)
+        if transformation.source is not source_presheaf or not self._presheaf_data_matches(
+            transformation.target,
+            expected_target,
+        ):
+            raise ValueError("Transformation must have type F -> u*G.")
+
+        components = {}
+        for obj in self.category.objects:
+            mapping = {}
+            for equivalence_class in sigma.sets[obj]:
+                values = {
+                    target_presheaf.restrict(arrow, transformation.apply(source_obj, element))
+                    for source_obj, arrow, element in equivalence_class
+                }
+                if len(values) != 1:
+                    raise ValueError("Left Kan untranspose is not well-defined.")
+                mapping[equivalence_class] = next(iter(values))
+            components[obj] = mapping
+
+        return self.natural_transformation(source=sigma, target=target_presheaf, components=components)
+
+    def left_kan_unit(self, functor: FiniteFunctor, presheaf: Presheaf):
+        """Unit `F -> u* Sigma_u F` of the finite adjunction `Sigma_u -| u*`."""
+        sigma, sigma_classes = self._left_kan_extension_data(functor, presheaf)
+        source_topos = PresheafTopos(functor.source)
+        reindexed_sigma = source_topos.reindex_presheaf(functor, sigma)
+        components = {}
+        for source_obj in functor.source.objects:
+            target_obj = functor.map_object(source_obj)
+            identity = self.category.identities[target_obj]
+            components[source_obj] = {
+                element: sigma_classes[target_obj][(source_obj, identity, element)]
+                for element in presheaf.sets[source_obj]
+            }
+
+        return source_topos.natural_transformation(source=presheaf, target=reindexed_sigma, components=components)
+
+    def left_kan_counit(self, functor: FiniteFunctor, presheaf: Presheaf):
+        """Counit `Sigma_u u*G -> G` of the finite adjunction `Sigma_u -| u*`."""
+        if presheaf.category is not functor.target:
+            raise ValueError("Left Kan counit is defined for target-side presheaves.")
+        source_topos = PresheafTopos(functor.source)
+        reindexed = source_topos.reindex_presheaf(functor, presheaf)
+        sigma_reindexed, _classes = self._left_kan_extension_data(functor, reindexed)
+        components = {}
+        for obj in self.category.objects:
+            mapping = {}
+            for equivalence_class in sigma_reindexed.sets[obj]:
+                values = {
+                    presheaf.restrict(arrow, element)
+                    for _source_obj, arrow, element in equivalence_class
+                }
+                if len(values) != 1:
+                    raise ValueError("Left Kan counit is not well-defined.")
+                mapping[equivalence_class] = next(iter(values))
+            components[obj] = mapping
+
+        return self.natural_transformation(source=sigma_reindexed, target=presheaf, components=components)
+
+    def validate_left_kan_adjunction(
+        self,
+        functor: FiniteFunctor,
+        source_presheaf: Presheaf,
+        target_presheaf: Presheaf,
+    ):
+        """Check hom-set transpose round trips and triangle identities for `Sigma_u -| u*`."""
+        sigma = self.left_kan_extension_presheaf(functor, source_presheaf)
+        source_topos = PresheafTopos(functor.source)
+        reindexed_target = source_topos.reindex_presheaf(functor, target_presheaf)
+
+        for alpha in natural_transformations(sigma, target_presheaf):
+            beta = self.left_kan_transpose(functor, source_presheaf, target_presheaf, alpha)
+            if self.left_kan_untranspose(functor, source_presheaf, target_presheaf, beta).components != alpha.components:
+                return False
+
+        for beta in natural_transformations(source_presheaf, reindexed_target):
+            alpha = self.left_kan_untranspose(functor, source_presheaf, target_presheaf, beta)
+            if self.left_kan_transpose(functor, source_presheaf, target_presheaf, alpha).components != beta.components:
+                return False
+
+        unit = self.left_kan_unit(functor, source_presheaf)
+        sigma_unit = self.left_kan_extension_transformation(functor, unit)
+        counit_sigma = self.left_kan_counit(functor, sigma)
+        for obj in self.category.objects:
+            for element in sigma.sets[obj]:
+                if counit_sigma.apply(obj, sigma_unit.apply(obj, element)) != element:
+                    return False
+
+        unit_reindexed = self.left_kan_unit(functor, reindexed_target)
+        counit = self.left_kan_counit(functor, target_presheaf)
+        reindexed_counit = source_topos.reindex_transformation(functor, counit)
+        for obj in functor.source.objects:
+            for element in reindexed_target.sets[obj]:
+                if reindexed_counit.apply(obj, unit_reindexed.apply(obj, element)) != element:
+                    return False
+
+        return True
+
+    def right_kan_extension_transformation(self, functor: FiniteFunctor, transformation: NaturalTransformation):
+        """Map a natural transformation `F -> G` to `Pi_u F -> Pi_u G`."""
+        if transformation.source.category is not functor.source or transformation.target.category is not functor.source:
+            raise ValueError("Right Kan extension of a transformation requires source-side presheaves.")
+
+        source_pi = self.right_kan_extension_presheaf(functor, transformation.source)
+        target_pi = self.right_kan_extension_presheaf(functor, transformation.target)
+        components = {}
+        for obj in self.category.objects:
+            mapping = {}
+            for assignment_items in source_pi.sets[obj]:
+                assignment = dict(assignment_items)
+                mapped = frozenset(
+                    ((source_obj, arrow), transformation.apply(source_obj, value))
+                    for (source_obj, arrow), value in assignment.items()
+                )
+                mapping[assignment_items] = mapped
+            components[obj] = mapping
+
+        return self.natural_transformation(source=source_pi, target=target_pi, components=components)
+
+    def right_kan_transpose(
+        self,
+        functor: FiniteFunctor,
+        source_presheaf: Presheaf,
+        target_presheaf: Presheaf,
+        transformation: NaturalTransformation,
+    ):
+        """Transpose `u*G -> F` to `G -> Pi_u F` for the finite adjunction `u* -| Pi_u`."""
+        if source_presheaf.category is not functor.target:
+            raise ValueError("Right Kan transpose source must live on the functor target category.")
+        if target_presheaf.category is not functor.source:
+            raise ValueError("Right Kan transpose target must live on the functor source category.")
+
+        source_topos = PresheafTopos(functor.source)
+        reindexed_source = source_topos.reindex_presheaf(functor, source_presheaf)
+        if not self._presheaf_data_matches(transformation.source, reindexed_source) or transformation.target is not target_presheaf:
+            raise ValueError("Transformation must have type u*G -> F.")
+
+        pi_target = self.right_kan_extension_presheaf(functor, target_presheaf)
+        components = {}
+        for obj in self.category.objects:
+            mapping = {}
+            for element in source_presheaf.sets[obj]:
+                assignment = {
+                    (source_obj, arrow): transformation.apply(
+                        source_obj,
+                        source_presheaf.restrict(arrow, element),
+                    )
+                    for source_obj, arrow in self._right_kan_index(functor, obj)
+                }
+                mapping[element] = frozenset(assignment.items())
+            components[obj] = mapping
+
+        return self.natural_transformation(source=source_presheaf, target=pi_target, components=components)
+
+    def right_kan_untranspose(
+        self,
+        functor: FiniteFunctor,
+        source_presheaf: Presheaf,
+        target_presheaf: Presheaf,
+        transformation: NaturalTransformation,
+    ):
+        """Transpose `G -> Pi_u F` back to `u*G -> F`."""
+        if source_presheaf.category is not functor.target:
+            raise ValueError("Right Kan untranspose source must live on the functor target category.")
+        if target_presheaf.category is not functor.source:
+            raise ValueError("Right Kan untranspose target must live on the functor source category.")
+
+        pi_target = self.right_kan_extension_presheaf(functor, target_presheaf)
+        if transformation.source is not source_presheaf or not self._presheaf_data_matches(
+            transformation.target,
+            pi_target,
+        ):
+            raise ValueError("Transformation must have type G -> Pi_u F.")
+
+        source_topos = PresheafTopos(functor.source)
+        reindexed_source = source_topos.reindex_presheaf(functor, source_presheaf)
+        components = {}
+        for source_obj in functor.source.objects:
+            target_obj = functor.map_object(source_obj)
+            identity = self.category.identities[target_obj]
+            components[source_obj] = {
+                element: dict(transformation.apply(target_obj, element))[(source_obj, identity)]
+                for element in reindexed_source.sets[source_obj]
+            }
+
+        return source_topos.natural_transformation(
+            source=reindexed_source,
+            target=target_presheaf,
+            components=components,
+        )
+
+    def right_kan_unit(self, functor: FiniteFunctor, presheaf: Presheaf):
+        """Unit `G -> Pi_u u*G` of the finite adjunction `u* -| Pi_u`."""
+        if presheaf.category is not functor.target:
+            raise ValueError("Right Kan unit is defined for target-side presheaves.")
+        source_topos = PresheafTopos(functor.source)
+        reindexed = source_topos.reindex_presheaf(functor, presheaf)
+        identity = source_topos.identity_transformation(reindexed)
+        return self.right_kan_transpose(functor, presheaf, reindexed, identity)
+
+    def right_kan_counit(self, functor: FiniteFunctor, presheaf: Presheaf):
+        """Counit `u* Pi_u F -> F` of the finite adjunction `u* -| Pi_u`."""
+        if presheaf.category is not functor.source:
+            raise ValueError("Right Kan counit is defined for source-side presheaves.")
+        pi = self.right_kan_extension_presheaf(functor, presheaf)
+        identity = self.identity_transformation(pi)
+        return self.right_kan_untranspose(functor, pi, presheaf, identity)
+
+    def validate_right_kan_adjunction(
+        self,
+        functor: FiniteFunctor,
+        source_presheaf: Presheaf,
+        target_presheaf: Presheaf,
+    ):
+        """Check hom-set transpose round trips and triangle identities for `u* -| Pi_u`."""
+        source_topos = PresheafTopos(functor.source)
+        reindexed_source = source_topos.reindex_presheaf(functor, source_presheaf)
+        pi = self.right_kan_extension_presheaf(functor, target_presheaf)
+
+        for alpha in natural_transformations(reindexed_source, target_presheaf):
+            beta = self.right_kan_transpose(functor, source_presheaf, target_presheaf, alpha)
+            if self.right_kan_untranspose(functor, source_presheaf, target_presheaf, beta).components != alpha.components:
+                return False
+
+        for beta in natural_transformations(source_presheaf, pi):
+            alpha = self.right_kan_untranspose(functor, source_presheaf, target_presheaf, beta)
+            if self.right_kan_transpose(functor, source_presheaf, target_presheaf, alpha).components != beta.components:
+                return False
+
+        unit = self.right_kan_unit(functor, source_presheaf)
+        reindexed_unit = source_topos.reindex_transformation(functor, unit)
+        counit_reindexed = self.right_kan_counit(functor, reindexed_source)
+        for obj in functor.source.objects:
+            for element in reindexed_source.sets[obj]:
+                if counit_reindexed.apply(obj, reindexed_unit.apply(obj, element)) != element:
+                    return False
+
+        unit_pi = self.right_kan_unit(functor, pi)
+        counit = self.right_kan_counit(functor, target_presheaf)
+        pi_counit = self.right_kan_extension_transformation(functor, counit)
+        for obj in self.category.objects:
+            for element in pi.sets[obj]:
+                if pi_counit.apply(obj, unit_pi.apply(obj, element)) != element:
+                    return False
+
+        return True
 
     def identity_transformation(self, presheaf: Presheaf):
         """Identity natural transformation on a presheaf."""
@@ -910,6 +1241,85 @@ class PresheafTopos:
                 if first.apply(obj, element) == second.apply(obj, element)
             }
         return Subpresheaf(parent=first.source, subsets=subsets)
+
+    def validate_product_universal_property(self, left: Presheaf, right: Presheaf, domain: Presheaf):
+        """Check `Hom(X, A x B) ~= Hom(X, A) x Hom(X, B)` for a finite probe `X`."""
+        product_object, pi_left, pi_right = self.product_presheaf(left, right)
+        actual_pairs = {
+            (
+                self._transformation_key(self.compose_transformations(pi_left, candidate)),
+                self._transformation_key(self.compose_transformations(pi_right, candidate)),
+            )
+            for candidate in natural_transformations(domain, product_object)
+        }
+        expected_pairs = {
+            (self._transformation_key(to_left), self._transformation_key(to_right))
+            for to_left in natural_transformations(domain, left)
+            for to_right in natural_transformations(domain, right)
+        }
+        return actual_pairs == expected_pairs and len(actual_pairs) == len(natural_transformations(domain, product_object))
+
+    def validate_coproduct_universal_property(self, left: Presheaf, right: Presheaf, codomain: Presheaf):
+        """Check `Hom(A + B, X) ~= Hom(A, X) x Hom(B, X)` for a finite probe `X`."""
+        coproduct_object, in_left, in_right = self.coproduct_presheaf(left, right)
+        actual_pairs = {
+            (
+                self._transformation_key(self.compose_transformations(candidate, in_left)),
+                self._transformation_key(self.compose_transformations(candidate, in_right)),
+            )
+            for candidate in natural_transformations(coproduct_object, codomain)
+        }
+        expected_pairs = {
+            (self._transformation_key(from_left), self._transformation_key(from_right))
+            for from_left in natural_transformations(left, codomain)
+            for from_right in natural_transformations(right, codomain)
+        }
+        return actual_pairs == expected_pairs and len(actual_pairs) == len(natural_transformations(coproduct_object, codomain))
+
+    def validate_pullback_universal_property(
+        self,
+        first: NaturalTransformation,
+        second: NaturalTransformation,
+        domain: Presheaf,
+    ):
+        """Check the finite universal property of a pullback square."""
+        pullback_object, pi_first, pi_second = self.pullback(first, second)
+        actual_cones = {
+            (
+                self._transformation_key(self.compose_transformations(pi_first, candidate)),
+                self._transformation_key(self.compose_transformations(pi_second, candidate)),
+            )
+            for candidate in natural_transformations(domain, pullback_object)
+        }
+        expected_cones = set()
+        for to_first in natural_transformations(domain, first.source):
+            first_leg = self.compose_transformations(first, to_first)
+            for to_second in natural_transformations(domain, second.source):
+                second_leg = self.compose_transformations(second, to_second)
+                if first_leg.components == second_leg.components:
+                    expected_cones.add((self._transformation_key(to_first), self._transformation_key(to_second)))
+        return actual_cones == expected_cones and len(actual_cones) == len(natural_transformations(domain, pullback_object))
+
+    def validate_equalizer_universal_property(
+        self,
+        first: NaturalTransformation,
+        second: NaturalTransformation,
+        domain: Presheaf,
+    ):
+        """Check `Hom(X, Eq(f,g))` equals maps `h: X -> A` with `f h = g h`."""
+        equalizer = self.equalizer(first, second)
+        equalizer_object, inclusion = self.subpresheaf_inclusion(equalizer)
+        actual = {
+            self._transformation_key(self.compose_transformations(inclusion, candidate))
+            for candidate in natural_transformations(domain, equalizer_object)
+        }
+        expected = {
+            self._transformation_key(candidate)
+            for candidate in natural_transformations(domain, first.source)
+            if self.compose_transformations(first, candidate).components
+            == self.compose_transformations(second, candidate).components
+        }
+        return actual == expected and len(actual) == len(natural_transformations(domain, equalizer_object))
 
     def subpresheaf_object(self, subobject: Subpresheaf):
         """View a subobject as its own presheaf with inherited restrictions."""
@@ -1206,6 +1616,64 @@ class PresheafTopos:
 
         return power, self.natural_transformation(source=domain, target=power, components=components)
 
+    def untranspose(
+        self,
+        exponential_map: NaturalTransformation,
+        domain: Presheaf,
+        exponent: Presheaf,
+        base: Presheaf,
+        power: Presheaf | None = None,
+    ):
+        """Uncurry a map `domain -> base^exponent` into `domain x exponent -> base`."""
+        self._require_presheaf(exponential_map.source)
+        self._require_presheaf(exponential_map.target)
+        self._require_presheaf(domain)
+        self._require_presheaf(exponent)
+        self._require_presheaf(base)
+        if exponential_map.source is not domain:
+            raise ValueError("Untranspose source must be the requested domain.")
+        if power is None:
+            power = self.exponential_presheaf(exponent, base)
+        else:
+            self._require_presheaf(power)
+            if getattr(power, "exponent", None) is not exponent or getattr(power, "base", None) is not base:
+                raise ValueError("Untranspose requires the exponential object base^exponent.")
+        if not self._presheaf_data_matches(exponential_map.target, power):
+            raise ValueError("Untranspose target must be the requested exponential object.")
+
+        product_object, _pi_domain, _pi_exponent = self.product_presheaf(domain, exponent)
+        components = {}
+        for obj in self.category.objects:
+            identity = self.category.identities[obj]
+            components[obj] = {
+                (domain_element, exponent_element): exponential_map.apply(obj, domain_element).apply(
+                    obj,
+                    (identity, exponent_element),
+                )
+                for domain_element, exponent_element in product_object.sets[obj]
+            }
+
+        return product_object, self.natural_transformation(source=product_object, target=base, components=components)
+
+    def validate_exponential_adjunction(self, domain: Presheaf, exponent: Presheaf, base: Presheaf):
+        """Check the finite cartesian-closed bijection `Hom(H x F, G) ~= Hom(H, G^F)`."""
+        power = self.exponential_presheaf(exponent, base)
+        product_object, _pi_domain, _pi_exponent = self.product_presheaf(domain, exponent)
+
+        for product_map in natural_transformations(product_object, base):
+            _power, exponential_map = self.transpose(product_map, domain, exponent, base, power=power)
+            _product, recovered = self.untranspose(exponential_map, domain, exponent, base, power=power)
+            if recovered.components != product_map.components:
+                return False
+
+        for exponential_map in natural_transformations(domain, power):
+            _product, product_map = self.untranspose(exponential_map, domain, exponent, base, power=power)
+            _power, recovered = self.transpose(product_map, domain, exponent, base, power=power)
+            if recovered.components != exponential_map.components:
+                return False
+
+        return True
+
     def _require_same_parent(self, left: Subpresheaf, right: Subpresheaf):
         if left.parent is not right.parent:
             raise ValueError("Subobject operations require the same parent presheaf object.")
@@ -1453,6 +1921,53 @@ class PresheafTopos:
         )
         return image_object, quotient_to_image, inclusion
 
+    def effective_epimorphism_comparison(self, transformation: NaturalTransformation):
+        """
+        Compare the coequalizer of a kernel pair with the codomain of an epi.
+
+        For an epimorphism `e: X -> Y`, this returns the quotient
+        `Q = coeq(p1, p2)` of its kernel pair, the projection `q: X -> Q`, and
+        the canonical comparison `Q -> Y`.
+        """
+        kernel_pair, first_projection, second_projection = self.kernel_pair(transformation)
+        quotient, projection = self.coequalizer(first_projection, second_projection)
+        components = {}
+        for obj in self.category.objects:
+            mapping = {}
+            for equivalence_class in quotient.sets[obj]:
+                values = {
+                    transformation.apply(obj, representative)
+                    for representative in equivalence_class
+                }
+                if len(values) != 1:
+                    raise ValueError("Effective-epi comparison is not well-defined.")
+                mapping[equivalence_class] = next(iter(values))
+            components[obj] = mapping
+
+        comparison = self.natural_transformation(source=quotient, target=transformation.target, components=components)
+        return quotient, projection, comparison
+
+    def validate_effective_epimorphism(self, transformation: NaturalTransformation):
+        """Check that an epimorphism is the coequalizer of its kernel pair."""
+        if not self.is_epimorphism(transformation):
+            return False
+        _quotient, projection, comparison = self.effective_epimorphism_comparison(transformation)
+        if not self.is_monomorphism(comparison) or not self.is_epimorphism(comparison):
+            return False
+        return self.compose_transformations(comparison, projection).components == transformation.components
+
+    def validate_regular_image_factorization(self, transformation: NaturalTransformation):
+        """Check epi-mono image factorization and effectiveness of its epi part."""
+        image_object, epi, mono = self.image_factorization(transformation)
+        recomposed = self.compose_transformations(mono, epi)
+        return (
+            image_object.validate_functor_laws()
+            and recomposed.components == transformation.components
+            and self.is_epimorphism(epi)
+            and self.is_monomorphism(mono)
+            and self.validate_effective_epimorphism(epi)
+        )
+
     def kernel_pair(self, transformation: NaturalTransformation):
         """Kernel pair of a natural transformation, implemented as its pullback along itself."""
         return self.pullback(transformation, transformation)
@@ -1502,6 +2017,26 @@ class PresheafTopos:
             },
         )
         return quotient, projection
+
+    def validate_coequalizer_universal_property(
+        self,
+        first: NaturalTransformation,
+        second: NaturalTransformation,
+        codomain: Presheaf,
+    ):
+        """Check maps out of `Coeq(f,g)` equal maps coequalizing `f` and `g`."""
+        quotient, projection = self.coequalizer(first, second)
+        actual = {
+            self._transformation_key(self.compose_transformations(candidate, projection))
+            for candidate in natural_transformations(quotient, codomain)
+        }
+        expected = {
+            self._transformation_key(candidate)
+            for candidate in natural_transformations(first.target, codomain)
+            if self.compose_transformations(candidate, first).components
+            == self.compose_transformations(candidate, second).components
+        }
+        return actual == expected and len(actual) == len(natural_transformations(quotient, codomain))
 
     def _is_sieve(self, obj, arrows):
         arrows = frozenset(arrows)
@@ -2043,6 +2578,34 @@ class PresheafTopos:
             true_at_obj = self.maximal_sieve(obj)
             subsets[obj] = {element for element in classifier.source.sets[obj] if classifier.apply(obj, element) == true_at_obj}
         return Subpresheaf(parent=classifier.source, subsets=subsets)
+
+    def validate_subobject_classifier_universal_property(self, parent: Presheaf):
+        """Check the finite bijection `Sub(F) ~= Hom(F, Omega)`."""
+        self._require_presheaf(parent)
+        omega = self.omega()
+
+        subobject_names = {
+            self._transformation_key(self.characteristic_map(subobject))
+            for subobject in self.subobjects(parent)
+        }
+        all_maps = {
+            self._transformation_key(classifier)
+            for classifier in natural_transformations(parent, omega)
+        }
+        if subobject_names != all_maps:
+            return False
+
+        for subobject in self.subobjects(parent):
+            recovered = self.pullback_truth(self.characteristic_map(subobject))
+            if recovered.subsets != subobject.subsets:
+                return False
+
+        for classifier in natural_transformations(parent, omega):
+            recovered = self.pullback_truth(classifier)
+            if self.characteristic_map(recovered).components != classifier.components:
+                return False
+
+        return True
 
 
 class GrothendieckTopology:

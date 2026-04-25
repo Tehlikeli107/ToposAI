@@ -141,6 +141,10 @@ def test_finite_path_groupoid_models_identity_types_and_transport():
     assert family.transport("p", 1) == "one"
     assert family.transport(paths.compose("p_inv", "p"), 0) == 0
     assert family.validate_functorial_transport() is True
+    assert family.validate_transport_equivalences() is True
+    forward, backward = family.transport_equivalence("p")
+    assert forward[0] == "zero"
+    assert backward["one"] == 1
 
 
 def test_distributed_setup_returns_model_when_fsdp_unavailable_or_uninitialized():
@@ -329,6 +333,7 @@ def test_finite_simplicial_set_checks_inner_horn_fillers():
     assert nerve.validate_face_identities() is True
     assert nerve.horn_fillers(horn) == (("comp", "g", "f"),)
     assert nerve.is_inner_kan(max_dimension=2) is True
+    assert nerve.has_unique_inner_horn_fillers(max_dimension=2) is True
 
     broken = FiniteSimplicialSet(
         simplices={
@@ -382,6 +387,7 @@ def test_nerve_3_skeleton_encodes_associativity_coherence():
     assert nerve.horn_fillers(horn) == (simplex,)
     assert nerve.validate_degeneracy_identities() is True
     assert nerve.is_inner_kan(max_dimension=3) is True
+    assert nerve.has_unique_inner_horn_fillers(max_dimension=3) is True
 
 
 def test_tame_geometry_layers_are_finite_and_bounded():
