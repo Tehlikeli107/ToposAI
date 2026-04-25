@@ -1,4 +1,4 @@
-import math
+﻿import math
 import numpy as np
 
 # =====================================================================
@@ -29,7 +29,7 @@ class WarlordToposAgent:
         [ADJOINT FUNCTOR / NEWTON-RAPHSON ROOT FINDING]
         Kaba kuvvet (for t in range) yerine, hedefin dairesel yörüngesi ile
         geminin doğrusal uçuşunu Kesiştiren (Intersection) fonksiyonun
-        kökünü (Root) Newton-Raphson (Analitik türev) ile O(1) sürede bulur.
+        kökünü (Root) Newton-Raphson (Analitik türev) ile tek analitik adımda bulur.
         """
         w = p_info['angular_velocity']
         

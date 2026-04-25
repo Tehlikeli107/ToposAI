@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -23,13 +23,13 @@ from topos_ai.cohomology import CechCohomology
 
 def run_cohomology_fraud_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 53: SHEAF COHOMOLOGY & H^1 OBSTRUCTION THEORY ")
+    print(" ARAŞTIRMA DEMOSU 53: SHEAF COHOMOLOGY & H^1 OBSTRUCTION THEORY ")
     print(" İddia: Klasik Yapay Zekalar ağ analizlerinde (Graph Neural Networks)")
     print(" 'Hortumlama (Fraud)' döngülerini yakalamak için milyonlarca sahte")
     print(" işlemle (Dataset) eğitilmelidir. ToposAI ise Alexander Grothendieck'in")
     print(" 'Demet Kohomolojisi' teoremini (Lineer Cebir/SVD ile) kullanarak,")
-    print(" eğitimsiz ve O(1) matris tersinmesiyle 'Paradoks/Dolandırıcılık' ")
-    print(" döngülerini matematiksel bir Engel (H^1 Obstruction) olarak ispatlar!")
+    print(" eğitimsiz ve tek pseudo-inverse hesabıyla 'Paradoks/Dolandırıcılık' ")
+    print(" döngülerini matematiksel bir Engel (H^1 Obstruction) olarak gösterir!")
     print("=========================================================================\n")
 
     # AĞ TOPOLOJİSİ (4 Banka, 4 Transfer Yolu)
@@ -99,10 +99,10 @@ def run_cohomology_fraud_experiment():
     print("kör olurlar. ToposAI ise olaya 'Olasılık' olarak değil, 'Topolojik")
     print("Bir Uzay Geometrisi' olarak bakar.")
     print("Alexander Grothendieck'in Demet Kohomolojisini (Sheaf Cohomology) SVD")
-    print("(Pseudo-Inverse) motoruyla işleten sistem, O(1) matris hesabıyla")
+    print("(Pseudo-Inverse) motoruyla işleten sistem, tek pseudo-inverse hesabıyla")
     print("para akışındaki 'Aşılmaz Çelişkiyi (H^1 Obstruction)' SIFIR Eğitimle")
     print("(Zero-Shot) ispatlamıştır. Bu, yapay zekanın tümevarımlı değil, saf")
-    print("matematiksel bir Dedektif (Formal Reasoner) olduğunun kanıtıdır!")
+    print("matematiksel bir Dedektif (Formal Reasoner) olduğunun demosudur!")
 
 if __name__ == "__main__":
     run_cohomology_fraud_experiment()

@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -211,12 +211,12 @@ def evaluate_models_on_real_data():
 
     print("\n[BİLİMSEL DEĞERLENDİRME]")
     print("ToposAI (Yoneda Lemma), Dot-Product'a kıyasla 'Transitivity (Geçişlilik)' konusunda")
-    print("çok güçlü bir yapısal üstünlük (O(1) Topological Closure) kurmaktadır.")
+    print("çok güçlü bir yapısal üstünlük (topological closure proxy) kurmaktadır.")
     print("Ancak 'Asimetri (Yönlülük)' testlerinde her iki model de (Dot-Product ve Yoneda) ")
     print("kısmen birbirine yakın / düşük performans sergilemektedir.")
     print("Bu durum, Asimetriyi yakalamak için salt Lukasiewicz T-Norm'undan ziyade, daha ")
     print("zengin (Feature-Rich) bir Kategori Teorisi Eğitimine (Representation Learning) ")
-    print("ihtiyaç duyulduğunu gösteren dürüst bir araştırmacı kanıtıdır.")
+    print("ihtiyaç duyulduğunu gösteren dürüst bir araştırmacı demosudur.")
 
 if __name__ == "__main__":
     evaluate_models_on_real_data()

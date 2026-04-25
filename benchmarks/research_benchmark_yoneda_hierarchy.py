@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -173,7 +173,7 @@ def run_academic_benchmark():
     print(" BİLİMSEL MAKALE (RESEARCH BENCHMARK): REPRESENTATION LEARNING IN AI ")
     print(" İddia: Dot-Product Embedding'ler, 'Hiyerarşik Mantığı' öğrenemez, ")
     print(" çünkü A*B işlemi simetriktir. Topos (Yoneda) ise yönlü morfizmalarla")
-    print(" Hiyerarşiyi (Asimetriyi) ve Geçişliliği %100 Kesinlikle kanıtlar.")
+    print(" Hiyerarşiyi (Asimetriyi) ve Geçişliliği %100 Kesinlikle gösterir.")
     print("=========================================================================\n")
     
     vocab, train_data, test_queries = generate_hierarchical_dataset(num_chains=50, depth=4)

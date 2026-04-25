@@ -1,65 +1,81 @@
 import torch
 import torch.nn as nn
 
-# =====================================================================
-# QUANTUM TOPOI & NON-COMMUTATIVE LOGIC (ORTHOMODULAR LATTICES)
-# Amacı: Klasik YZ mantığı (Boolean) veya Sezgisel Mantık (Heyting)
-# her zaman "Değişmelidir (Commutative)": A AND B == B AND A.
-# Ancak Kuantum dünyasında ölçüm sırası sonucu değiştirir (Heisenberg).
-# Bu modül, PyTorch üzerinde Kuantum Mantığını (Quantum Logic) inşa eder.
-# Değerler (Truth Values) artık skaler sayılar [0,1] değil;
-# Hilbert Uzayındaki 'İzdüşüm Operatörleridir (Projection Matrices)'.
-# Kuantum mantığında: P AND Q != Q AND P (Eğer P ve Q birbiriyle değişmiyorsa/commute).
-# =====================================================================
 
 class QuantumLogicGate(nn.Module):
     """
-    Kuantum Toposlarında (Quantum Topoi) Mantık Kapısı.
-    A ve B klasik sayılar değil, Karmaşık veya Reel Hermitian (Simetrik) Matrislerdir.
-    Her mantıksal önerme, Hilbert uzayındaki bir 'Alt Uzaya (Subspace)' karşılık gelir.
+    Finite-dimensional quantum logic over orthogonal projections.
+
+    `quantum_and` and `quantum_or` implement the projection-lattice
+    meet and join. The non-commutative measurement product is exposed
+    separately as `sequential_and`.
     """
-    def __init__(self):
+
+    def __init__(self, tol: float = 1e-5):
         super().__init__()
+        self.tol = tol
+
+    def _validate_projection_pair(
+        self, P: torch.Tensor, Q: torch.Tensor
+    ) -> None:
+        if P.shape != Q.shape or P.shape[-1] != P.shape[-2]:
+            raise ValueError("P and Q must be square matrices with matching shapes.")
+
+    def _eye_like(self, P: torch.Tensor) -> torch.Tensor:
+        n = P.shape[-1]
+        eye = torch.eye(n, dtype=P.dtype, device=P.device)
+        return eye.expand(P.shape[:-2] + (n, n))
+
+    def _symmetrize(self, P: torch.Tensor) -> torch.Tensor:
+        return 0.5 * (P + P.transpose(-2, -1).conj())
+
+    def _spectral_projector(
+        self,
+        operator: torch.Tensor,
+        keep_mask,
+    ) -> torch.Tensor:
+        hermitian = self._symmetrize(operator)
+        eigenvalues, eigenvectors = torch.linalg.eigh(hermitian)
+        mask = keep_mask(eigenvalues).to(dtype=eigenvectors.dtype)
+        return (eigenvectors * mask.unsqueeze(-2)) @ eigenvectors.transpose(-2, -1).conj()
 
     def check_commutation(self, P, Q, tol=1e-5):
-        """
-        [HEISENBERG BELİRSİZLİK KONTROLÜ]
-        İki gözlemlenebilir (Observable) aynı anda ölçülebilir mi?
-        [P, Q] = P*Q - Q*P == 0 ise Değişmelidir (Commutative).
-        """
-        PQ = torch.matmul(P, Q)
-        QP = torch.matmul(Q, P)
-        commutator = PQ - QP
+        """Return whether two observables commute and their commutator."""
+        self._validate_projection_pair(P, Q)
+        commutator = torch.matmul(P, Q) - torch.matmul(Q, P)
         is_commuting = torch.norm(commutator).item() < tol
         return is_commuting, commutator
 
     def quantum_and(self, P, Q):
         """
-        [QUANTUM SEQUENTIAL MEASUREMENT (AND)]
-        Kuantum mantığında 'P ve ardından Q' (P THEN Q),
-        dalga fonksiyonunun sırayla çökmesidir: Q * P
-        (Klasik mantıkta bu P*Q == Q*P'dir, ama Kuantum'da asimetriktir).
+        Projection-lattice meet: the projection onto range(P) intersect range(Q).
         """
-        # P ölçümü yapılır, uzay P'ye çöker. Sonra Q ölçümü yapılır.
+        self._validate_projection_pair(P, Q)
+        return self._spectral_projector(
+            P + Q,
+            lambda eig: eig > (2.0 - self.tol),
+        )
+
+    def sequential_and(self, P, Q):
+        """
+        Non-commutative sequential measurement: first P, then Q.
+
+        This is useful for Heisenberg-ordering demos, but it is not the
+        lattice meet because the result need not be a projection.
+        """
+        self._validate_projection_pair(P, Q)
         return torch.matmul(Q, P)
 
     def quantum_not(self, P):
-        """
-        [QUANTUM NEGATION (NOT)]
-        Kuantum mantığında bir şeyin değili (Orthogonal Complement),
-        Birim Matris eksi İzdüşüm Matrisidir: I - P
-        Bu, uzayın geri kalanına izdüşüm yapmaktır.
-        """
-        I = torch.eye(P.size(0), dtype=P.dtype, device=P.device)
-        return I - P
+        """Orthogonal complement of a projection."""
+        return self._eye_like(P) - P
 
     def quantum_or(self, P, Q):
         """
-        [QUANTUM DISJUNCTION (OR)]
-        De Morgan Kuralları kuantum mantığında da geçerlidir (İzdüşümler için).
-        P OR Q = ~(~P AND ~Q)
+        Projection-lattice join: projection onto span(range(P), range(Q)).
         """
-        not_P = self.quantum_not(P)
-        not_Q = self.quantum_not(Q)
-        not_P_and_not_Q = self.quantum_and(not_P, not_Q)
-        return self.quantum_not(not_P_and_not_Q)
+        self._validate_projection_pair(P, Q)
+        return self._spectral_projector(
+            P + Q,
+            lambda eig: eig > self.tol,
+        )

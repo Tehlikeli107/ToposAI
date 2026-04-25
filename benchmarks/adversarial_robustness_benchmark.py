@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -34,7 +34,7 @@ def godel_composition(R1, R2):
 
 def run_adversarial_robustness_test():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 3: ADVERSARIAL ROBUSTNESS (DÜŞMANSAL GÜRÜLTÜ DAYANIKLILIĞI) ")
+    print(" ARAŞTIRMA DEMOSU 3: ADVERSARIAL ROBUSTNESS (DÜŞMANSAL GÜRÜLTÜ DAYANIKLILIĞI) ")
     print(" Klasik YZ vs ToposAI: Veriye (Girdilere) Gürültü (Noise) eklendiğinde")
     print(" sistemlerin 'Halüsinasyon / Çökme' profilleri karşılaştırılıyor.")
     print("=========================================================================\n")
@@ -42,7 +42,7 @@ def run_adversarial_robustness_test():
     torch.manual_seed(42)
     N = 5 # 5 Adımlık Mantık Zinciri: A -> B -> C -> D -> E
     
-    # 1. KUSURSUZ (GÜRÜLTÜSÜZ) VERİ HAZIRLIĞI
+    # 1. İDEALİZE (GÜRÜLTÜSÜZ) VERİ HAZIRLIĞI
     # Klasik Model için Vektörler (Embedding simülasyonu)
     # A->B->C->D->E zincirini kosinüs benzerliği ile kuruyoruz.
     dim = 16
@@ -98,7 +98,7 @@ def run_adversarial_robustness_test():
     print("   'Transitive Closure' (A->B, B->C bağları) topolojik bir halat gibi davrandı.")
     print("   Düğümler titrese bile HALAT KOPMADIĞI İÇİN (Topological Invariance),")
     print("   sistem A'dan E'ye giden mantığı %100 başarıyla muhafaza etti.")
-    print("-> Bu, Mission-Critical (Hayati) yapay zeka sistemlerinde Topos mimarisinin şart olduğunun matematiksel ispatıdır.")
+    print("-> Bu, Mission-Critical (Hayati) yapay zeka sistemlerinde Topos mimarisinin şart olduğunun matematiksel demosudır.")
 
 if __name__ == "__main__":
     run_adversarial_robustness_test()

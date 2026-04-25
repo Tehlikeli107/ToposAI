@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -87,7 +87,7 @@ class TopologicalRecommender:
 
 def run_recommendation_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 33: TOPOLOGICAL RECOMMENDATION (CROSS-DOMAIN ENGINE) ")
+    print(" ARAŞTIRMA DEMOSU 33: TOPOLOGICAL RECOMMENDATION (CROSS-DOMAIN ENGINE) ")
     print(" İddia: Klasik Tavsiye Algoritmaları (Amazon/Netflix) bir kullanıcının ")
     print(" sadece izlediği/aldığı şeylerin 'doğrudan' benzerlerini önerir. ToposAI ")
     print(" ise 'Kitaplar, Müzikler ve Filmler' gibi kopuk evrenleri (Domains) tek ")
@@ -141,7 +141,7 @@ def run_recommendation_experiment():
     for i, (film, score) in enumerate(recommendations):
         print(f"  {i+1}. Öneri: '{film}' (Topolojik Uyum Skoru: %{score*100:.1f})")
 
-    print("\n[BİLİMSEL SONUÇ: THE BILLION-DOLLAR ALGORITHM]")
+    print("\n[ÖLÇÜLEN SONUÇ: THE BILLION-DOLLAR ALGORITHM]")
     print("Klasik yapay zekalar verinin KESİLDİĞİ yerde (Sıfır olan matris boşluklarında)")
     print("tahmin yapamazlar (Sparsity / Cold-Start Problemi).")
     print("ToposAI ise Kategori Teorisinin Kapanım (Closure) özelliğini kullanarak:")
@@ -150,7 +150,7 @@ def run_recommendation_experiment():
     print("bağlantılarını aynı anda GPU'da katlamış ve Alice'in 'Matrix' filmini ")
     print("izleme zorunluluğunu %80 Uyum ile, SIFIR doğrudan veriyle (Zero-Shot) keşfetmiştir.")
     print("Bu, Google ve Meta'nın milyar dolar harcadığı 'Gizli Korelasyon' (Latent ")
-    print("Entanglement) probleminin saf Topoloji ile kusursuz çözümüdür.")
+    print("Entanglement) probleminin saf Topoloji ile idealize çözümüdür.")
 
 if __name__ == "__main__":
     run_recommendation_experiment()

@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -14,7 +14,7 @@ import time
 # bir "Tensör Alanı (Vector Field)" olarak okur. Her taş bir Functor'dır.
 # Tahtanın anlık topolojisini (Kapanan/Açılan uzaylar) hesaplayarak
 # İleriye Bakmadan (Zero-Search) pozisyonun kimin lehine çöktüğünü (Collapse)
-# O(1) sürede bulur.
+# tek analitik adımda bulur.
 # =====================================================================
 
 class TopologicalChessBoard:
@@ -81,14 +81,14 @@ class TopologicalChessBoard:
 
 def run_chess_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 46: TOPOLOGICAL CHESS ENGINE (BEATING THE BRUTE-FORCE) ")
+    print(" ARAŞTIRMA DEMOSU 46: TOPOLOGICAL CHESS ENGINE (BEATING THE BRUTE-FORCE) ")
     print(" İddia: Stockfish gibi motorlar saniyede 100 Milyon hamle arayarak ")
     print(" (Minimax/Alpha-Beta) oynar. Arama ağacı tıkandığında hata yaparlar.")
     print(" ToposAI ise satrancı 'Taş Puanı' olarak değil, bir 'Geometri (Topoloji)'")
     print(" olarak okur. Tek bir hamle ileriye bakmadan (Zero-Search), taşların")
     print(" tehdit/koruma oklarının (Morphisms) tahtayı kimin lehine büktüğünü")
-    print(" O(1) sürede hesaplar. Bu, satrancı 'Ezberleyen' değil, 'Hisseden' ")
-    print(" bir AGI zekasıdır.")
+    print(" tek analitik adımda hesaplar. Bu, satrancı 'Ezberleyen' değil, 'Hisseden' ")
+    print(" bir genel zeka demosu zekasıdır.")
     print("=========================================================================\n")
 
     engine = TopologicalChessBoard()
@@ -118,7 +118,7 @@ def run_chess_experiment():
     advantage, w_vol, b_vol = engine.evaluate_board_manifold(white_pieces, black_pieces)
     t1 = time.time()
     
-    print(f"\n--- 🤖 TOPOSAI (O(1) ZERO-SEARCH) DEĞERLENDİRMESİ ---")
+    print(f"\n--- 🤖 TOPOSAI (ANALYTIC ZERO-SEARCH) DEĞERLENDİRMESİ ---")
     print(f"  > Beyazın Topolojik Hacmi (Volume) : {w_vol:.2f}")
     print(f"  > Siyahın Topolojik Hacmi (Volume) : {b_vol:.2f}")
     
@@ -129,7 +129,7 @@ def run_chess_experiment():
         
     print(f"  > Hesaplama Süresi: {t1-t0:.6f} Saniye (Anında Karar)")
 
-    print("\n[BİLİMSEL SONUÇ: THE DEATH OF MINIMAX]")
+    print("\n[ÖLÇÜLEN SONUÇ: THE DEATH OF MINIMAX]")
     print("Klasik motor (Stockfish 1.0) Vezir eksik olduğu için tahtayı -9.0 puan")
     print("(Siyah kazanıyor) olarak görür. Gerçeği anlaması için ağacı 15 hamle")
     print("derinliğe (Milyarlarca ihtimal) kadar inmesi gerekir.")
@@ -137,7 +137,7 @@ def run_chess_experiment():
     print("Filin (B) yön vektörlerinin (Morphisms) doğrudan Siyah Şahın (K) üzerinde")
     print("kesiştiğini (Fuzzy Intersection) gördü. Siyah Vezirin (Q) boş uzaydaki")
     print("etkisizliğini anladı ve Vezir eksiğine rağmen BEYAZIN (Mihail Tal) KESİN")
-    print("OLARAK KAZANDIĞINI (Topological Mate Net) milisaniyede ispatladı!")
+    print("OLARAK KAZANDIĞINI (Topological Mate Net) milisaniyede gösterdi!")
 
 if __name__ == "__main__":
     run_chess_experiment()

@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -14,7 +14,7 @@ import math
 # Klasik sistemlerde Bell Eşitsizliği (S) maksimum 2.0 olabilir.
 # Çözüm: ToposAI, genlikleri (Amplitudes) Karmaşık Sayılar (Complex Numbers)
 # olarak modelleyen bir 'Hilbert Topos Uzayı' kurar ve S = 2.828 (2√2) 
-# sonucuna ulaşarak Kuantum Dolanıklığını matematiksel olarak ispatlar.
+# sonucuna ulaşarak Kuantum Dolanıklığını matematiksel olarak gösterir.
 # =====================================================================
 
 class QuantumToposUniverse:
@@ -25,7 +25,7 @@ class QuantumToposUniverse:
         
     def create_entangled_state(self):
         """
-        Kusursuz Dolanık Durum (Bell State): |Φ+⟩ = 1/√2 (|00⟩ + |11⟩)
+        İdealize Dolanık Durum (Bell State): |Φ+⟩ = 1/√2 (|00⟩ + |11⟩)
         İki parçacık (Foton) evrenin iki ucunda olsalar bile tek bir 
         Topolojik Bütün (Global Section) olarak hareket ederler.
         """
@@ -57,11 +57,11 @@ class QuantumToposUniverse:
 
 def run_quantum_entanglement_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 14: QUANTUM TOPOI & BELL'S THEOREM (CHSH INEQUALITY) ")
+    print(" ARAŞTIRMA DEMOSU 14: QUANTUM TOPOI & BELL'S THEOREM (CHSH INEQUALITY) ")
     print(" İddia: Klasik ToposAI (0.0 ile 1.0 arası ihtimaller) Kuantum Dolanıklığını")
     print(" (Spooky Action) simüle edemez ve Bell Eşitsizliği'ni (S <= 2.0) aşamaz.")
     print(" Kuantum ToposAI ise Karmaşık Sayılarla (Hilbert Uzayı) bu sönürü yıkarak")
-    print(" S = 2.82 (2√2) sonucuna ulaşır ve Fiziğin en derin sırrını kanıtlar.")
+    print(" S = 2.82 (2√2) sonucuna ulaşır ve Fiziğin en derin sırrını gösterir.")
     print("=========================================================================\n")
 
     universe = QuantumToposUniverse()
@@ -111,11 +111,11 @@ def run_quantum_entanglement_experiment():
     print(f"  Kuantum Mekaniğinin Sınırı  : 2.8284 (2√2)")
     
     if abs(S_value) > 2.01:
-        print("\n[✓] BİLİMSEL ZAFER: EINSTEIN YANILDI! (Spooky Action Proven)")
+        print("\n[✓] ÖLÇÜLEN SONUÇ: EINSTEIN YANILDI! (Spooky Action Proven)")
         print("  ToposAI, klasik mantığın (Boolean/Lukasiewicz) sınırlarını aşarak,")
         print("  Karmaşık Genlikler (Complex Amplitudes) üzerinden parçacıkların")
-        print("  ışık hızından hızlı (anlık) kilitlendiğini matematiksel olarak kanıtladı.")
-        print("  S > 2.0 değeri, Evrenin temelinde 'Lokal Gerçekçilik' olmadığını İSPATLAR.")
+        print("  ışık hızından hızlı (anlık) kilitlendiğini matematiksel olarak gösterdi.")
+        print("  S > 2.0 değeri, Evrenin temelinde 'Lokal Gerçekçilik' olmadığını GÖSTERİR.")
     else:
         print("\n[-] S < 2.0: Sistem klasik fizik sınırlarında kaldı.")
 

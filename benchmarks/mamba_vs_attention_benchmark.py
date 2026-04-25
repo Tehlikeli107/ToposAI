@@ -1,111 +1,101 @@
-import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-if hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
+import sys
+import time
 
 import torch
-import time
-from topos_ai.models import ToposTransformer
-from topos_ai.mamba import ToposMambaLM
 
-# =====================================================================
-# BENCHMARK: TRANSFORMER (ATTENTION) vs MAMBA (CATEGORICAL STATE SPACE)
-# İddia: Uzun metinlerde (Uzun Context), Dikkat (Attention) mekanizması
-# O(N^2) olduğu için zamanla boğulur ve çöker.
-# Ancak Kategori Teorisiyle desteklenmiş O(N) ToposMamba mimarisi,
-# geçmişle olan bağını tek bir 'State' (Hafıza Vektörü) içinde taşıdığı
-# için metin ne kadar uzarsa uzasın hızı Lineer (Sabit hızda) artar!
-# =====================================================================
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
+from topos_ai.mamba import ToposMambaLM
+from topos_ai.models import ToposTransformer
+
+
+def _sync(device):
+    if device.type == "cuda":
+        torch.cuda.synchronize()
+
 
 def run_speed_benchmark(seq_lengths=None):
     if seq_lengths is None:
         seq_lengths = [128, 256, 512, 1024, 2048]
-        
+
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 49: THE END OF TRANSFORMERS (TOPOS-MAMBA BENCHMARK) ")
-    print(" İddia: Tüm dünya OpenAI/GPT'nin kullandığı O(N^2) Dikkat (Attention)")
-    print(" mekanizmasının sınırlarına çarptı. ToposAI ise Kategori Teorisini")
-    print(" 'Sürekli Dinamik Sistemlere' (Mamba/SSM) uygulayarak, teorik olarak")
-    print(" O(N) hızında çalışan yeni nesil bir Mimari hedefler. Bu test, ")
-    print(" Transformer ve Mamba'nın hız eğrilerini (Scaling) kıyaslar.")
+    print(" TOPOS-MAMBA VS TOPOS-TRANSFORMER SPEED BENCHMARK")
+    print(" This compares the current Python implementations, not an optimized")
+    print(" fused/parallel-scan kernel. Treat theoretical O(N) claims separately.")
     print("=========================================================================\n")
-    
+
     vocab_size = 100
     d_model = 64
     batch_size = 1
-    
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f"[CİHAZ]: {device.type.upper()}\n")
 
-    # 1. Eski Nesil ToposTransformer (O(N^2) Attention tabanlı)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"[DEVICE]: {device.type.upper()}\n")
+
     transformer = ToposTransformer(vocab_size, d_model=d_model, num_layers=2).to(device)
-    
-    # 2. Yeni Nesil ToposMamba (O(N) State Space tabanlı)
     mamba = ToposMambaLM(vocab_size, d_model=d_model, num_layers=2).to(device)
-    
-    print(f"{'Metin Uzunluğu (N)':<20} | {'Transformer Hızı (O(N^2))':<25} | {'ToposMamba Hızı (O(N))':<25} | {'FARK'}")
-    print("-" * 90)
 
+    print(f"{'SeqLen':<12} | {'Transformer':<18} | {'ToposMamba':<18} | {'Observed'}")
+    print("-" * 76)
+
+    observed_speedups = []
     for seq in seq_lengths:
         idx = torch.randint(0, vocab_size, (batch_size, seq), device=device)
-        
-        # --- TRANSFORMER TESTİ ---
+
         try:
-            torch.cuda.synchronize() if device.type == 'cuda' else None
+            _sync(device)
             t0 = time.time()
             with torch.no_grad():
                 _ = transformer(idx)
-            torch.cuda.synchronize() if device.type == 'cuda' else None
-            t1 = time.time()
-            time_transformer = (t1 - t0) * 1000 # ms
+            _sync(device)
+            time_transformer = (time.time() - t0) * 1000
             trans_status = f"{time_transformer:.2f} ms"
         except RuntimeError as e:
             if "out of memory" in str(e).lower():
-                trans_status = "OOM (Çöktü)"
-                time_transformer = float('inf')
-                torch.cuda.empty_cache()
+                trans_status = "OOM"
+                time_transformer = float("inf")
+                if device.type == "cuda":
+                    torch.cuda.empty_cache()
             else:
-                raise e
+                raise
 
-        # --- MAMBA TESTİ ---
         try:
-            torch.cuda.synchronize() if device.type == 'cuda' else None
+            _sync(device)
             t0 = time.time()
             with torch.no_grad():
-                _ = mamba(idx)
-            torch.cuda.synchronize() if device.type == 'cuda' else None
-            t1 = time.time()
-            time_mamba = (t1 - t0) * 1000 # ms
+                _, _ = mamba(idx)
+            _sync(device)
+            time_mamba = (time.time() - t0) * 1000
             mamba_status = f"{time_mamba:.2f} ms"
         except RuntimeError as e:
             if "out of memory" in str(e).lower():
-                mamba_status = "OOM (Çöktü)"
-                time_mamba = float('inf')
-                torch.cuda.empty_cache()
+                mamba_status = "OOM"
+                time_mamba = float("inf")
+                if device.type == "cuda":
+                    torch.cuda.empty_cache()
             else:
-                raise e
-                
-        # Hız Farkı
-        if time_transformer != float('inf') and time_mamba != float('inf') and time_mamba > 0:
+                raise
+
+        if time_transformer != float("inf") and time_mamba != float("inf") and time_mamba > 0:
             speedup = time_transformer / time_mamba
-            diff_text = f"{speedup:.2f}X DAHA HIZLI!" if speedup > 1.0 else f"{(1/speedup):.2f}X Yavaş"
-        elif time_transformer == float('inf') and time_mamba != float('inf'):
-            diff_text = "MAMBA HAYATTA KALDI!"
+            observed_speedups.append(speedup)
+            diff_text = f"{speedup:.2f}x faster" if speedup > 1.0 else f"{(1 / speedup):.2f}x slower"
+        elif time_transformer == float("inf") and time_mamba != float("inf"):
+            diff_text = "Mamba survived"
         else:
             diff_text = "-"
-            
-        print(f"{seq:<20,} | {trans_status:<25} | {mamba_status:<25} | {diff_text}")
 
-    print("\n[BİLİMSEL DEĞERLENDİRME: THEORETICAL O(N) SCALING]")
-    print("Transformer (Dikkat) mekanizması, N büyüdükçe (Uzun romanlar, DNA dizilimleri,")
-    print("Milyon satırlık kodlar) kendi ağırlığı ve hafıza yükü altında ezilmektedir.")
-    print("ToposMamba ise Kategori Teorisinin (Fuzzy Logic) getirdiği O(N) karmaşıklıklı")
-    print("'Dinamik Durum (State)' okuması sayesinde teorik olarak hızı N ile doğru")
-    print("orantılı tutar. Mevcut Python for-döngüsü implementasyonu nedeniyle uzun")
-    print("metinlerde şu an PyTorch'un optimize edilmiş Attention'ından yavaş kalsa da,")
-    print("donanımsal (GPU) bir Paralel Scan (C++) Kerneli ile birleştirildiğinde")
-    print("bu O(N) mimarisi gerçek bir hızlanma (Speedup) sağlayacaktır.")
+        print(f"{seq:<12,} | {trans_status:<18} | {mamba_status:<18} | {diff_text}")
+
+    print("\n[OBSERVED RESULT]")
+    if observed_speedups and max(observed_speedups) > 1.0:
+        print("ToposMamba wins on at least one measured size in this run.")
+    else:
+        print("This Python ToposMamba implementation did not beat the Transformer in this run.")
+    print("A real speedup claim needs an optimized scan/kernel implementation and repeated timing.")
+
 
 if __name__ == "__main__":
     run_speed_benchmark()

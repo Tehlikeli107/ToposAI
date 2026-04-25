@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -140,11 +140,11 @@ class ToposContinualLearner:
                 new_brain[v, u] = 1.0
             
         self.brain = new_brain
-        print(f"  ✅ [BAŞARILI] SIFIR Backpropagation ile bilgi lehimlendi (O(1) Memory Update)!")
+        print(f"  ✅ [BAŞARILI] Backpropagation yapmadan proxy bilgi aktarımı ölçüldü!")
 
 def run_kan_extension_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 50: CATEGORICAL KAN EXTENSIONS (ZERO-FORGETTING AGI) ")
+    print(" ARAŞTIRMA DEMOSU 50: CATEGORICAL KAN EXTENSIONS (ZERO-FORGETTING genel zeka demosu) ")
     print(" İddia: Modern YZ'ler (LLMs) yeni veri öğrendiğinde eski bilgisini ")
     print(" siler (Catastrophic Forgetting). ToposAI, Kategori Teorisinin en ileri")
     print(" düzeyi olan 'Kan Genişlemeleri' (Left Kan Extensions) sayesinde,")
@@ -161,7 +161,7 @@ def run_kan_extension_experiment():
         return
 
     # --- 1. AŞAMA: TIP UZAYI (WordNet'ten Tıbbi Kavramlar) ---
-    print("[AGI BAŞLANGICI]: Makine WordNet 'Medicine/Biology' kavramlarını öğreniyor...")
+    print("[genel zeka demosu BAŞLANGICI]: Makine WordNet 'Medicine/Biology' kavramlarını öğreniyor...")
     
     # Biyolojik bir alt-ağ (Synsets)
     med_synsets = [
@@ -191,7 +191,7 @@ def run_kan_extension_experiment():
     learner.evaluate_knowledge("Medicine (Öğrenmeden Önce)", med_synsets, med_domain.R)
 
     # --- 2. AŞAMA: FİNANS UZAYI (Catastrophic Forgetting Tehlikesi!) ---
-    print("\n[AGI YENİ EĞİTİM]: Makine 'Finans/Ekonomi' uzayını öğreniyor (Sıfır Backprop ile)...")
+    print("\n[genel zeka demosu YENİ EĞİTİM]: Makine 'Finans/Ekonomi' uzayını öğreniyor (Sıfır Backprop ile)...")
     fin_synsets = [
         "inflation.n.01", "interest_rate.n.01", "crisis.n.01", "bank.n.01", "economy.n.01"
     ]
@@ -216,14 +216,14 @@ def run_kan_extension_experiment():
     # Tıbbı unutmuş mu?
     acc_med = learner.evaluate_knowledge("Medicine (Eski Hatıralar)", med_synsets, med_domain.R)
 
-    print("\n[BİLİMSEL SONUÇ: CONTINUAL LEARNING ON REAL ONTOLOGIES]")
+    print("\n[ÖLÇÜLEN SONUÇ: CONTINUAL LEARNING ON REAL ONTOLOGIES]")
     if acc_med == 100.0:
         print("ToposAI, 'Tıp (Medicine)' Uzayını hiçbir kayba uğratmadan %100 (Sıfır Unutma)")
         print("oranıyla KORUMUŞTUR! Klasik Derin Öğrenme, finans verisini öğrenirken eski")
         print("bağları (Tıp) ezerdi. ToposAI ise NLTK WordNet gibi GERÇEK ontolojileri")
-        print("'Left Kan Extension' ile matematiksel olarak kusursuzca izdüşümlemiştir.")
+        print("'Left Kan Extension' ile matematiksel olarak ölçülen koşulda izdüşümlemiştir.")
         print("Artık makine Wikipedia'daki tüm bilim dallarını ilk öğrendiğini zerre kadar")
-        print("unutmadan üst üste ekleyerek devasa bir AGI beynine dönüşebilir!")
+        print("unutmadan üst üste ekleyerek devasa bir genel zeka demosu beynine dönüşebilir!")
     else:
         print("HATA: Model bilgiyi unutmuş. Kategori teorisi çöktü!")
 

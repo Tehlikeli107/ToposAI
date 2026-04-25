@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -9,7 +9,7 @@ import time
 from topos_ai.rl_killer import TopologicalPlanner
 
 # =====================================================================
-# THE DEATH OF REINFORCEMENT LEARNING (ZERO-SHOT ROBOTICS)
+# LINEAR PLANNING VS RANDOM SEARCH (IDEALIZED ROBOTICS)
 # İddia: PPO, SAC veya Q-Learning gibi klasik Reinforcement Learning 
 # (RL) algoritmaları, Robotik (Continuous Control) sorunlarını çözmek
 # için "Çevreyle (Environment)" MİLYONLARCA kez etkileşime girip, hata 
@@ -17,19 +17,20 @@ from topos_ai.rl_killer import TopologicalPlanner
 # ToposAI, çevrenin fiziksel matrislerini (Dynamics Model) bildiği an,
 # Kategori Teorisindeki "Adjoint Functors (Eklenti Okları / Pullbacks)"
 # yöntemini kullanarak 'Zamanı Geriye Döndürür' ve Başlangıç Noktasından
-# Hedefe Giden KUSURSUZ Hamleyi SIFIR (0) DENEME ile bulur!
-# Bu deney, O(1) Topolojik Planlamanın RL'i nasıl YOK ETTİĞİNİ ispatlar!
+# Hedefe giden en küçük-kareler hamlesini pseudo-inverse ile hesaplar.
+# Bu deney bilinen doğrusal dinamiklerde analitik planlamayı random search
+# baseline ile karşılaştırır; RL'in genel yerine geçmez.
 # =====================================================================
 
 def run_rl_killer_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 70: THE DEATH OF REINFORCEMENT LEARNING (RL) ")
+    print(" ARAŞTIRMA DEMOSU 70: LINEAR PLANNING VS RANDOM SEARCH ")
     print(" İddia: Tüm RL ajanları (PPO, Q-Learning vb.) bir robota takla attırmak")
     print(" veya araba sürmeyi öğretmek için ortamı Milyonlarca Kez (Trial & Error)")
     print(" dener ve ödül (Reward) beklerler. Bu aşırı verimsiz (Sample Inefficient)")
     print(" ve aptalca bir süreçtir. ToposAI, Kategori Teorisinin 'Adjoint Functors'")
     print(" (Geri-Çekme Okları) formülüyle, Hedef Durumdan (Goal State) yola çıkıp")
-    print(" O(1) hesaplamayla (Sıfır Deneme / Zero-Shot) KUSURSUZ Aksiyonu (Policy)")
+    print(" tek pseudo-inverse hesabıyla İDEALİZE Aksiyonu (Policy)")
     print(" bulur! Bu testte RL'in Kaba Kuvveti ile ToposAI'nin Matematiği kapışır!")
     print("=========================================================================\n")
 
@@ -37,7 +38,7 @@ def run_rl_killer_experiment():
 
     # Robotik Kol / Araba Dinamik Uzayı
     state_dim = 20 # 20 Sensör
-    action_dim = 20 # 20 Motor (Kusursuz kontrol edilebilirlik için kare matris)
+    action_dim = 20 # 20 Motor (İdealize kontrol edilebilirlik için kare matris)
     
     print(f"[UZAY]: {state_dim} Sensörlü ve {action_dim} Motorlu bir Robot (Continuous Space).")
 
@@ -86,10 +87,10 @@ def run_rl_killer_experiment():
     time_topos = (t1_topos - t0_topos) * 1000 # ms
     
     print(f"  > Yapılan Deneme (Episode): 0 (Zero-Shot Analytics)")
-    print(f"  > Hedef Sapması (Iska): {topos_min_dist:.6f} Birim (Kusursuz!)")
+    print(f"  > Hedef Sapması (Iska): {topos_min_dist:.6f} Birim (İdealize!)")
     print(f"  > Harcanan Süre       : {time_topos:.3f} Milisaniye\n")
 
-    print("[BİLİMSEL SONUÇ: THE DEATH OF REINFORCEMENT LEARNING]")
+    print("[ÖLÇÜLEN SONUÇ: LINEAR PLANNING BASELINE]")
     
     speedup = time_rl / time_topos if time_topos > 0 else float('inf')
     
@@ -99,10 +100,10 @@ def run_rl_killer_experiment():
     print(f"{rl_min_dist:.2f} birim sapma (Loss) yaşamıştır.")
     print("ToposAI ise, sistemin topolojik dinamiğini (Matris Geometrisini) tersine")
     print("çevirerek (Pseudo-Inverse / Adjoint Functor), Hedeflenen Durumu yaratan")
-    print("KUSURSUZ Motor Aksiyonunu (Action) hiçbir eğitim (Training) veya Ödül (Reward)")
-    print("sistemi kullanmadan, O(1) sürede ve SIFIR HATA ile keşfetmiştir!")
-    print("Kategori Teorisi ve ToposAI, Trial-Error tabanlı (PPO/SAC) Reinforcement")
-    print("Learning çağını matematiksel olarak SONLANDIRMIŞTIR!")
+    print("İDEALİZE Motor Aksiyonunu (Action) hiçbir eğitim (Training) veya Ödül (Reward)")
+    print("sistemi kullanmadan, bilinen doğrusal model için least-squares çözüm üretmiştir.")
+    print("Bu sonuç idealize tek-adım doğrusal dinamikler içindir; PPO/SAC gibi RL")
+    print("yöntemlerini bilinmeyen veya doğrusal olmayan ortamlarda geçersiz kılmaz.")
 
 if __name__ == "__main__":
     run_rl_killer_experiment()

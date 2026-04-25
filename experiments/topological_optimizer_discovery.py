@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -109,7 +109,7 @@ def test_optimizers(target_value=0.999):
 
 def run_optimizer_discovery_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 44: ALGORITHMIC DISCOVERY (AI INVENTING OPTIMIZERS) ")
+    print(" ARAŞTIRMA DEMOSU 44: ALGORITHMIC DISCOVERY (AI INVENTING OPTIMIZERS) ")
     print(" İddia: ToposAI sadece kendisine verilen algoritmaları çalıştırmakla")
     print(" kalmaz, insanlığın en çok kullandığı (AdamW vb.) denklemleri okuyup")
     print(" onların 'Topolojik Boşluklarını' (Sınır aşımı hatalarını) bularak")

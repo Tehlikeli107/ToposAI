@@ -1,11 +1,11 @@
-import torch
+﻿import torch
 import torch.nn as nn
 
 # =====================================================================
 # GROTHENDIECK TOPOI & CONTINUOUS SHEAVES (SÜREKLİ UZAYLAR)
 # Ayrık mantık (True/False) yerine, Sürekli Uzaylardaki (Geometri/Fizik)
 # çelişen veya eksik bilgilerin "Sheaf Cohomology" (Demet Kohomolojisi) ile
-# birleştirilerek kusursuz Global Gerçekliğe (Örn: Protein 3D modeli) dönüştürülmesi.
+# birleştirilerek idealize Global Gerçekliğe (Örn: Protein 3D modeli) dönüştürülmesi.
 # =====================================================================
 
 class GrothendieckSheafGluing(nn.Module):
@@ -48,7 +48,7 @@ class GrothendieckSheafGluing(nn.Module):
 
 def run_grothendieck_experiment():
     print("--- GROTHENDIECK TOPOI & SÜREKLİ UZAYLAR (CONTINUOUS SHEAVES) ---")
-    print("Yapay Zeka, eksik ve parçalı 2D ölçümleri birleştirerek \nkusursuz 3D Protein/Molekül haritasını (Global Section) buluyor...\n")
+    print("Yapay Zeka, eksik ve parçalı 2D ölçümleri birleştirerek \nidealize 3D Protein/Molekül haritasını (Global Section) buluyor...\n")
 
     space_dim = 10 # 10 birimlik bir 1D uzay simülasyonu (Kolay okunması için)
     topos = GrothendieckSheafGluing(space_dim)
@@ -74,7 +74,7 @@ def run_grothendieck_experiment():
     print(f"Kesişim Alanındaki Maksimum Sapma: {conflict:.4f}")
     if can_glue:
         print("[+] SHEAF COHOMOLOGY BAŞARILI!")
-        print("İki farklı laboratuvarın eksik verileri, Kategori Teorisiyle kusursuz birleştirildi.")
+        print("İki farklı laboratuvarın eksik verileri, Kategori Teorisiyle idealize birleştirildi.")
         print(f"Nihai Global Protein Şekli:\n{global_shape.numpy().round(2)}\n")
     else:
         print("[-] VERİLER UYUŞMUYOR. YAPIŞTIRMA REDDEDİLDİ!\n")

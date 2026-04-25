@@ -1,105 +1,136 @@
-import torch
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from topos_ai.formal_category import (
+    FiniteCategory,
+    Presheaf,
+    PresheafTopos,
+    Subpresheaf,
+)
 
 # =====================================================================
-# MECHANISTIC INTERPRETABILITY (XAI) & TOPOLOGICAL CIRCUIT EXTRACTION
-# Modelin "Kara Kutu" (Black Box) olmasını engeller.
-# Model bir karara vardığında (Transitive Closure = 1.0), bu karara
-# varırken matrisin içinde GİZLİCE kullandığı alt-yolları (Morfizmaları)
-# geriye doğru (Traceback) takip ederek "Matematiksel İspat Devresini"
-# şeffaf bir şekilde ekrana basar.
+# MECHANISTIC INTERPRETABILITY (XAI) & TOPOS FORCING LOGIC
+# İddia: Klasik YZ'lerdeki "Neden bu kararı verdin?" sorusu, matris
+# ağırlıklarında "En çok parlayan yolu" (BFS/Graph) arayarak çözülemez.
+# Çünkü kararlar "Şartlara (Context)" bağlıdır.
+# Kategori Teorisinde (Topos Logic) bir karar `True` (1.0) değildir,
+# "Hangi evren aşamalarında (Morfizmalar) doğru olduğu" bir Sieve'dir
+# (Zorlama/Forcing Kümesi).
+# Bu modül, yapay zekanın "Hastaya Kanser Teşhisi" veya "Kredi Ret"
+# kararını neden verdiğini, arka planda çalışan Kripke-Joyal (İçsel Mantık)
+# kurallarının kesişim (Meet) ve gereklilik (Implication) kümelerini
+# şeffaf bir şekilde dökerek MATEMATİKSEL İSPATLAR.
 # =====================================================================
 
-class ExplainableToposEngine:
-    def __init__(self, entities):
-        self.entities = entities
-        self.e_idx = {e: i for i, e in enumerate(entities)}
-        self.N = len(entities)
-        self.R = torch.zeros(self.N, self.N)
+def create_medical_topos():
+    # 1. HASTALIĞIN BAĞLAMSAL EVRENİ (Category)
+    # Tıbbi kararların alındığı evrenin yapısı (Hiyerarşisi/Morfizmaları)
+    # Zaman ve bulgu ilerleyişi: Checkup -> Symptom_X -> Final_Diagnosis
+    category = FiniteCategory(
+        objects=("Checkup", "Symptom_X", "Diagnosis"),
+        morphisms={
+            "idC": ("Checkup", "Checkup"), "idS": ("Symptom_X", "Symptom_X"), "idD": ("Diagnosis", "Diagnosis"),
+            "find_symptom": ("Symptom_X", "Checkup"), # Checkup'ta semptom bulunur
+            "conclude": ("Diagnosis", "Symptom_X"),   # Semptom teşhise götürür
+            "direct_conclude": ("Diagnosis", "Checkup") # (conclude o find_symptom)
+        },
+        identities={"Checkup": "idC", "Symptom_X": "idS", "Diagnosis": "idD"},
+        composition={
+            ("idC", "idC"): "idC", ("idS", "idS"): "idS", ("idD", "idD"): "idD",
+            ("idC", "find_symptom"): "find_symptom", ("find_symptom", "idS"): "find_symptom",
+            ("idS", "conclude"): "conclude", ("conclude", "idD"): "conclude",
+            ("idC", "direct_conclude"): "direct_conclude", ("direct_conclude", "idD"): "direct_conclude",
+            ("find_symptom", "conclude"): "direct_conclude" # A <- B <- C = A <- C
+        }
+    )
 
-    def add_fact(self, u, v, weight=1.0):
-        self.R[self.e_idx[u], self.e_idx[v]] = weight
+    # 2. HASTANIN (PATIENT) TÜM VERİ EVRENİ (Presheaf)
+    patient_data = Presheaf(
+        category,
+        sets={
+            "Checkup": {"Blood_Test_High", "Normal_BP"},
+            "Symptom_X": {"Anomaly_Detected"},
+            "Diagnosis": {"Critical_Condition"}
+        },
+        restrictions={
+            "idC": {"Blood_Test_High": "Blood_Test_High", "Normal_BP": "Normal_BP"},
+            "idS": {"Anomaly_Detected": "Anomaly_Detected"},
+            "idD": {"Critical_Condition": "Critical_Condition"},
 
-    def extract_proof_circuit(self, source, target):
-        """
-        [MECHANISTIC INTERPRETABILITY]
-        A'dan D'ye giden yolun varlığını bilmek yetmez. 
-        Nasıl gittiğini (A -> B -> C -> D) DEVRE HARİTASI olarak çıkarır.
-        (Breadth-First Search ile Matris üzerinden Topolojik Yol Keşfi).
-        """
-        start = self.e_idx[source]
-        end = self.e_idx[target]
-        
-        # Eğer zaten doğrudan bir bağ varsa
-        if self.R[start, end] > 0.0:
-            return [source, target]
-            
-        # Geçmişi (Predecessors) tutarak BFS yap
-        queue = [[start]]
-        visited = set()
-        visited.add(start)
-        
-        while queue:
-            path = queue.pop(0)
-            node = path[-1]
-            
-            if node == end:
-                # Düğümleri (Node ID) tekrar kelimelere (String) çevir
-                return [self.entities[n] for n in path]
-                
-            # Matriste 'node' satırındaki oklara bak (Gücü 0.5'ten büyük olanlar)
-            neighbors = torch.where(self.R[node] > 0.5)[0].tolist()
-            
-            for neighbor in neighbors:
-                if neighbor not in visited:
-                    visited.add(neighbor)
-                    new_path = list(path)
-                    new_path.append(neighbor)
-                    queue.append(new_path)
-                    
-        return None # Mantıksal yol (Devre) bulunamadı!
+            # Contravariant Functor Kuralları: F(Hedef) -> F(Kaynak)
+            # Ok: Symptom_X -> Checkup
+            # Restriction: Checkup -> Symptom_X
+            # (Checkup anındaki yüksek kan bulgusu, Semptom aşamasına anomali olarak taşınır)
+            "find_symptom": {"Blood_Test_High": "Anomaly_Detected", "Normal_BP": "Anomaly_Detected"}, # Basitlik için ikisi de anomaliye haritalansın
 
-def run_xai_experiment():
-    print("--- MECHANISTIC INTERPRETABILITY (EXPLAINABLE AI / XAI) ---")
-    print("Yapay Zeka sadece cevap vermez, beyninin içindeki 'Düşünce Devresini' (Circuit) ispatlar.\n")
+            # Ok: Diagnosis -> Symptom_X
+            # Restriction: Symptom_X -> Diagnosis
+            "conclude": {"Anomaly_Detected": "Critical_Condition"},
 
-    # Kavramlar
-    entities = ["Sigara", "Akciğer_Hasarı", "Hücre_Mutasyonu", "Kanser", "Öksürük", "Zatürre"]
-    engine = ExplainableToposEngine(entities)
-    
-    # Sisteme dağınık, ham Tıbbi veriler (Facts) giriyoruz
-    engine.add_fact("Sigara", "Akciğer_Hasarı")
-    engine.add_fact("Akciğer_Hasarı", "Hücre_Mutasyonu")
-    engine.add_fact("Hücre_Mutasyonu", "Kanser")
-    engine.add_fact("Akciğer_Hasarı", "Öksürük")
-    engine.add_fact("Zatürre", "Öksürük")
+            # Ok: Diagnosis -> Checkup
+            # Restriction: Checkup -> Diagnosis
+            "direct_conclude": {"Blood_Test_High": "Critical_Condition", "Normal_BP": "Critical_Condition"}
+        }
+    )
 
-    print("[SİSTEME VERİLEN KARIŞIK OLGULAR]:")
-    print(" - Sigara -> Akciğer Hasarı")
-    print(" - Akciğer Hasarı -> Hücre Mutasyonu")
-    print(" - Hücre Mutasyonu -> Kanser")
-    print(" - Akciğer Hasarı -> Öksürük")
-    print(" - Zatürre -> Öksürük\n")
+    return category, patient_data
 
-    # AI Kararı: Sigara Kanser Yapar mı?
-    # Kategori Teorisinin Transitive Closure (R^n) matrisi bunu 1.0 (Evet) bulacaktır.
-    # Peki NEDEN?
-    
-    print("[MÜŞTERİ / DOKTOR SORUSU]: 'Sigara -> Kanser' riski var mı? VARSA NASIL?")
-    
-    proof_circuit = engine.extract_proof_circuit("Sigara", "Kanser")
-    
-    if proof_circuit:
-        print("\n[!] AI KARARI: EVET, RİSK VARDIR.")
-        print("\n>>> [XAI] MECHANISTIC CIRCUIT EXTRACTION (ŞEFFAF DEVRE) <<<")
-        print("Modelin beyninden 'Karar Alma Mekanizması' (Sub-Graph) başarıyla çekildi:")
-        
-        # Devreyi çiz
-        circuit_str = " ➔ ".join(proof_circuit)
-        print(f"   [KANIT ZİNCİRİ]: {circuit_str}")
-        print("\nSonuç: Model kara kutu değildir. Kararını alırken arkada çalışan ")
-        print("matematiksel nöron aktivasyon zincirini 'Explainable AI' olarak sundu.")
+def run_interpretability_experiment():
+    print("=========================================================================")
+    print(" ARAŞTIRMA DEMOSU 23: MECHANISTIC INTERPRETABILITY (XAI) & TOPOS LOGIC ")
+    print(" (FORMAL KRIPKE-JOYAL FORCING / HEYTING CEBİRİ İLE YENİDEN YAZILMIŞTIR) ")
+    print("=========================================================================\n")
+
+    category, patient_universe = create_medical_topos()
+    topos = PresheafTopos(category)
+
+    # 3. YZ'NİN ÖĞRENDİĞİ KURALLAR (ALT KÜMELER / SUBOBJECTS)
+    print("--- 1. YZ'NİN (AĞIRLIKSIZ / MATEMATİKSEL) KURALLARI ---")
+
+    # YZ'nin içindeki kural 1: Kan değeri yüksekliği tespit edildi (Fact 1)
+    fact_blood = Subpresheaf(patient_universe, subsets={"Checkup": {"Blood_Test_High"}, "Symptom_X": {"Anomaly_Detected"}, "Diagnosis": {"Critical_Condition"}})
+
+    # YZ'nin içindeki kural 2: Teşhis durumu kritiktir (Fact 2)
+    # (Not: Normal_BP bu kurala dahil değil, onu eliyoruz)
+    fact_critical = Subpresheaf(patient_universe, subsets={"Checkup": set(), "Symptom_X": set(), "Diagnosis": {"Critical_Condition"}})
+
+    print(" YZ Kararı (Sonuç): 'Critical_Condition' tetiklendi.")
+    print(" Klasik (Black-box) model: '0.98 ihtimalle Kritik. Nedenini sorma, ağırlıklar (Weights) öyle diyor.'")
+
+    print("\n--- 2. TOPOS İÇSEL MANTIĞI İLE ŞEFFAF İSPAT (FORCING SIEVES) ---")
+    print(" Topos (Heyting) mantığında bir şeyin 'Neden' doğru olduğu, o sonuca götüren")
+    print(" tüm Morfizma oklarının (Sieve / Açık Kümeler) matematiksel izdüşümüyle bulunur.")
+
+    # "Kan Tahlili" alt kümesi, "Kritik Teşhis" alt kümesini ZORUNLU KILIYOR MU?
+    # (Implication: Blood => Critical)
+    implication_rule = topos.subobject_implication(fact_blood, fact_critical)
+
+    print(f"\n [Kural Denetimi] YZ'nin İçsel Mantığı (Blood_Test => Critical_Condition):")
+    print(" Sistemin bu kararı verirken kullandığı kanıt zinciri (Sieves):")
+    for context, elements in implication_rule.subsets.items():
+        print(f"   Bağlam (Zaman) '{context}': Kapsanan Öğeler -> {elements}")
+
+    print("\n--- 3. XAI (EXPLAINABLE AI) SONUÇ DÖKÜMÜ ---")
+
+    # Karar: Checkup aşamasındaki Blood_Test_High nesnesi, sistemi Diagnosis aşamasına "Forcing" (Zorluyor) mu?
+    # Kripke-Joyal teoreminde: x forces P_implies_Q, ancak ve ancak x'e gelen her yolda P doğruysa Q da doğruysa.
+    forcing_sieve = topos.forcing_sieve(implication_rule, "Checkup", "Blood_Test_High")
+
+    print(" Soru: 'Blood_Test_High' bulgusu, Critical duruma neden olmak ZORUNDA MIYDI?")
+    print(f" Sistemin Zorlayıcı Kanıt Ağacı (Forcing Sieve): {forcing_sieve}")
+
+    if "direct_conclude" in forcing_sieve:
+        print("\n [BAŞARILI: %100 ŞEFFAF VE MATEMATİKSEL İSPAT]")
+        print(" Yapay Zeka kararı verirken istatistiksel bir ağırlık (0.98) SALLAMADI.")
+        print(" ToposAI, Kripke-Joyal içsel mantığını kullanarak;")
+        print(" Checkup'taki 'Blood_Test_High' bulgusunun aradaki tüm adımları aşıp")
+        print(" 'direct_conclude' okuyla doğrudan 'Critical_Condition'ı zorladığını")
+        print(" bir 'Sieve' (Kanıt Kümesi / Forcing Sieve) olarak ŞEFFAFÇA masaya koydu.")
+        print(" Geleceğin Güvenilir YZ (Explainable AI / XAI) sistemleri, kararlarını ")
+        print(" kara-kutu (Blackbox) tensörlerle değil, Topos-Sieve kanıtlarıyla sunacaktır.")
     else:
-        print("\n[!] AI KARARI: HAYIR, RİSK YOKTUR.")
+        print("\n [HATA] Kararın nedeni (İspat Zinciri) bulunamadı.")
 
 if __name__ == "__main__":
-    run_xai_experiment()
+    run_interpretability_experiment()

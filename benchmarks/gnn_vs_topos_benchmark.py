@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -47,7 +47,7 @@ def godel_composition(R1, R2):
 
 def run_gnn_vs_topos_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 6: GNN (GRAPH NEURAL NETWORKS) VS TOPOS AI ")
+    print(" ARAŞTIRMA DEMOSU 6: GNN (GRAPH NEURAL NETWORKS) VS TOPOS AI ")
     print(" İddia: GNN'ler 'Message Passing' yaparken mantığı bulanıklaştırır")
     print(" (Over-smoothing). Topos ise Gödel mantığı ile keskinliği sonsuza dek korur.")
     print("=========================================================================\n")

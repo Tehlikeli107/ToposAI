@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -74,14 +74,14 @@ class ToposRAGBridge:
         else:
             print("\n🚨 DİKKAT: RAG Sistemi çelişkili belgeler getirdi! Klasik bir LLM bu belgeleri")
             print("okuyup halüsinasyon (Zehirli Sentez) görebilirdi. ToposAI şüpheli belgeleri eledi.")
-            print("(Not: Bu modül tam bir üretim RAG'ı değil, kavram kanıtıdır - Proof of Concept).")
+            print("(Not: Bu modül tam bir üretim RAG'ı değil, kavram demosudur - Proof of Concept).")
             
         return global_truth, accepted_chunks, rejected_chunks
 
 
 def run_rag_bridge_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 7: TOPOS RAG-BRIDGE (VECTOR-TOPOS HYBRID) ")
+    print(" ARAŞTIRMA DEMOSU 7: TOPOS RAG-BRIDGE (VECTOR-TOPOS HYBRID) ")
     print(" İddia: Vektör veritabanları anlamsal benzerliğe (Cosine) göre belge")
     print(" getirir, belgelerin birbiriyle çelişip çelişmediğini bilmezler.")
     print(" ToposAI, dönen belgeleri okuyarak Şizofrenik RAG çıktılarını engeller.")

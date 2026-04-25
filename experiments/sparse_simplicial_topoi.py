@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -49,7 +49,7 @@ class SparseSimplicialEngine:
 
 def run_sparse_simplicial_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 12: SPARSE SIMPLICIAL TOPOI (OVERCOMING DIMENSIONALITY) ")
+    print(" ARAŞTIRMA DEMOSU 12: SPARSE SIMPLICIAL TOPOI (OVERCOMING DIMENSIONALITY) ")
     print(" İddia: 1 Milyon Kavramlık bir Evrende, 3'lü (Grup) ilişkileri Dense")
     print(" matrisle tutmak 4 Exabayt (Milyon Terabayt) RAM ister. ToposAI Sparse")
     print(" Tensörler kullanarak bu devasa uzayı sıfır çökme ile anında kurar.")

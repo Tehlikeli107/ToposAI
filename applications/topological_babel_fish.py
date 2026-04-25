@@ -1,4 +1,4 @@
-import torch
+﻿import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -102,7 +102,7 @@ def run_babel_fish_experiment():
         print(f"  {word_A:<8} ===> {word_B:<8} (Eminlik: %{confidence:.1f})")
         success_count += 1
         
-    print("\n[BİLİMSEL KANIT]")
+    print("\n[ARAŞTIRMA DEMOSU]")
     print("Eğer sözlüğe bakarsanız; 'King' ve 'Queen' ikisi de 'Crown'(Taç) düğümüne bağlı olduğu için")
     print("model, uzaylı dilinde ortak bir şeye (Xorx) bağlanan 'Zig' ve 'Zog' kelimelerini ")
     print("anında Kral ve Kraliçe olarak eşleştirdi. ")

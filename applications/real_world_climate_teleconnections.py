@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -15,7 +15,7 @@ import numpy as np
 # İddia: Klasik YZ iklimi bir "Kara Kutu" olarak tahmin eder. ToposAI ise 
 # Zaman-Gecikmeli Topoloji (Time-Lagged Category) kurarak, Pasifik'teki 
 # bir ısınmanın haftalar sonra Sibirya'yı nasıl vurduğunu (Kelebek Etkisi / 
-# Teleconnection) matematiksel geçişlilik (Transitivity) ile ispatlar.
+# Teleconnection) matematiksel geçişlilik (Transitivity) ile gösterir.
 # =====================================================================
 
 def godel_composition(R1, R2):
@@ -102,7 +102,7 @@ def build_time_lagged_topology(df, lag_days=7):
 
 def run_climate_teleconnection_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 10: GLOBAL CLIMATE CHAOS & TOPOLOGICAL TELECONNECTIONS")
+    print(" ARAŞTIRMA DEMOSU 10: GLOBAL CLIMATE CHAOS & TOPOLOGICAL TELECONNECTIONS")
     print(" İddia: Klasik YZ, hava durumunu kara kutu olarak tahmin eder.")
     print(" ToposAI ise, gezegenin sıcaklık verilerini 7-günlük Zaman-Gecikmeli")
     print(" (Time-Lagged) bir Kategoriye çevirir. Ve Transitive Closure ile")

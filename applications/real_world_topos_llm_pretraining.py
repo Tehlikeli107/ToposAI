@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -73,7 +73,7 @@ def generate_text(model, tokenizer, start_text="The history of the world", max_n
 
 def run_topos_llm_pretraining():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 21: TOPOS-LLM (LARGE LANGUAGE MODEL) PRETRAINING ")
+    print(" ARAŞTIRMA DEMOSU 21: TOPOS-LLM (LARGE LANGUAGE MODEL) PRETRAINING ")
     print(" İddia: Kategori Teorisi matrisleri (Yoneda Embeddings) kendi icadımız")
     print(" olan Topolojik Tokenizer ile O(V^2) çökmesi yaşamadan (Low-Rank ile)")
     print(" öğrenebilir ve kelime mantığı (Syntax/Semantics) geliştirmeye başlayabilir.")
@@ -140,7 +140,7 @@ def run_topos_llm_pretraining():
             
             print(f"Iter {iter_num:<4} | Loss: {loss.item():.4f} | Süre: {dt:.2f}s | Üretim: '{sample_text}'")
 
-    print("\n[BİLİMSEL SONUÇ (Heuristic/Proof of Concept)]")
+    print("\n[ÖLÇÜLEN SONUÇ (Heuristic/Proof of Concept)]")
     print("ToposAI, BPE'yi sökerek kendi Topological Tokenizer'ı ile ÇÖKMEDEN ")
     print("çalıştı. Low-Rank Factorized Yoneda Embedding, 40 GB'lık VRAM ihtiyacını")
     print("ortadan kaldırdı. Model, Wikipedia İngilizcesi üzerindeki 'Kategori Oklarını' ")

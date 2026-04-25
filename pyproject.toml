@@ -5,16 +5,15 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "topos_ai"
 version = "1.0.0"
-description = "A neuro-symbolic AI framework bridging Category Theory (Toposes, Yoneda, Sheaves) with PyTorch"
+description = "Experimental neuro-symbolic PyTorch components inspired by category theory"
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
 requires-python = ">=3.10"
 authors = []
 keywords = ["category-theory", "topos", "neuro-symbolic", "AI", "heyting-algebra", "sheaf", "yoneda"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -62,6 +61,13 @@ topos-showcase = "topos_showcase:run_showcase"
 [tool.ruff]
 line-length = 120
 target-version = "py310"
+
+[tool.setuptools]
+py-modules = ["chat_custom_llm", "topos_showcase", "train_custom_llm"]
+
+[tool.setuptools.packages.find]
+include = ["topos_ai*"]
+exclude = ["tests*", "experiments*", "applications*", "benchmarks*"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]

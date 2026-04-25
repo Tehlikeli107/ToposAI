@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import torch
@@ -18,7 +18,7 @@ from topos_ai.math import transitive_closure
 # Sistem, GERÇEK bir Solidity kodunu (String) okur. 
 # Kodun Kontrol Akış Grafiğini (CFG) Topos Matrisine çevirir.
 # Matematiksel geçişlilik (Transitive Closure) ile "Reentrancy"
-# (Geri Çağırma) açıklarını %100 kesinlikle kanıtlar.
+# (Geri Çağırma) açıklarını %100 kesinlikle gösterir.
 # =====================================================================
 
 class SolidityToToposParser:
@@ -97,7 +97,7 @@ def analyze_contract(contract_name, solidity_code):
         
         if loop_exists and checks_effect_interaction_violated:
             print("  🚨 KRİTİK ZAFİYET (CRITICAL VULNERABILITY): REENTRANCY (GERİ ÇAĞIRMA) AÇIĞI 🚨")
-            print(f"  [KANIT]: Topos Matrisi, '{call_node}' satırının kendisini bir döngüye (Loop) sokabildiğini kanıtladı.")
+            print(f"  [KANIT]: Topos Matrisi, '{call_node}' satırının kendisini bir döngüye (Loop) sokabildiğini gösterdi.")
             print(f"  [SEBEP]: Durum güncellemesi ('{state_update_node}') para transferinden SONRA yazılmış.")
             print("  [ÇÖZÜM]: Checks-Effects-Interactions (CEI) kuralını uygulayın. Bakiye güncellemesini '.call' satırından ÖNCEYE alın!")
         else:

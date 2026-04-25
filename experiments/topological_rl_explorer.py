@@ -1,4 +1,4 @@
-import torch
+﻿import torch
 import random
 import time
 
@@ -119,7 +119,7 @@ def run_topological_rl_experiment():
     print(f"zincirleme ağı okuyarak, Oda {new_start}'dan Oda {new_goal}'e giden YOLU ")
     print("HİÇ HATA YAPMADAN KENDİ KENDİNE BULACAKTIR (Zero-Shot Planning).\n")
     
-    # Ajan zihnindeki haritadan "Kusursuz Rotayı" çıkarır (Planlama)
+    # Ajan zihnindeki haritadan "İdealize Rotayı" çıkarır (Planlama)
     path = agent.find_path_to_goal(new_start, new_goal)
     
     if path:

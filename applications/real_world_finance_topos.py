@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -60,7 +60,7 @@ def run_finance_contagion_experiment():
     print(" TOPOSAI: FINANCIAL CONTAGION (GERÇEK DÜNYA EKONOMİK KRİZ SİMÜLATÖRÜ) ")
     print(" İddia: Klasik borsa analistleri 'A ve B birbirine ne kadar bağlı?' diye sorar.")
     print(" ToposAI ise, 'A batarsa, B üzerinden C'yi tetikleyerek D'yi yok edebilir mi?' ")
-    print(" zincirlemesini (Sistemik Kelebek Etkisi) canlı veri üzerinden KANITLAR.")
+    print(" zincirlemesini (Sistemik Kelebek Etkisi) canlı veri üzerinden GÖSTERİR.")
     print("=========================================================================\n")
 
     # Farklı Sektörlerden 15 Gerçek Şirket

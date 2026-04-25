@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -100,7 +100,7 @@ def build_spatiotemporal_topology(df, distance_threshold_km=500.0, time_threshol
 
 def run_seismic_causality_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 6: SPATIOTEMPORAL CAUSAL DISCOVERY (JEOFİZİK) ")
+    print(" ARAŞTIRMA DEMOSU 6: SPATIOTEMPORAL CAUSAL DISCOVERY (JEOFİZİK) ")
     print(" İddia: ToposAI, devasa ve kaotik gerçek dünya olaylarını (Depremler)")
     print(" Uzay-Zaman topolojisine çevirip, 'Kelebek Etkisini' (Hangi olayın")
     print(" küresel bir zincirleme reaksiyon başlattığını) matematiksel bir sezgisel (Spatiotemporal Heuristic) ile haritalandırır.")

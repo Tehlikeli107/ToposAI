@@ -1,4 +1,4 @@
-import torch
+﻿import torch
 import torch.nn.functional as F
 import sys
 import os
@@ -10,7 +10,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # GROMOV-WASSERSTEIN OPTIMAL TRANSPORT (CROSS-DOMAIN ALIGNMENT)
 # Araştırma: İki farklı uzay (Örn: Görüntü ve Dil) arasında hiçbir 
 # eşleşme verisi (label) olmadan, sadece içsel geometrilerini (uzaklıklar) 
-# birbirine yapıştırarak kusursuz eşleşmeyi bulma.
+# birbirine yapıştırarak idealize eşleşmeyi bulma.
 # =====================================================================
 
 def sinkhorn_algorithm(M, epsilon=0.01, n_iter=100):
@@ -96,12 +96,12 @@ def run_gromov_wasserstein_experiment():
     correct = (matches[0] == "Kral" and matches[1] == "Kraliçe" and 
                matches[2] == "Elma" and matches[3] == "Armut")
 
-    print("\n[BİLİMSEL SONUÇ]")
+    print("\n[ÖLÇÜLEN SONUÇ]")
     if correct:
         print("[✓] KANITLANDI: Model, tek bir kelime anlamı bilmeden, sadece")
         print("    iki uzayın topolojik uzaklıklarını eşleştirerek sözlüğü çözdü!")
-        print("    Bu, AGI'ın farklı modaliteleri (Görüntü, Ses, Dil) nasıl")
-        print("    hizalayabileceğinin matematiksel ispatıdır.")
+        print("    Bu, farklı modaliteler arasında topolojik/optimal-transport")
+        print("    hizalama fikrinin küçük bir demosudur.")
     else:
         print("[-] Hizalama başarısız oldu. Parametre ayarı gerekebilir.")
 

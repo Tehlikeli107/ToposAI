@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -82,7 +82,7 @@ def buyer_coplay(Y_price, decision, R_env, buyer_threshold):
 
 def run_cybernetics_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 55: CATEGORICAL CYBERNETICS (OPEN GAMES) ")
+    print(" ARAŞTIRMA DEMOSU 55: CATEGORICAL CYBERNETICS (OPEN GAMES) ")
     print(" İddia: Klasik Oyun Teorisi (Nash Dengesi), çoklu ajan (Multi-Agent)")
     print(" senaryolarında, merkezi bir 'Ödül Sistemi' olmadan çalışamaz.")
     print(" Ancak gerçek dünyada (Borsalar, Otonom Sürüş) merkezi bir Tanrı yoktur.")
@@ -103,7 +103,7 @@ def run_cybernetics_experiment():
     # Market (X) -> Seller -> (Price) -> Buyer -> Decision -> Environment (R)
     market_game = ComposedOpenGame(seller_game, buyer_game)
 
-    print("[SİSTEM]: Merkeziyetsiz AGI Pazarı Kuruldu.")
+    print("[SİSTEM]: Merkeziyetsiz genel zeka demosu Pazarı Kuruldu.")
     print(f"  > Satıcı Başlangıç Kâr Marjı İsteği : %{seller_game.params.item()*100:.0f} (Çok Yüksek)")
     print(f"  > Alıcı Başlangıç Fiyat Eşiği İsteği: %{buyer_game.params.item()*100:.0f} (Çok Düşük)")
     print(f"  > Maliyet: 0.2, Alıcı İçin Ürünün Gerçek Değeri (V): 0.8")
@@ -135,7 +135,7 @@ def run_cybernetics_experiment():
                   f"Alıcı Eşiği: %{buyer_game.params.item()*100:02.0f} | "
                   f"Sonuç: {current_decision}")
 
-    print("\n[BİLİMSEL SONUÇ: DECENTRALIZED CYBERNETIC INTELLIGENCE]")
+    print("\n[ÖLÇÜLEN SONUÇ: DECENTRALIZED CYBERNETIC INTELLIGENCE]")
     final_price = seller_game.history_Y.item()
     print(f"  > Nihai Anlaşma Fiyatı: {final_price:.4f}")
     
@@ -145,7 +145,7 @@ def run_cybernetics_experiment():
     print("geri ileterek (Açık Oyunlar) fiyatı olması gereken optimum değere")
     print("(Nash Dengesi) çekmiştir. Bu yapı, 1 Milyon farklı Ajanın (Otonom")
     print("Dronlar, Finans Botları) birbirine 'Lensler' gibi kenetlenerek")
-    print("kaosa düşmeden Global bir Toplum yaratabileceğinin kesin kanıtıdır!")
+    print("kaosa düşmeden Global bir Toplum yaratabileceğinin kesin demosudur!")
 
 if __name__ == "__main__":
     run_cybernetics_experiment()

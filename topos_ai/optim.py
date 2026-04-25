@@ -74,7 +74,7 @@ class ToposAdam(Optimizer):
                 # p*(1-p) değeri sınırlar (0 veya 1) yaklaştıkça küçülür (Gradyan ölür).
                 # Biz bunu tersine çevirerek (Bölerek) o ölü noktaları canlandırıyoruz (Curved Geometry).
                 # S6 FIX: Ancak sıfıra çok yakın değerler 10000x amplifikasyona (patlamaya) yol açabilir.
-                fisher_metric = (p_val * (1.0 - p_val)).clamp(min=1e-4, max=0.25)
+                fisher_metric = (p_val * (1.0 - p_val)).clamp(min=1e-3, max=0.25)
 
                 # Natural Update
                 step_size = group['lr'] / bias_correction1

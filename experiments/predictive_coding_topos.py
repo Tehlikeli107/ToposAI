@@ -83,8 +83,8 @@ def run_predictive_coding_experiment():
     if sun_heat > 0.8 and heat_melt > 0.8:
         print("\n[✓] BAŞARILI: Model, tek bir Türev (Backward) almadan,")
         print("sadece 'Dünyayı Tahmin Ederek' kuralları keşfetti!")
-        print("Bu, GPU maliyetlerini %90 azaltan ve AGI'ı biyolojik ")
-        print("gerçekliğe yaklaştıran 'Predictive Coding' zaferidir.")
+        print("Bu, predictive-coding fikrinin küçük bir simülasyonda çalıştığını")
+        print("gösteren ölçümdür; maliyet ve kalite iddiaları ayrıca benchmark ister.")
     else:
         print("\n[-] Model henüz yeterince uyumlanamadı.")
 

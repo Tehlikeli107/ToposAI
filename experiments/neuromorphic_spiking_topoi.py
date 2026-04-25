@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -12,8 +12,9 @@ import torch
 # enerji tüketir. İnsan beyni ise nöromorfiktir (Zaman uyumlu ateşleme).
 # Çözüm: ToposAI, olasılık matrislerini (0.0-1.0) "Zaman (Time-to-Spike)"
 # parametresine çevirir. Birbirine yakın kavramlar "aynı anda" ateşlenir.
-# Bu Leaky Integrate-and-Fire modeli, AGI'ın %99 daha az enerjiyle 
-# çalışmasını sağlayan Donanım (Hardware) vizyonudur.
+# Bu Leaky Integrate-and-Fire modeli, olay-tabanlı hesaplama fikrini küçük
+# bir oyuncak ağda gösterir; enerji verimliliği iddiaları ayrı donanım
+# benchmarkları gerektirir.
 # =====================================================================
 
 class SpikingToposNeuron:
@@ -97,7 +98,7 @@ class NeuromorphicToposNetwork:
 
 def run_spiking_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 15: NEUROMORPHIC SPIKING TOPOI (BRAIN-LIKE ENERGY) ")
+    print(" ARAŞTIRMA DEMOSU 15: NEUROMORPHIC SPIKING TOPOI (BRAIN-LIKE ENERGY) ")
     print(" İddia: Klasik YZ ondalıklı sayıları milyarlarca kez çarparak MWH harcar.")
     print(" ToposAI, beyin gibi çalışarak olayları 'Zamanlı Ateşleme (Spiking)' ")
     print(" dizisine çevirir. Bir kavram, eşik (Voltage) değerini aştığında sadece")
@@ -132,13 +133,13 @@ def run_spiking_experiment():
     mapped_history = " ➔ ".join([names[i] for i in history])
     print(mapped_history)
     
-    print("\n[BİLİMSEL SONUÇ]")
+    print("\n[ÖLÇÜLEN SONUÇ]")
     print("Sistem, ondalıklı sayı dizileri yerine sadece Boolean (1/0) elektrik")
     print("patlamaları kullanarak Kategori (Geçişlilik) hiyerarşisini çözdü!")
     print("Bulut (0.5 Volt) ilk adımda ateşlenmedi, voltaj birikmesini bekledi (Integrate).")
     print("Dolduğunda 'Patladı' ve tüm Yağmur->Şemsiye zincirini tetikledi.")
-    print("Bu mimari, Intel Loihi gibi Nöromorfik çiplerde çalıştırıldığında")
-    print("AGI'ın bir nükleer santrale değil, 20 Wattlık bir pile ihtiyacı olacağını İSPATLAR.")
+    print("Bu mimari, nöromorfik çiplerde ayrıca benchmarklanabilecek olay-tabanlı")
+    print("hesaplama fikrini gösterir; geniş enerji iddiaları bu demo ile kanıtlanmaz.")
 
 if __name__ == "__main__":
     run_spiking_experiment()

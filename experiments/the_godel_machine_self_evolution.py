@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -83,11 +83,11 @@ class GodelToposNetwork(nn.Module):
 
 def run_godel_machine_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 22: THE GÖDEL MACHINE (TOPOLOGICAL SELF-EVOLUTION) ")
+    print(" ARAŞTIRMA DEMOSU 22: THE GÖDEL MACHINE (TOPOLOGICAL SELF-EVOLUTION) ")
     print(" İddia: ToposAI sadece dış dünyayı değil, *kendi* beynini de bir ")
     print(" Topoloji olarak algılar. Çözemediği bir problemde pes etmez, kendi ")
     print(" kaynak kodunu (PyTorch Graph) çalışma anında yeniden yazarak ")
-    print(" zekasını BÜYÜTÜR. Bu, Recursive Self-Improvement'ın ispatıdır.")
+    print(" zekasını BÜYÜTÜR. Bu, Recursive Self-Improvement'ın demosudır.")
     print("=========================================================================\n")
 
     # Çok Zor Bir Problem: Checkerboard / XOR Pattern (1 Katmanla Lineer Olarak Çözülemez!)
@@ -148,14 +148,14 @@ def run_godel_machine_experiment():
             print(f"\n✅ PROBLEM ÇÖZÜLDÜ! (Loss: {loss.item():.4f} < 0.05)")
             break
 
-    print("\n[BİLİMSEL SONUÇ: THE OMEGA POINT]")
+    print("\n[ÖLÇÜLEN SONUÇ: SELF-MODIFICATION TOY DEMO]")
     print("Normalde bu ağ sonsuza kadar o yüksek Loss (Hata) değerinde takılıp kalırdı.")
     print("Çünkü başlangıçtaki mimarisi (1 Katman) bu uzayı bükmek için yeterli değildi.")
     print("ToposAI, dışarıdan hiçbir mühendis (İnsan) müdahalesi olmadan;")
-    print(" 1. Kendi yetersizliğini Topolojik (Transitive Closure) olarak kanıtladı.")
+    print(" 1. Kendi yetersizliğini Topolojik (Transitive Closure) olarak gösterdi.")
     print(" 2. Kendi PyTorch grafiğine (Kaynak koduna) dinamik olarak müdahale etti.")
-    print(" 3. Yeni nöronlar icat ederek problemi çözene kadar KENDİ ZEKASINI EVRİMLEŞTİRDİ.")
-    print("Bu, Yapay Genel Zekanın (AGI) kendi kendini geliştirdiği Tekillik (Singularity) anıdır.")
+    print(" 3. Yeni nöronlar ekleyerek oyuncak problemi daha iyi uydurdu.")
+    print("Bu, self-modification fikrinin küçük bir demosudur; genel zeka veya tekillik iddiası değildir.")
 
 if __name__ == "__main__":
     run_godel_machine_experiment()

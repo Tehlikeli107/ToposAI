@@ -1,63 +1,39 @@
 import torch
 import torch.nn as nn
 
-# =====================================================================
-# THE YONEDA LEMMA (CATEGORICAL EMBEDDINGS)
-# Amacı: Kategori Teorisinin en önemli teoremi olan Yoneda Lemma'yı
-# PyTorch'a taşımak.
-# Teorem: X ≅ Hom(-, X). Bir X objesi (Örn: Devasa bir Veri Vektörü),
-# kendisinin ne olduğuyla değil; Evrendeki diğer referans noktalarına
-# (Probes / A) olan uzaklıkları ve ilişkileriyle (Morphisms) %100
-# kusursuz tanımlanır.
-# Bu modül, objelerin içsel özelliklerini (Features) SİLER ve
-# onları sadece birer 'İlişki Vektörüne (Contravariant Functor)'
-# dönüştürür.
-# =====================================================================
 
 class YonedaUniverse(nn.Module):
     """
-    Evrendeki referans noktalarını (Probes/A) temsil eder.
-    Yoneda Lemma'nın "Hom(-, X)" kısmındaki "-" (Her şey) burasıdır.
+    Yoneda-inspired probe universe.
+
+    This module does not implement the categorical Yoneda lemma directly.
+    It stores reference probes and represents an object by its squared
+    Euclidean distances to those probes. That makes it a useful
+    relation-vector reconstruction toy model, not a proof of Yoneda.
     """
+
     def __init__(self, num_probes, dim):
         super().__init__()
-        # Evrenin farklı köşelerine dağılmış Referans Noktaları
-        # Bunlara "Sonda (Probe)" veya "Gözlemci" diyebiliriz.
         self.probes = nn.Parameter(torch.randn(num_probes, dim))
 
     def get_morphisms(self, X):
-        """
-        [THE HOM-FUNCTOR: Hom(A, X)]
-        X'in (Bilinmeyen Obje), evrendeki tüm Probe'lara (A) olan
-        Uzaklık / Benzerlik ilişkilerini (Morfizmalarını) çıkarır.
-        X'in KENDİ ÖZELLİKLERİ SİLİNİR, geriye sadece "İlişki Ağı" kalır.
-        """
-        # X: [Batch, Dim], Probes: [Num_Probes, Dim]
-        # Morfizma = Uzaklık kareleri (Gradientler kaybolmasın)
-        # Çıktı: [Batch, Num_Probes]
-        distances = torch.cdist(X, self.probes, p=2) ** 2
-        return distances
+        """Return squared distances from X to every probe."""
+        return torch.cdist(X, self.probes, p=2) ** 2
+
 
 class YonedaReconstructor(nn.Module):
     """
-    [THE YONEDA INVERSE: Hom(-, X) -> X]
-    Yoneda Lemma'nın asıl mucizesi: Sadece "İlişki Ağını" (Morfizmaları)
-    alarak, objenin "Gerçek Fiziksel Koordinatlarını (X)" GERİ BULMAK!
+    Reconstruct coordinates whose probe-distance vector matches a target.
+
+    The optimization variable is the coordinate vector itself, so this is an
+    inverse-distance reconstruction baseline rather than a categorical inverse.
     """
+
     def __init__(self, num_probes, dim):
         super().__init__()
-        # Makine "Gerçekliği" tahmin etmeye çalışacak
         self.estimated_X = nn.Parameter(torch.zeros(1, dim))
 
     def forward(self, true_morphisms, universe: YonedaUniverse):
-        """
-        Tahmin edilen X'in morfizmalarını, Gerçek X'in morfizmalarıyla
-        kıyaslar. Eğer Morfizmalar eşitse (İzomorfik Functor),
-        Yoneda Lemma'ya göre OBJELER KESİNLİKLE EŞİT OLMALIDIR!
-        """
-        # Makinenin tahmin ettiği uydurma X'in Evrenle olan ilişkisi
         estimated_morphisms = universe.get_morphisms(self.estimated_X)
-
-        # Eğer bu iki ilişki ağı birbirine uyarsa, X'i kusursuz bulduk demektir!
         loss = torch.nn.functional.mse_loss(estimated_morphisms, true_morphisms)
         return loss, self.estimated_X

@@ -1,54 +1,45 @@
 import torch
 
-# =====================================================================
-# THE DEATH OF REINFORCEMENT LEARNING (RL) via TOPOS THEORY
-# Problem: Reinforcement Learning (PPO, Q-Learning) deneme-yanılma
-# (Trial and Error) ile öğrenir. Milyonlarca rastgele hamle yapar,
-# çevre (Environment) ona "Ödül (Reward)" verirse o yolu güçlendirir.
-# Bu aşırı verimsizdir (Sample Inefficient) ve sadece "Oynadığı Oyunu"
-# öğrenir, genel zeka (AGI) üretemez.
-#
-# Çözüm: Kategori Teorisinde "Adjoint Functors (Eklenti Okları)"
-# ve "Homotopy Type Theory (HoTT)" kullanılarak, RL'in "Ödül Fonksiyonu"
-# bir 'Zamanı Geriye Döndüren (Contravariant) Topolojik İzdüşüm'
-# olarak modellenir.
-# ToposAI, çevreyi rastgele denemek YERİNE, Hedef Durumdan (Goal State)
-# Başlangıç Durumuna (Start State) KUSURSUZ BİR YOL (Path) çizer.
-# SIFIR DENEME (Zero-Shot) ile RL ajanlarının milyonlarca turda
-# öğrendiğini O(1) matematiksel kesinlikle çözer!
-# =====================================================================
 
 class TopologicalPlanner:
+    """
+    Linear-dynamics planning baseline.
+
+    This module contrasts random action search with an analytic least-squares
+    action for a one-step linear transition model:
+
+        next_state = T @ start_state + C @ action
+
+    The pseudo-inverse solution is exact only when the requested goal lies in
+    the reachable affine subspace. Otherwise it returns the least-squares
+    action and a non-zero residual distance. It is a planning toy model, not a
+    replacement for reinforcement learning in unknown or nonlinear
+    environments.
+    """
+
     def __init__(self, state_dim, action_dim):
         self.state_dim = state_dim
         self.action_dim = action_dim
 
-        # Evrenin Fiziği (Dynamics Model) F: S x A -> S'
-        # Gerçek dünyada bu, fizik motoru veya dünyanın kurallarıdır.
-        # Basit bir doğrusal dinamik modeli: S_{t+1} = A * S_t + B * u_t
         self.transition_matrix = torch.randn(state_dim, state_dim)
         self.control_matrix = torch.randn(state_dim, action_dim)
 
     def reinforcement_learning_simulate(self, start_state, goal_state, num_episodes=1000):
         """
-        [KLASİK RL YAKLAŞIMI: KABA KUVVET (TRIAL & ERROR)]
-        Milyonlarca rastgele aksiyon (Action) dener. Hedefe yaklaşırsa
-        ödül alır ve Q-Table / Policy günceller.
+        Random-search baseline over one-step actions.
+
+        This intentionally simple baseline samples actions and keeps the best
+        one under the known linear dynamics. It is not a full PPO/Q-learning
+        implementation.
         """
         best_action = None
-        min_dist = float('inf')
+        min_dist = float("inf")
+        T = self.transition_matrix.to(device=start_state.device, dtype=start_state.dtype)
+        C = self.control_matrix.to(device=start_state.device, dtype=start_state.dtype)
 
-        # Milyonlarca rastgele aksiyon denemesi (Arama Uzayı)
-        # Continuous aksiyon uzayında RL ajanları Policy Gradient kullanır,
-        # biz burada Random Sampling (Kaba RL simülasyonu) yapıyoruz.
         for _ in range(num_episodes):
-            action = torch.randn(self.action_dim)
-
-            # Dinamik modele göre 1 tur sonraki durum
-            # S' = T * S + C * A
-            next_state = torch.matmul(self.transition_matrix, start_state) + torch.matmul(self.control_matrix, action)
-
-            # Loss (Reward'ın tersi)
+            action = torch.randn(self.action_dim, device=start_state.device, dtype=start_state.dtype)
+            next_state = T @ start_state + C @ action
             dist = torch.norm(next_state - goal_state)
 
             if dist < min_dist:
@@ -59,26 +50,21 @@ class TopologicalPlanner:
 
     def topos_contravariant_pullback(self, start_state, goal_state):
         """
-        [TOPOS AI YAKLAŞIMI: KATEGORİK GERİ-ÇEKME (ADJOINT FUNCTORS)]
-        Zar atmak (RL) YERİNE;
-        Eğer S_goal = T * S_start + C * Action ise,
-        Action = C_pseudo_inverse * (S_goal - T * S_start)
+        Compute a least-squares action with the Moore-Penrose pseudo-inverse.
 
-        Bu, Hom(A, B) uzayındaki oku analitik olarak Geriye Çevirmektir
-        (Contravariant Functor / Pseudo-Inverse).
-        SIFIR Simülasyon, O(1) İşlem Süresi, KUSURSUZ DOĞRULUK!
+        Returns:
+            (action, residual_distance)
+
+        A residual near zero means the one-step goal is reachable under the
+        current linear model. A larger residual means the action is only the
+        closest least-squares solution.
         """
-        # S_goal - T * S_start (Ulaşmamız gereken fark / Vector)
-        state_diff = goal_state - torch.matmul(self.transition_matrix, start_state)
+        T = self.transition_matrix.to(device=start_state.device, dtype=start_state.dtype)
+        C = self.control_matrix.to(device=start_state.device, dtype=start_state.dtype)
+        state_diff = goal_state - T @ start_state
+        control_pinv = torch.linalg.pinv(C)
+        action = control_pinv @ state_diff
 
-        # C matrisinin Pseudo-Inverse'ini (Geri-Çekme Oku) al
-        C_pinv = torch.linalg.pinv(self.control_matrix)
-
-        # Kusursuz Aksiyonu (Optimal Policy) tek bir çarpımla bul!
-        optimal_action = torch.matmul(C_pinv, state_diff)
-
-        # Bu aksiyonu uyguladığımızda nereye varıyoruz?
-        predicted_state = torch.matmul(self.transition_matrix, start_state) + torch.matmul(self.control_matrix, optimal_action)
-        dist = torch.norm(predicted_state - goal_state)
-
-        return optimal_action, dist
+        predicted_state = T @ start_state + C @ action
+        residual = torch.norm(predicted_state - goal_state)
+        return action, residual

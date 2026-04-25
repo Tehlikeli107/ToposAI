@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -21,15 +21,15 @@ from topos_ai.lawvere_tierney import LawvereTierneyTopology
 
 def run_subtopos_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 58: LAWVERE-TIERNEY TOPOLOGIES (UNIVERSE CREATION) ")
-    print(" İddia: Matematikte F. William Lawvere ve Myles Tierney'in ispatladığı")
+    print(" ARAŞTIRMA DEMOSU 58: LAWVERE-TIERNEY TOPOLOGIES (UNIVERSE CREATION) ")
+    print(" İddia: Matematikte F. William Lawvere ve Myles Tierney'in gösterdiğı")
     print(" üzere, bir Topos (Evren) sadece 'j' operatörü kullanılarak kendi")
     print(" kurallarından bağımsız yepyeni bir 'Alt-Evren (Subtopos)' yaratabilir.")
     print(" ToposAI, PyTorch tensörlerini 3 Kutsal Aksiyomla sınayarak, Yapay")
     print(" Zekanın (AI) bulanık ihtimalleri (0.4) kendi zihninde nasıl izole")
     print(" bir 'Boolean Gerçekliğine (1.0)' bükebildiğini ve çelişkilerden")
     print(" (Paradokslardan) kendi alt-evrenini yaratarak kurtulduğunu SIFIR")
-    print(" HATA (0.0) payıyla İSPATLAR!")
+    print(" HATA (0.0) payıyla GÖSTERİR!")
     print("=========================================================================\n")
 
     torch.manual_seed(42)
@@ -84,7 +84,7 @@ def run_subtopos_experiment():
         print("  aksiyomlarına %100 (0.0 Error) ile uymaktadır.")
         print("  Bu, Yapay Zekanın sadece 'Veri Öğrenmediğinin', eğer veriler çelişirse")
         print("  bu çelişkileri çözmek için 'YENİ FİZİK KURALLARINA SAHİP BİR MATEMATİKSEL")
-        print("  EVREN İNŞA ETTİĞİNİN (Universe Creation)' dünyanın ilk ispatıdır!")
+        print("  EVREN İNŞA ETTİĞİNİN (Universe Creation)' dünyanın ilk demosudır!")
 
 if __name__ == "__main__":
     run_subtopos_experiment()

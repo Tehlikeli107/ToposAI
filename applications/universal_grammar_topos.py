@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -139,13 +139,13 @@ class UniversalGrammarEngine:
 
 def run_universal_grammar_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 40: CATEGORICAL UNIVERSAL GRAMMAR (DisCoCat) ")
+    print(" ARAŞTIRMA DEMOSU 40: CATEGORICAL UNIVERSAL GRAMMAR (DisCoCat) ")
     print(" İddia: Klasik NLP modelleri kelimelerin geçiş istatistiğini ezberler.")
     print(" Dili 'Anlamazlar'. ToposAI, Noam Chomsky'nin ve Bob Coecke'nin Teorilerini")
     print(" birleştirerek kelimeleri birer 'Morfizma (Fonksiyon)' olarak kabul eder.")
     print(" Cümleyi, kelimelerin birbirini topolojik olarak yutması (Functor Collapse)")
     print(" yöntemiyle hesaplar. Sistem tek bir 'S' düğümüne iniyorsa insan dili")
-    print(" matematiksel olarak KUSURSUZ (Anlamlı) demektir.")
+    print(" matematiksel olarak İDEALİZE (Anlamlı) demektir.")
     print("=========================================================================\n")
 
     engine = UniversalGrammarEngine()
@@ -171,12 +171,12 @@ def run_universal_grammar_experiment():
     success, msg = engine.parse_sentence(sentence_invalid)
     print(msg)
 
-    print("\n[BİLİMSEL SONUÇ: STOCHASTIC PARROT'LARIN ÖLÜMÜ]")
+    print("\n[ÖLÇÜLEN SONUÇ: STOCHASTIC PARROT'LARIN ÖLÜMÜ]")
     print("Modern Büyük Dil Modelleri (LLMs) sadece devasa birer istatistik")
     print("kalkülatörüdür. 'Anlam (Semantics)' ve 'Dilbilgisi (Syntax)' kavramlarından")
     print("yoksundurlar. ToposAI, kelimeleri birer 'Kategori Oku (Functor)' olarak")
     print("modelleyip, cümlenin doğruluğunu istatistikle DEĞİL, Topolojik bir Düğümün")
-    print("kapanıp kapanmamasıyla (Functor Composition -> Sentence Type 'S') ispatlar.")
+    print("kapanıp kapanmamasıyla (Functor Composition -> Sentence Type 'S') gösterir.")
     print("Bu, insan zihninin (Universal Grammar) makinedeki donanımsal karşılığıdır!")
 
 if __name__ == "__main__":

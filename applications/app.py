@@ -1,4 +1,4 @@
-import gradio as gr
+﻿import gradio as gr
 import torch
 import sys
 import os
@@ -81,7 +81,7 @@ def run_smart_contract_audit(solidity_code):
             
             if loop_exists and cei_violated:
                 print("🚨 KRİTİK ZAFİYET (CRITICAL VULNERABILITY): REENTRANCY (GERİ ÇAĞIRMA) AÇIĞI 🚨")
-                print(f"[KANIT]: Topos Matrisi, '{call_node}' satırının kendisini bir döngüye (Loop) sokabildiğini kanıtladı.")
+                print(f"[KANIT]: Topos Matrisi, '{call_node}' satırının kendisini bir döngüye (Loop) sokabildiğini gösterdi.")
                 print(f"[SEBEP]: Durum güncellemesi ('{state_update_node}') para transferinden SONRA yazılmış.")
                 print("[ÇÖZÜM]: Checks-Effects-Interactions (CEI) kuralını uygulayın. Bakiye güncellemesini '.call' satırından ÖNCEYE alın!")
             else:
@@ -140,7 +140,7 @@ with gr.Blocks(title="ToposAI Reasoning Engine") as app:
         # --- TAB 2: WEB3 SMART CONTRACT AUDITOR ---
         with gr.TabItem("🛡️ Web3 Smart Contract Auditor"):
             gr.Markdown("### Solidity Kod Denetimi (Reentrancy Loop Finder)")
-            gr.Markdown("GPT-4 veya standart LLM'ler kodu metin olarak okur ve prompt-injection ile kandırılabilir. ToposAI, kodu **Topolojik Kontrol Akış Grafiğine (CFG)** çevirir ve döngüleri (Hacker Loop) matematiksel olarak kanıtlar.")
+            gr.Markdown("GPT-4 veya standart LLM'ler kodu metin olarak okur ve prompt-injection ile kandırılabilir. ToposAI, kodu **Topolojik Kontrol Akış Grafiğine (CFG)** çevirir ve döngüleri (Hacker Loop) matematiksel olarak gösterir.")
             
             with gr.Row():
                 with gr.Column():

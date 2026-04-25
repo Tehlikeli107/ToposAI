@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -117,7 +117,7 @@ def run_hf_integration_experiment():
     
     print(f"  ToposAI'ın (Mantıksal) Tahmini: '{topos_prediction}'\n")
     
-    print("[BİLİMSEL SONUÇ: KANITLANDI]")
+    print("[ÖLÇÜLEN SONUÇ: KANITLANDI]")
     print(f"Standart LLM, internetteki kelime frekanslarına güvenerek (Cosine Similarity)")
     print(f"cümleyi '{raw_prediction}' ile tamamlamaya çalıştı.")
     print(f"Ancak bizim ToposAI HuggingFace Adaptörümüz, o kelimenin veya diğer yasaklı kelimelerin")

@@ -1,4 +1,4 @@
-import torch
+﻿import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -89,7 +89,7 @@ def train_functor_analogy():
         
     print("\nMATEMATİKSEL KANIT (Functor Commutativity):")
     print("Model, Biyolojideki 'Kalp -> Kan' okunu, Tesisattaki 'Motor -> Su' okuna haritaladı.")
-    print("Çünkü ağ, her iki evrenin Topolojik İskeletinin (Skeleton) birebir aynı (İzomorfik) olduğunu matematiksel olarak kanıtladı.")
+    print("Çünkü ağ, her iki evrenin Topolojik İskeletinin (Skeleton) birebir aynı (İzomorfik) olduğunu matematiksel olarak gösterdi.")
 
 if __name__ == "__main__":
     train_functor_analogy()

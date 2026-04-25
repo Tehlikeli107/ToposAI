@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -15,7 +15,7 @@ import numpy as np
 # (Sayısal İntegrasyon) gerek kalmadan, Kategori Teorisi ile kanıtlanabilir.
 # Yörüngesel Rezonanslar (Orbital Resonances) birer "Topos Oku"dur. 
 # Geçişlilik (Transitivity) ile kurulan "Rezonans Zincirleri", sistemin
-# sonsuza dek Topolojik olarak kilitlendiğini (Kararlı olduğunu) ispatlar.
+# sonsuza dek Topolojik olarak kilitlendiğini (Kararlı olduğunu) gösterir.
 # =====================================================================
 
 def godel_composition(R1, R2):
@@ -77,7 +77,7 @@ def is_in_resonance(period1, period2, tolerance=0.03):
 
 def run_astrophysics_topos_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 11: ASTROPHYSICS TOPOI (ORBITAL RESONANCE CHAINS)")
+    print(" ARAŞTIRMA DEMOSU 11: ASTROPHYSICS TOPOI (ORBITAL RESONANCE CHAINS)")
     print(" İddia: Klasik Astrofizik (N-Body), kararlılığı simüle etmek için GPU'da")
     print(" aylar harcar. ToposAI, 'Laplace Rezonanslarını' Kategorik oklara çevirip,")
     print(" sistemin 'Topolojik Kararlılık Eğilimini' (Topological Stability Tendency)")

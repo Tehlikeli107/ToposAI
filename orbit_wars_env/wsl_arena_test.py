@@ -8,28 +8,26 @@ from kaggle_environments import make
 
 # Baseline ajan ve Topos ajan dosya yolları
 baseline_agent_path = "/mnt/c/Users/salih/ToposAI/orbit_wars_env/main.py"
-topos_agent_path = "/mnt/c/Users/salih/ToposAI/applications/kaggle_orbit_wars_topos_agent.py"
+warlord_agent_path = "/mnt/c/Users/salih/ToposAI/applications/kaggle_orbit_wars_2500_elo.py"
 
-# Orbit wars çevresini başlat (2 ajanlı simülasyon)
+# Orbit wars çevresini başlat (4 ajanlı simülasyon)
 print("[WSL]: Kaggle Orbit Wars Ortamı (C++ Motoru) Başlatılıyor...")
-env = make("orbit_wars", debug=True, configuration={"episodeSteps": 100})
+env = make("orbit_wars", debug=True, configuration={"episodeSteps": 500})
 
-# Ajanları arenaya sok: ToposAI vs Kaggle Baseline
-print("[WSL]: ToposAI vs Kaggle Baseline (Greedy Sniper) Arenaya Yükleniyor...")
-# ToposAI dosyasında 'agent' adında callable bir wrapper yazmadığımız için,
-# WSL üzerinde denemek adına şimdilik iki baseline'ı veya baseline vs random yapıp 
-# arenanın çalıştığını test edelim.
-env.run([topos_agent_path, baseline_agent_path])
+# Ajanları arenaya sok: ToposAI Warlord vs 3x Kaggle Baseline
+print("[WSL]: ToposAI Warlord vs 3x Kaggle Baseline (4-Player FFA) Arenaya Yükleniyor...")
+env.run([warlord_agent_path, baseline_agent_path, baseline_agent_path, baseline_agent_path])
 
-print("\n--- 🏁 MAÇ SONUCU ---")
-rewards = env.steps[-1][0]['reward'], env.steps[-1][1]['reward']
-print(f"  ToposAI Ödülü: {rewards[0]} | Baseline Ödülü: {rewards[1]}")
+print("\n--- 🏁 MAÇ SONUCU (4 OYUNCULU KAOS) ---")
+rewards = [env.steps[-1][i]['reward'] for i in range(4)]
+print(f"  ToposAI Warlord: {rewards[0]}")
+print(f"  Baseline 1:      {rewards[1]}")
+print(f"  Baseline 2:      {rewards[2]}")
+print(f"  Baseline 3:      {rewards[3]}")
 
-if rewards[0] > rewards[1]:
-    print("\n🏆 KAZANAN: TOPOS AI (Category Theory Agent)!")
-elif rewards[1] > rewards[0]:
-    print("\n🏆 KAZANAN: KAGGLE BASELINE (Nearest Sniper)!")
+if rewards[0] == max(rewards):
+    print("\n🏆 KAZANAN: TOPOS AI (2500+ ELO Warlord)!")
 else:
-    print("\n🤝 SONUÇ: BERABERLİK (Draw)!")
+    print("\n🚨 KAZANAN: Düşman Botlarından Biri!")
 
 print("\n[WSL BİLGİ]: Kaggle C++ (OpenSpiel) Motoru Başarıyla Test Edildi!")

@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -13,7 +13,7 @@ import random
 # 'Kategori Oklarının (Morphism)' doygunluğuna bakar. Eğer elinde sağından
 # isim (N) isteyen bir sıfat varsa, oraya ASLA bir fiil yerleştirmez. 
 # Bu sayede sadece matematiksel/topolojik kuralları izleyerek %100
-# gramatik olarak kusursuz, sıfır-halüsinasyon (Zero-Hallucination)
+# gramatik olarak idealize, sıfır-halüsinasyon (Zero-Hallucination)
 # cümleler (S) SENTEZLEYEBİLİR (Generative Grammar).
 # =====================================================================
 
@@ -121,7 +121,7 @@ class GenerativeGrammarEngine:
 
 def run_generative_grammar_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 41: GENERATIVE GRAMMAR (SYNTACTIC TOY SYNTHESIS) ")
+    print(" ARAŞTIRMA DEMOSU 41: GENERATIVE GRAMMAR (SYNTACTIC TOY SYNTHESIS) ")
     print(" İddia: Büyük Dil Modelleri (LLMs) sonraki kelimeyi sadece istatistik")
     print(" (Olasılık Dağılımı) ile seçer. ToposAI ise, kelimeleri")
     print(" birer Kategori Oku (Functor) olarak alır ve açıkta kalan bağları ")

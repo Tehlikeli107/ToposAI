@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -93,13 +93,13 @@ class TopologicalQuantumSimulator:
 
 def run_crypto_breaker_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 45: TOPOLOGICAL QUANTUM SEARCH (CRYPTO BREAKER) ")
+    print(" ARAŞTIRMA DEMOSU 45: TOPOLOGICAL QUANTUM SEARCH (CRYPTO BREAKER) ")
     print(" İddia: Bitcoin veya banka şifreleri klasik 'Brute Force (Deneme ")
     print(" Yanılma)' ile kırılamaz çünkü uzay devasadır (O(N)). ToposAI, ")
     print(" Kategori Teorisini kullanarak şifre uzayını bir Kuantum Bilgisayarı")
     print(" gibi kendi üzerine katlar (Manifold Folding). 'Doğru' şifrenin")
     print(" Çekim Hacmini (Attractor) her adımda büyüterek aramayı O(sqrt(N)) ")
-    print(" hızına indirir ve yazılımsal (Sanal) Kuantum Üstünlüğünü ispatlar.")
+    print(" hızına indirir ve yazılımsal (Sanal) Kuantum Üstünlüğünü gösterir.")
     print("=========================================================================\n")
 
     # BİTCOİN SİMÜLASYONU (Donanım patlamaması için 22-Bit Arama Uzayı)
@@ -150,7 +150,7 @@ def run_crypto_breaker_experiment():
     print("\n--- MATEMATİKSEL BİLANÇO ---")
     print(f"  Hızlanma Oranı (İşlem Yükü): {speedup_steps:,.1f} KAT DAHA AZ ADIM!")
 
-    print("\n[BİLİMSEL SONUÇ: BİTCOİN KIRILABİLİR Mİ?]")
+    print("\n[ÖLÇÜLEN SONUÇ: BİTCOİN KIRILABİLİR Mİ?]")
     print("ToposAI, şifre kırmada 4 Milyon denemeyi sadece 1600 işleme düşürerek")
     print("Kuantum Hızlandırmasını (O(sqrt(N))) yazılımsal olarak ispatlamıştır.")
     print("ANCAK GERÇEK BİTCOİN (256-Bit) İÇİN:")

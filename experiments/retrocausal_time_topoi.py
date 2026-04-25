@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -82,12 +82,12 @@ class RetrocausalToposEngine:
 
 def run_time_symmetry_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 26: RETROCAUSAL TOPOI (DELAYED CHOICE QUANTUM ERASER) ")
+    print(" ARAŞTIRMA DEMOSU 26: RETROCAUSAL TOPOI (DELAYED CHOICE QUANTUM ERASER) ")
     print(" İddia: Klasik YZ, zamanı tek yönlü (Geçmiş -> Gelecek) bir ok olarak")
     print(" görür. ToposAI ise Kuantum Mekaniğindeki 'Gecikmiş Seçim' deneyini")
     print(" simüle eder. Gelecekte yapılan bir ölçümün (Future State), geçmişteki")
     print(" fotonun rotasını (Past State) nasıl değiştirdiğini, zamanı Topolojik")
-    print(" olarak tersine çevirerek (Adjoint Functors / R^T) İSPATLAR.")
+    print(" olarak tersine çevirerek (Adjoint Functors / R^T) GÖSTERİR.")
     print("=========================================================================\n")
 
     # Kuantum Gecikmiş Seçim Deneyi (Simplified)

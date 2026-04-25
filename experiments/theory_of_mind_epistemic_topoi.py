@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -70,11 +70,11 @@ class EpistemicToposEngine:
 
 def run_theory_of_mind_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 25: THEORY OF MIND & EPISTEMIC TOPOI (MACHINE EMPATHY) ")
+    print(" ARAŞTIRMA DEMOSU 25: THEORY OF MIND & EPISTEMIC TOPOI (MACHINE EMPATHY) ")
     print(" İddia: Klasik YZ'ler 'Başkalarının ne düşündüğünü' metin ezberleyerek")
     print(" taklit eder. ToposAI ise, her insanın zihnini paralel bir 'Presheaf'")
     print(" (Ön-Demet) matrisi olarak simüle eder ve 'Yanlış İnanç / Yalan'")
-    print(" kavramını matematiksel bir Topolojik Fark (Belief Gap) olarak ispatlar.")
+    print(" kavramını matematiksel bir Topolojik Fark (Belief Gap) olarak gösterir.")
     print("=========================================================================\n")
 
     # Nesneler: Top, Kutu_A, Kutu_B

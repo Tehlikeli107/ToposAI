@@ -1,4 +1,4 @@
-import torch
+﻿import torch
 import triton
 import triton.language as tl
 import time
@@ -123,10 +123,10 @@ def fetch_massive_wordnet_data(target_nodes=16384):
 
 def run_scale_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 5: MASSIVE SCALE REAL-WORLD ONTOLOGY (BIG DATA) ")
+    print(" ARAŞTIRMA DEMOSU 5: MASSIVE SCALE REAL-WORLD ONTOLOGY (BIG DATA) ")
     print(" İddia: ToposAI, 16.000 kelimelik devasa bir gerçek dünya haritasını")
     print(" (17 Terabayt RAM gerektiren işlemi) 'Tropical Semiring' kerneli ile")
-    print(" GPU üzerinde sıfır çökme ile (O(1) VRAM) dakikalar içinde çözer.")
+    print(" GPU üzerinde sıfır çökme ile (ölçülen VRAM) dakikalar içinde çözer.")
     print("=========================================================================\n")
     
     if not torch.cuda.is_available():

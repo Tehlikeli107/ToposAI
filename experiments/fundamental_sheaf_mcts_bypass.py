@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -13,12 +13,12 @@ import time
 # Problem: Sürekli (Continuous) uzay oyunlarında (Orbit Wars vb.)
 # sonsuz sayıda hamle açısı (0 ile 2*pi arası) vardır. AlphaGo gibi
 # sistemler (MCTS) bu açıları binlerce kez rastgele deneyerek (Sampling)
-# en iyisini bulmaya çalışır. Bu çok yavaştır ve asla %100 kusursuz olamaz.
+# en iyisini bulmaya çalışır. Bu çok yavaştır ve asla %100 idealize olamaz.
 # Çözüm: Kategori Teorisinde 'Pullback (Geri Çekme)', gelecekteki
 # (veya başka bir uzaydaki) hedefi, şu anki uzaya analitik olarak
 # yansıtır. ToposAI, binlerce simülasyon yapmak yerine hedefin 
 # 'Topolojik Çekim Merkezini (Attractor Pullback)' hesaplayarak
-# kusursuz açıyı tek işlemde O(1) bulur!
+# idealize açıyı tek işlemde analitik/ölçülen bulur!
 # =====================================================================
 
 def mcts_brute_force(my_pos, target_future_pos, num_samples=10000):
@@ -72,19 +72,19 @@ def categorical_sheaf_pullback(my_pos, target_future_pos):
 
 def run_sheaf_mcts_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 69: SHEAF PULLBACKS VS MONTE CARLO TREE SEARCH (MCTS) ")
+    print(" ARAŞTIRMA DEMOSU 69: SHEAF PULLBACKS VS MONTE CARLO TREE SEARCH (MCTS) ")
     print(" İddia: AlphaGo ve Kaggle Şampiyonları (2500+ Elo), doğru hamleyi bulmak")
     print(" için 'Monte Carlo Ağaç Arama (MCTS)' kullanarak geleceği binlerce kez")
     print(" kaba kuvvetle (Brute-Force) simüle eder. Sürekli (Continuous) uzayda")
-    print(" bu işlem CPU/GPU'yu kilitler ve asla kusursuz açıyı bulamaz.")
+    print(" bu işlem CPU/GPU'yu kilitler ve asla idealize açıyı bulamaz.")
     print(" ToposAI, Kategori Teorisinin 'Pullback (Geri Çekme)' teoremiyle,")
     print(" gelecekteki kazanma durumunu (Terminal Object) şu anki uzaya analitik")
-    print(" olarak yansıtır. 10.000 simülasyonun yapamadığını O(1) sürede SIFIR")
+    print(" olarak yansıtır. 10.000 simülasyonun yapamadığını tek analitik adımda SIFIR")
     print(" hata ile yaparak Dünya Şampiyonlarının algoritmasını (MCTS) YOK EDER!")
     print("=========================================================================\n")
 
     my_pos = (20.534, 15.112)
-    target_future_pos = (88.761, 92.443) # Kusursuz Kesişim Noktası
+    target_future_pos = (88.761, 92.443) # İdealize Kesişim Noktası
     
     print(f"[UZAY]: Bizim Konumumuz: {my_pos} | Hedefin Gelecekteki Konumu: {target_future_pos}")
     
@@ -110,22 +110,21 @@ def run_sheaf_mcts_experiment():
     t1_topos = time.time()
     time_topos = (t1_topos - t0_topos) * 1000 # ms
     
-    print(f"  > Bulunan Kusursuz Açı : {topos_angle:.6f} Radyan")
-    print(f"  > Hedefden Sapma (Iska): {topos_error:.6f} Birim (Sıfır Hata!)")
+    print(f"  > Bulunan İdealize Açı : {topos_angle:.6f} Radyan")
+    print(f"  > Hedefden Sapma (Iska): {topos_error:.6f} Birim")
     print(f"  > Harcanan Süre        : {time_topos:.3f} Milisaniye")
 
-    print("\n[BİLİMSEL SONUÇ: THE DEATH OF MONTE CARLO]")
+    print("\n[ÖLÇÜLEN SONUÇ: ANALYTIC GEOMETRY VS MCTS BASELINE]")
     speedup = time_mcts / time_topos if time_topos > 0 else float('inf')
     
     print(f"Hız Farkı: ToposAI, MCTS'den {speedup:.1f} KAT DAHA HIZLIDIR!")
     print("MCTS (Dünya Şampiyonlarının Botu), doğru açıyı bulmak için 10.000 farklı")
     print("ihtimali denemiş (Zar atmış), buna rağmen hedefi tam merkezden vuramayıp")
     print(f"{mcts_error:.6f} birim sapma (Iska) yaşamıştır.")
-    print("ToposAI ise Kategori Teorisinin 'Pullback' teoremiyle geleceği simüle")
-    print("etmeyi REDDETMİŞ; uzayın geometrisini analitik olarak geriye çekerek")
-    print("KUSURSUZ açıyı SIFIR simülasyon, SIFIR hata ve O(1) sürede bulmuştur.")
-    print("İşte bu yüzden saf matematik, en güçlü GPU'ların kaba kuvvetini her zaman")
-    print("yenecektir! Dünya Şampiyonlarının MCTS'si, ToposAI karşısında ilkel kalır!")
+    print("ToposAI tarafı, bilinen hedef geometrisi için analitik açı hesabı yapar;")
+    print("bu yüzden bu idealize senaryoda random search baseline'dan daha hızlıdır.")
+    print("Bu sonuç MCTS'i genel olarak geçersiz kılmaz; sadece bu oyuncak problemde")
+    print("kapalı-form geometri çözümünün avantajını gösterir.")
 
 if __name__ == "__main__":
     run_sheaf_mcts_experiment()

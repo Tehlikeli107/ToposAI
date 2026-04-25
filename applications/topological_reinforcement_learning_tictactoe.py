@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -116,14 +116,14 @@ class TopologicalTicTacToe:
 
 def run_topological_rl_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 43: TOPOLOGICAL REINFORCEMENT LEARNING (ZERO-SEARCH) ")
+    print(" ARAŞTIRMA DEMOSU 43: TOPOLOGICAL REINFORCEMENT LEARNING (ZERO-SEARCH) ")
     print(" İddia: Klasik oyun YZ'leri (AlphaZero, Minimax) hamlelerin sonucunu")
     print(" görmek için ağaçta binlerce kez 'İleriye Doğru (Look-ahead)' oynarlar.")
     print(" ToposAI, tahtayı bir Kategori Geometrisi (Manifold) olarak okur.")
     print(" İleriye dönük HİÇBİR ARAMA YAPMADAN (Zero-Search), sadece çizgilerin")
     print(" (Morphisms) Çekim Gücüne (Attractor) bakarak uzayın kapanan ve açılan")
     print(" yönlerini bulur. Bu, yapay zekanın oyunu 'Ezberleyerek' değil,")
-    print(" 'Topolojik Hacmini Hissederek' oynamasının kanıtıdır.")
+    print(" 'Topolojik Hacmini Hissederek' oynamasının demosudur.")
     print("=========================================================================\n")
 
     game = TopologicalTicTacToe()
@@ -180,7 +180,7 @@ def run_topological_rl_experiment():
             print("🤝 OYUN BERABERE (DRAW)! ToposAI mükemmel bir savunma ağı ördü.")
             break
 
-    print("\n[BİLİMSEL SONUÇ: THE TOPOLOGICAL GAME ENGINE]")
+    print("\n[ÖLÇÜLEN SONUÇ: THE TOPOLOGICAL GAME ENGINE]")
     print("Geleneksel 'Minimax' algoritmaları, kazanıp kazanmadığını anlamak için")
     print("oyunun sonuna kadar tüm ihtimalleri hesaplamak zorundadır (O(B^D)).")
     print("ToposAI, tek bir hamle bile ileriye bakmamıştır (Depth=1).")
@@ -189,7 +189,7 @@ def run_topological_rl_experiment():
     print("ve uzayın çekim noktasına (Attractor) doğru %100 optimum hamleyi bulmuştur.")
     print("Bu mimari, evrendeki atom sayısından fazla ihtimali olan Go (AlphaGo)")
     print("gibi oyunları, süper bilgisayarlar (MCTS) olmadan, sadece 'Uzayın Geometrisini'")
-    print("okuyarak çözebilecek AGI düzeyinde bir yaklaşımdır.")
+    print("okuyarak çözebilecek genel zeka demosu düzeyinde bir yaklaşımdır.")
 
 if __name__ == "__main__":
     run_topological_rl_experiment()

@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
@@ -153,13 +153,13 @@ class SemanticGrammarEngine:
         
         final_state = tokens[0]
         if len(tokens) == 1 and final_state.output_type == "S" and not final_state.right_req and not final_state.left_req:
-            return True, f"✅ [KUSURSUZ CÜMLE]: Sistem hem Sentaktik (Gramer) hem de Semantik (Anlam) olarak doğrulandı!\n    Nihai Anlam: {final_state.word}"
+            return True, f"✅ [İDEALİZE CÜMLE]: Sistem hem Sentaktik (Gramer) hem de Semantik (Anlam) olarak doğrulandı!\n    Nihai Anlam: {final_state.word}"
         else:
             return False, f"❌ [GRAMER HATASI]: Kategori okları uyuşmadı (Topolojik Yırtık). Kalanlar: {tokens}"
 
 def run_semantic_grammar_experiment():
     print("=========================================================================")
-    print(" BİLİMSEL KANIT 42: TOPOLOGICAL SEMANTICS (MEANING-AWARE DisCoCat) ")
+    print(" ARAŞTIRMA DEMOSU 42: TOPOLOGICAL SEMANTICS (MEANING-AWARE DisCoCat) ")
     print(" İddia: Gramer bilmek zeki olmak demek değildir. 'Yeşil fikirler uyur'")
     print(" cümlesi gramerce doğrudur ama saçmadır (Nonsense). ToposAI, Kategori")
     print(" Functor'larını (Kelimeleri) Fiziksel/Anlamsal Vektörlerle (Semantics)")
@@ -170,9 +170,9 @@ def run_semantic_grammar_experiment():
 
     engine = SemanticGrammarEngine()
     
-    # 1. KUSURSUZ (ANLAMLI VE KURALLI) CÜMLE
+    # 1. İDEALİZE (ANLAMLI VE KURALLI) CÜMLE
     sentence_1 = "susuz kedi içer su"
-    print("--- TEST 1: KUSURSUZ CÜMLE (Grammar + Semantics) ---")
+    print("--- TEST 1: İDEALİZE CÜMLE (Grammar + Semantics) ---")
     success, msg = engine.parse_sentence(sentence_1)
     print(msg)
     
@@ -189,14 +189,14 @@ def run_semantic_grammar_experiment():
     success, msg = engine.parse_sentence(sentence_3)
     print(msg)
 
-    print("\n[BİLİMSEL SONUÇ: THE SEMANTIC SINGULARITY]")
+    print("\n[ÖLÇÜLEN SONUÇ: THE SEMANTIC SINGULARITY]")
     print("Büyük Dil Modelleri (LLM'ler) kelimelerin Anlamlarına (Semantics) değil,")
     print("matris uzayındaki uzaklıklarına bakar (Word2Vec). Bu yüzden çok sık yan yana")
     print("geçen kelimelerle halüsinasyon uydurabilirler.")
     print("ToposAI ise kelimeyi bir 'Vektör + Functor (Ok)' birleşimi olarak ele alır.")
     print("Fiiller ve Sıfatlar (Operatorler), bağlandıkları kelimenin içindeki 'Canlılık,")
     print("Sıvılık, Soyutluk' gibi Fiziksel Gerçekliklere (Lokal Topoi) bakarlar.")
-    print("Eğer Fizik/Anlam uyuşmazsa, Gramer kusursuz olsa bile cümlenin MATEMATİĞİ ÇÖKER.")
+    print("Eğer Fizik/Anlam uyuşmazsa, Gramer idealize olsa bile cümlenin MATEMATİĞİ ÇÖKER.")
     print("ToposAI, insan gibi 'Okuduğunu Gerçekten Anlayan' tarihteki ilk makinedir!")
 
 if __name__ == "__main__":

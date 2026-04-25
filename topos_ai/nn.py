@@ -4,21 +4,21 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# =====================================================================
-# TOPOS-LLM CORE ARCHITECTURE (THE LLAMA-CLASS UPGRADE)
-# Bu modül, ToposAI'ı bir "Proof of Concept" olmaktan çıkarıp, Llama-3
-# veya Mistral gibi endüstriyel modellere kafa tutabilecek devasa bir
-# "Büyük Dil Modeli (LLM)" mimarisine (RoPE, SwiGLU, KV-Cache) dönüştürür.
-# =====================================================================
+# Core neural layers used by ToposAI prototypes.
+#
+# These modules combine standard language-model ingredients (RoPE, gated
+# feed-forward layers, KV cache) with category-theory-inspired tensor
+# operators. They are research components, not a claim of parity with
+# production Llama/Mistral-class models.
+
 
 def precompute_freqs_cis(dim: int, end: int, theta: float = 10000.0):
     """
-    [ROTARY POSITION EMBEDDING (RoPE) - Kategori Teorisinde Functor]
-    Kelimelerin cümledeki sırasını 'mutlak' bir sayı olarak değil,
-    kompleks düzlemde birbirlerine göre bir 'Açı (Rotasyon)' olarak kodlar.
-    Bu, ToposAI'ın sabit bağlam (Context) penceresini kırıp çok daha uzun
-    metinleri okuyabilmesini (Uzun Bağlam - Long Context) sağlar.
-    (Not: RoPE tek başına 'Infinite Context' sağlamaz, S17 FIX).
+    Precompute rotary-position embedding frequencies.
+
+    RoPE encodes relative position through complex rotations. It can improve
+    extrapolation behavior in some settings, but by itself it is not an
+    infinite-context mechanism.
     """
     freqs = 1.0 / (theta ** (torch.arange(0, dim, 2)[: (dim // 2)].float() / dim))
     t = torch.arange(end, device=freqs.device, dtype=torch.float32)
@@ -26,8 +26,9 @@ def precompute_freqs_cis(dim: int, end: int, theta: float = 10000.0):
     freqs_cis = torch.polar(torch.ones_like(freqs), freqs)  # complex64
     return freqs_cis
 
+
 def apply_rotary_emb(xq: torch.Tensor, xk: torch.Tensor, freqs_cis: torch.Tensor):
-    """Q ve K vektörlerini kompleks düzlemde (Euler Açısı) döndürür."""
+    """Rotate Q and K vectors in the complex plane."""
     # xq: [B, SeqLen, H, D_head]
     xq_ = torch.view_as_complex(xq.float().reshape(*xq.shape[:-1], -1, 2))
     xk_ = torch.view_as_complex(xk.float().reshape(*xk.shape[:-1], -1, 2))
@@ -39,6 +40,7 @@ def apply_rotary_emb(xq: torch.Tensor, xk: torch.Tensor, freqs_cis: torch.Tensor
     xk_out = torch.view_as_real(xk_ * freqs_cis).flatten(3)
     return xq_out.type_as(xq), xk_out.type_as(xk)
 
+
 class TopologicalLinear(nn.Module):
     """
     [PURE TOPOS LINEAR PROJECTION]
@@ -48,6 +50,7 @@ class TopologicalLinear(nn.Module):
     Bu sınıf, öğrenilebilir ağırlıkları her zaman (sigmoid ile) 0.0 ile 1.0
     arasına hapseder. Negatif bilgi (Eksi ok) kavramı yoktur.
     """
+
     def __init__(self, in_features, out_features, bias=False):
         super().__init__()
         self.in_features = in_features
@@ -59,7 +62,7 @@ class TopologicalLinear(nn.Module):
         if bias:
             self.bias_raw = nn.Parameter(torch.zeros(out_features))
         else:
-            self.register_parameter('bias_raw', None)
+            self.register_parameter("bias_raw", None)
 
     def forward(self, x):
         # Ağırlıkları Kategori Teorisinin doğasına ([0, 1]) zorla
@@ -75,6 +78,7 @@ class TopologicalLinear(nn.Module):
         # ancak doğrusal projeksiyonda ağırlıklı toplamlar büyüyebilir.
         return out
 
+
 class TopologicalNorm(nn.Module):
     """
     [SHEAF NORMALIZATION]
@@ -83,13 +87,14 @@ class TopologicalNorm(nn.Module):
     Bu Norm, vektördeki değerleri [0, 1] aralığına doğrusal olarak yayar (Min-Max Scaling)
     veya sadece maksimum ok gücüne bölerek normalize eder.
     """
+
     def __init__(self, d_model, eps=1e-6):
         super().__init__()
         self.eps = eps
         # Öğrenilebilir ölçek (Scale) ve kaydırma (Shift) [0, 1] arası olmalı
         self.weight = nn.Parameter(torch.ones(d_model))
         # Norm bias'ının başlangıçta her şeye 0.5 (sigmoid(0)) eklememesi için
-        self.bias = nn.Parameter(torch.full((d_model,), -4.0)) # sigmoid(-4) ≈ 0.018
+        self.bias = nn.Parameter(torch.full((d_model,), -4.0))  # sigmoid(-4) ≈ 0.018
 
     def forward(self, x):
         # x: [B, SeqLen, D]
@@ -104,6 +109,7 @@ class TopologicalNorm(nn.Module):
         out = x_norm * torch.sigmoid(self.weight) + torch.sigmoid(self.bias)
         return torch.clamp(out, min=0.0, max=1.0)
 
+
 class TopologicalFFN(nn.Module):
     """
     [PURE TOPOS FEED-FORWARD (Fuzzy Logic Gate)]
@@ -111,6 +117,7 @@ class TopologicalFFN(nn.Module):
     TopologicalFFN, ağırlıkları her zaman [0, 1] arasında tutar.
     Katmanlar arası mantıksal AND (min) ve OR (max) işlemlerini simüle eder.
     """
+
     def __init__(self, in_features, hidden_features, out_features):
         super().__init__()
         # Ağırlıklar doğrudan [0, 1] olasılıkları olarak öğrenilecek (TopoLinear)
@@ -133,13 +140,18 @@ class TopologicalFFN(nn.Module):
 
         # Çıktı yine [0, 1] arasına sıkıştırılır
         return torch.clamp(w2_out, min=0.0, max=1.0)
+
+
 class TopologicalMoERouter(nn.Module):
     """
-    [MIXTURE OF EXPERTS (MoE) ROUTER]
-    Her kelime (Token) için 8 Evrenden (Expert) sadece en ilgili 2 tanesini seçer.
-    Bu, modelin trilyon parametreye çıkmasını ama sadece küçük bir kısmının
-    (Sparse) çalışarak O(1) hızında kalmasını sağlar (Örn: Mixtral 8x7B mantığı).
+    Mixture-of-experts router.
+
+    For each token, this selects the top-k universes/experts. The current
+    PyTorch path uses sparse indexing for selected expert projections, but it
+    is not a blanket O(1) speed guarantee. Real throughput depends on tensor
+    shapes, routing density, and whether a fused/custom kernel is available.
     """
+
     def __init__(self, d_model, num_universes, top_k=2):
         super().__init__()
         self.router_weights = TopologicalLinear(d_model, num_universes, bias=False)
@@ -147,7 +159,7 @@ class TopologicalMoERouter(nn.Module):
 
     def forward(self, x):
         # x: [B, SeqLen, D]
-        router_logits = self.router_weights(x) # [B, SeqLen, num_universes]
+        router_logits = self.router_weights(x)  # [B, SeqLen, num_universes]
 
         # Oyları olasılıklara (Routing probabilities) çevir
         routing_probs = F.softmax(router_logits, dim=-1)
@@ -160,6 +172,7 @@ class TopologicalMoERouter(nn.Module):
 
         return top_k_probs, top_k_indices
 
+
 class MultiUniverseToposAttention(nn.Module):
     """
     [SPARSE TOPOS MoE ATTENTION]
@@ -167,6 +180,7 @@ class MultiUniverseToposAttention(nn.Module):
     eksikliğinden dolayı Dense hesaplanıp Sparse maskelenen MoE yapısı (S12 FIX).
     Kategori Teorisi'nin (Local Presheaves) donanım verimliliğine dönüşmüş halidir.
     """
+
     def __init__(self, d_model, num_universes, top_k=2):
         super().__init__()
         self.num_universes = num_universes
@@ -187,15 +201,40 @@ class MultiUniverseToposAttention(nn.Module):
 
         # 1. MoE Yönlendirmesi (Routing)
         # Her token için hangi 2 evrenin çalışacağını buluyoruz
-        top_k_probs, top_k_indices = self.router(x) # probs: [B, SeqLen, top_k], indices: [B, SeqLen, top_k]
+        top_k_probs, top_k_indices = self.router(x)  # probs: [B, SeqLen, top_k], indices: [B, SeqLen, top_k]
 
-        # 2. Tüm Evrenlerin Projeksiyonları
-        # (Not: İddiamız olan O(1) Sparse computation tam olarak çalışması için
-        # CUDA kernel gerekir. PyTorch batch matmul kolaylığı için burada
-        # Dense olarak hesaplayıp sonra maskeliyoruz (Simulation of Sparsity).)
-        Q_new = self.q_proj(x).view(B, SeqLen, self.num_universes, self.d_universe)
-        K_new = self.k_proj(x).view(B, SeqLen, self.num_universes, self.d_universe)
-        V_new = self.v_proj(x).view(B, SeqLen, self.num_universes, self.d_universe)
+        # 2. Selected-universe projections.
+        # This avoids applying every universe slice to every token in Python,
+        # but it is still an eager PyTorch implementation rather than a fused
+        # sparse MoE kernel.
+        Q_new = torch.zeros(B, SeqLen, self.num_universes, self.d_universe, device=x.device)
+        K_new = torch.zeros(B, SeqLen, self.num_universes, self.d_universe, device=x.device)
+        V_new = torch.zeros(B, SeqLen, self.num_universes, self.d_universe, device=x.device)
+
+        W_q = torch.sigmoid(self.q_proj.weight_raw)
+        W_k = torch.sigmoid(self.k_proj.weight_raw)
+        W_v = torch.sigmoid(self.v_proj.weight_raw)
+
+        for u in range(self.num_universes):
+            mask_u = (top_k_indices == u).any(dim=-1)  # [B, SeqLen]
+            if not mask_u.any():
+                continue
+
+            x_u = x[mask_u]  # [N_u, D]
+
+            W_q_u = W_q[u * self.d_universe : (u + 1) * self.d_universe, :]
+            W_k_u = W_k[u * self.d_universe : (u + 1) * self.d_universe, :]
+            W_v_u = W_v[u * self.d_universe : (u + 1) * self.d_universe, :]
+
+            q_slice = Q_new[:, :, u, :]
+            k_slice = K_new[:, :, u, :]
+            v_slice = V_new[:, :, u, :]
+            q_slice[mask_u] = F.linear(x_u, W_q_u)
+            k_slice[mask_u] = F.linear(x_u, W_k_u)
+            v_slice[mask_u] = F.linear(x_u, W_v_u)
+            Q_new[:, :, u, :] = q_slice
+            K_new[:, :, u, :] = k_slice
+            V_new[:, :, u, :] = v_slice
 
         # [KV-CACHE VE RoPE DÜZELTMESİ (P11/P12)]
         # RoPE sadece YENİ (Q_new ve K_new) vektörlere uygulanır.
@@ -214,15 +253,15 @@ class MultiUniverseToposAttention(nn.Module):
         # Gelecek adımlar için cache'i güncelle
         new_kv_cache = (K_all, V_all)
 
-        Q_all = torch.sigmoid(Q_new).transpose(1, 2).contiguous() # [B, U, Seq, D_u]
-        K_all = torch.sigmoid(K_all).transpose(1, 2).contiguous() # [B, U, Cache_Seq, D_u]
+        Q_all = torch.sigmoid(Q_new).transpose(1, 2).contiguous()  # [B, U, Seq, D_u]
+        K_all = torch.sigmoid(K_all).transpose(1, 2).contiguous()  # [B, U, Cache_Seq, D_u]
         V_all = V_all.transpose(1, 2).contiguous()
 
-        # 3. Topos Mantığı (Lukasiewicz Implication)
-        Q_exp = Q_all.unsqueeze(3) # [B, U, Seq, 1, D_u]
-        K_exp = K_all.unsqueeze(2) # [B, U, 1, Cache_Seq, D_u]
-        implication = torch.clamp(1.0 - Q_exp + K_exp, min=0.0, max=1.0)
-        truth_matrix = implication.mean(dim=-1) # [B, U, Seq, Cache_Seq]
+        # 3. Goedel-Heyting internal hom.
+        Q_exp = Q_all.unsqueeze(3)  # [B, U, Seq, 1, D_u]
+        K_exp = K_all.unsqueeze(2)  # [B, U, 1, Cache_Seq, D_u]
+        implication = torch.where(Q_exp <= K_exp, torch.ones_like(K_exp), K_exp)
+        truth_matrix = implication.mean(dim=-1)  # [B, U, Seq, Cache_Seq]
 
         if mask is not None:
             # Geleceğe giden nedensellik oklarını iptal et (0.0 ile çarp)
@@ -236,43 +275,36 @@ class MultiUniverseToposAttention(nn.Module):
         row_sums = truth_matrix.sum(dim=-1, keepdim=True) + 1e-9
         attn_weights = truth_matrix / row_sums
 
-        out_all_universes = torch.matmul(attn_weights, V_all) # [B, U, Seq, D_u]
-        out_all_universes = out_all_universes.transpose(1, 2).contiguous() # [B, Seq, U, D_u]
+        out_all_universes = torch.matmul(attn_weights, V_all)  # [B, U, Seq, D_u]
+        out_all_universes = out_all_universes.transpose(1, 2).contiguous()  # [B, Seq, U, D_u]
 
-        # 4. SADECE SEÇİLEN 2 EVRENİ (TOP-K) BİRLEŞTİRME (Sheaf Gluing)
-        # Seçilmeyen 6 evrenin ürettiği sonuçlar ÇÖPE GİDER (Sıfırlanır).
-        # Her token kendi seçtiği 2 uzmanın cevabını (router ağırlıklarına göre) alır.
+        # 4. Combine selected universes only.
+        # The dense output projection is replaced with per-universe selected
+        # slices. Benchmark before claiming wall-clock speedups: Python-level
+        # sparse routing can lose to dense kernels on small tensors.
+        final_out = torch.zeros(B, SeqLen, D, device=x.device)
+        W_out = torch.sigmoid(self.out_proj.weight_raw)
 
-        final_out = torch.zeros(B, SeqLen, self.d_universe * self.num_universes, device=x.device)
+        for u in range(self.num_universes):
+            mask_u = top_k_indices == u  # [B, SeqLen, top_k]
+            any_mask_u = mask_u.any(dim=-1)  # [B, SeqLen]
 
-        # (PyTorch scatter/gather işlemleriyle hızlı MoE birleştirme)
-        for k in range(self.top_k):
-            # i. seçilen uzmanların ID'leri
-            expert_idx = top_k_indices[:, :, k] # [B, SeqLen]
-            expert_weights = top_k_probs[:, :, k].unsqueeze(-1) # [B, SeqLen, 1]
+            if not any_mask_u.any():
+                continue
 
-            # Bu tokenların seçtiği uzmanların ürettiği D_u boyutundaki çıktılar
-            # (Gather işlemi: out_all_universes matrisinden o anki tokenin seçtiği U. indexteki vektörü çek)
-            # index shape [B, SeqLen, 1, D_u] olmalı
-            idx_expanded = expert_idx.unsqueeze(2).unsqueeze(3).expand(B, SeqLen, 1, self.d_universe)
-            expert_out = torch.gather(out_all_universes, dim=2, index=idx_expanded).squeeze(2) # [B, SeqLen, D_u]
+            weights_u = (top_k_probs * mask_u).sum(dim=-1)[any_mask_u]  # [N_u]
+            out_u = out_all_universes[:, :, u, :][any_mask_u]  # [N_u, D_u]
+            out_u_scaled = out_u * weights_u.unsqueeze(-1)  # [N_u, D_u]
 
-            # Uzmanın çıktısını router oyu ile çarpıp, kendi evrenindeki (D) asıl yerine koy
-            # (Burada tam bir FFN-MoE yerine Attention-MoE yaptığımız için, ilgili evrenin dilimine ekliyoruz)
+            # İlgili evrenin out_proj ağırlıkları
+            W_out_u = W_out[:, u * self.d_universe : (u + 1) * self.d_universe]  # [D, D_u]
+            proj_u = F.linear(out_u_scaled, W_out_u)  # [N_u, D]
 
-            batch_indices = torch.arange(B).unsqueeze(1).expand(B, SeqLen)
-            seq_indices = torch.arange(SeqLen).unsqueeze(0).expand(B, SeqLen)
+            # Sparse toplama
+            final_out[any_mask_u] += proj_u
 
-            # expert_out'u (D_u) ana uzayda (D) uygun yere (expert_idx * D_u) yerleştir (Maskele)
-            # Bu kısım teorik olarak çok spesifiktir, basitlik adına hepsini D'ye yayıp topluyoruz
-            # Gerçek MoE'de Out_Proj'dan önce D_u'luk kısım kendi uzayında kalır.
-            # Şimdilik "Ağırlıklı Toplam (Weighted Sum)" yapıp her evrenin yerine koyacağız.
+        return final_out, new_kv_cache
 
-            mask_D = torch.zeros(B, SeqLen, self.num_universes, self.d_universe, device=x.device)
-            mask_D[batch_indices, seq_indices, expert_idx, :] = expert_out * expert_weights
-            final_out += mask_D.view(B, SeqLen, D)
-
-        return self.out_proj(final_out), new_kv_cache
 
 class YonedaEmbedding(nn.Module):
     """
@@ -281,6 +313,7 @@ class YonedaEmbedding(nn.Module):
     diğer tüm kelimelere olan Oklar (Morphism) üzerinden hesaplar.
     O(V^2) hafıza patlamasını (40GB VRAM) U (V x r) ve W (r x V) matrislerine böler.
     """
+
     def __init__(self, vocab_size, rank=128):
         super().__init__()
         self.vocab_size = vocab_size
@@ -292,7 +325,7 @@ class YonedaEmbedding(nn.Module):
     def forward(self, idx):
         selected_U = F.embedding(idx, self.U)
         logits = torch.matmul(selected_U, self.W)
-        return torch.sigmoid(logits) # Topos (0, 1) olasılık uzayı
+        return torch.sigmoid(logits)  # Topos (0, 1) olasılık uzayı
 
     def get_morphisms(self):
         """
