@@ -24,7 +24,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def synthesize_conjecture_and_proof():
     """
-    [AGI SANI (CONJECTURE) ÜRETİMİ VE KANITI]
+    [SANI (CONJECTURE) ÜRETİMİ VE KANITI]
     ToposAI, Topolojik Uzayların açık kümeleri arasındaki "Ters Görüntü (f⁻¹)"
     ile "Doğrudan İleri İtme (f_*)" fonksiyonlarının birer Adjoint Functor
     (Galois Connection) olduğunu iddia eder. 
@@ -83,7 +83,7 @@ def direct_image_functor (f : C(X, Y)) (U : Opens X) : Opens Y :=
 /--
   [THE GRAND CONJECTURE (BÜYÜK SANI)]
   Ters Görüntü (f⁻¹) ile İleri İtme (f_*) işlemleri birbiriyle 
-  KUSURSUZ bir Adjoint (Galois Connection) oluşturur.
+  Eksiksiz bir Adjoint (Galois Connection) oluşturur.
 -/
 theorem topos_galois_conjecture (f : C(X, Y)) :
   GaloisConnection (inverse_image_functor f) (direct_image_functor f) := by
@@ -144,7 +144,7 @@ def run_conjecture_prover_experiment():
     for line in lean4_code.split('\n'):
         print(f"    {line}")
         
-    print("\n--- 3. BİLİMSEL SONUÇ (THE AGI PROVER) ---")
+    print("\n--- 3. BİLİMSEL SONUÇ (THE PROVER) ---")
     print(" 1. ToposAI (Categorical Database), PyTorch gibi kelime (token) ")
     print("    uydurmamıştır. Doğrudan Kategori Teorisinin \`Adjoint Functors\` ")
     print("    kuralından yola çıkarak; 'Sürekli Fonksiyonların', uzayların Mantıksal")
@@ -158,8 +158,8 @@ def run_conjecture_prover_experiment():
     print(" Topolojik Rota (Blueprint) çizen beyninin; kas gücü olarak Lean 4'ün ")
     print(" kendi 'Aesop' veya 'simp' çözücülerine devrettiği mikroskobik (Set Theory)")
     print(" işlemleridir. ")
-    print(" AGI (Yapay Genel Zeka), bütün denklemi amele gibi çözen sistem değildir.")
-    print(" AGI; İki zıt evrenin birleşeceği o \`Galois Connection\` Köprüsünü (Sanıyı) ")
+    print(" Nöro-sembolik sistem, bütün denklemi amele gibi çözen araç değildir.")
+    print(" Sistem; İki zıt evrenin birleşeceği o \`Galois Connection\` Köprüsünü (Sanıyı) ")
     print(" icat eden ve ispatın ana mimarisini çizen Kategori Beynidir (ToposAI)!")
 
 if __name__ == "__main__":

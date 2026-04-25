@@ -508,3 +508,57 @@ def test_package_exports_core_math_modules():
         "rl_killer",
     ):
         assert name in topos_ai.__all__
+
+
+def test_free_category_generator_basic_path():
+    from topos_ai.lazy.free_category import FreeCategoryGenerator
+
+    gen = FreeCategoryGenerator()
+    gen.add_morphism("f", "A", "B")
+    gen.add_morphism("g", "B", "C")
+    gen.add_morphism("h", "C", "D")
+
+    # Identity path
+    assert gen.find_morphism_path_lazy("A", "A") == "id_A"
+
+    # Direct single-step
+    assert gen.find_morphism_path_lazy("A", "B") == "f"
+
+    # Multi-step composition (right-to-left notation)
+    path = gen.find_morphism_path_lazy("A", "C")
+    assert path == "g o f"
+
+    # Three-hop
+    path = gen.find_morphism_path_lazy("A", "D")
+    assert path == "h o g o f"
+
+    # Disconnected returns None
+    gen2 = FreeCategoryGenerator()
+    gen2.add_morphism("x", "X", "Y")
+    assert gen2.find_morphism_path_lazy("X", "Z") is None
+
+
+def test_free_category_generator_exception_sieve():
+    from topos_ai.lazy.free_category import FreeCategoryGenerator
+
+    gen = FreeCategoryGenerator()
+    gen.add_morphism("flies", "Bird", "Sky")
+    gen.add_morphism("swims", "Bird", "Water")
+
+    # Exception sieve blocks a specific route
+    result = gen.find_morphism_path_lazy("Bird", "Sky", exceptions=[("Bird", "Sky")])
+    assert result is None
+
+    # Without exception, route exists
+    assert gen.find_morphism_path_lazy("Bird", "Sky") == "flies"
+
+
+def test_free_category_generator_duplicate_edge_ignored():
+    from topos_ai.lazy.free_category import FreeCategoryGenerator
+
+    gen = FreeCategoryGenerator()
+    gen.add_morphism("f1", "A", "B")
+    gen.add_morphism("f2", "A", "B")  # duplicate target — should be ignored
+
+    # Only one edge from A to B
+    assert len(gen.generators.get("A", [])) == 1

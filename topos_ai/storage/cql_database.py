@@ -19,21 +19,21 @@ class CategoricalDatabase:
     def __init__(self, db_name: str = ":memory:"):
         self.db_name = db_name
         self.conn = sqlite3.connect(db_name)
-        
+
         # [THE HARDWARE BYPASS / DATABASE OPTIMIZATION]
-        # In Experiment 47 (The Grand Benchmark), computing 1 Million+ categorical 
-        # compositions (Transitive Closures) caused a 5-minute lockup. 
-        # The math (SQL JOIN) was instant, but writing millions of rows to disk 
+        # In Experiment 47 (The Grand Benchmark), computing 1 Million+ categorical
+        # compositions (Transitive Closures) caused a 5-minute lockup.
+        # The math (SQL JOIN) was instant, but writing millions of rows to disk
         # (Disk I/O bottleneck) crashed the system due to SQLite's ACID safety checks.
         #
-        # By applying these PRAGMA configurations, we instruct the database to prioritize 
-        # raw speed (RAM-buffered writes) over power-failure safety, achieving 
+        # By applying these PRAGMA configurations, we instruct the database to prioritize
+        # raw speed (RAM-buffered writes) over power-failure safety, achieving
         # a 100x-1000x speedup in massive Knowledge Graph insertions!
         self.conn.execute("PRAGMA synchronous = OFF;")
         self.conn.execute("PRAGMA journal_mode = MEMORY;")
         self.conn.execute("PRAGMA temp_store = MEMORY;")
         self.conn.execute("PRAGMA cache_size = -100000;") # ~100MB RAM Cache for B-Trees
-        
+
         self.cursor = self.conn.cursor()
         self._setup_schema()
 

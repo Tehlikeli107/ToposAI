@@ -185,7 +185,7 @@ def run_grand_benchmark():
     print(f"    Kurulum: {b2:.3f}s | RAM: {m2:.2f} MB | Milyon Ok Kapanımı: {q2:.3f}s")
     print("    * Yorum: Disk IO nedeniyle yavaş kurulur. Ancak RAM'i SIFIRA yakın harcar.")
     print("      'A'dan B'ye giden milyonlarca okun' tümünü kalıcı, formal yeni Teoremlere")
-    print("      (Ok İsimlerine) çeviren ve bunu diskte ölümsüzleştiren Tek Nöro-Sembolik AGI'dır.")
+    print("      (Ok İsimlerine) çeviren ve bunu diskte ölümsüzleştiren Tek Nöro-Sembolik Sistemdir.")
     print(f"\n 3. TOPOS LAZY (ZERO-RAM ENGINE):")
     print(f"    Kurulum: {b3:.3f}s | RAM: {m3:.2f} MB | Sorgu: {q3:.3f}s")
     print("    * Yorum: RAM'i Klasik yöntemden KAT KAT DAHA AZ harcar! Sorguyu anında (Lazy) ")

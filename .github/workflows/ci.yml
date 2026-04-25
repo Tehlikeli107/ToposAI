@@ -75,6 +75,7 @@ jobs:
             tests/test_examples.py \
             tests/test_claim_hygiene.py \
             tests/test_runtime.py \
+            tests/test_optional_dependencies.py \
             -v --tb=short \
             -m "not cuda and not triton and not slow" \
             --cov=topos_ai --cov-report=term-missing --cov-fail-under=85
