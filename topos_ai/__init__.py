@@ -1,51 +1,50 @@
 """
-ToposAI: A neuro-symbolic AI framework bridging Category Theory with PyTorch.
+ToposAI: neuro-symbolic research components bridging PyTorch with
+category-theory-inspired operators.
 
-Core modules:
-    models               - ToposTransformer end-to-end language model
-    nn                   - Building blocks (TopologicalLinear, ToposAttention, etc.)
-    logic                - Heyting algebra & Gödel T-norms (SubobjectClassifier)
-    math                 - Categorical composition & sheaf operators
-    topology             - Persistent homology (Betti numbers)
-    cohomology           - Cech cohomology engine
-    kernels              - Triton CUDA kernels (FlashTopos attention)
-    optim                - ToposAdam optimizer (Fisher natural gradient)
-    generation           - Topologically constrained decoding
-    reasoning            - Defeasible reasoning & theorem discovery
-    verification         - Lean 4 proof transpiler
-    yoneda               - Yoneda embedding & universe
-    hott                 - Homotopy type theory utilities
-    adjoint              - Adjoint functor pairs (F ⊣ G), unit/counit, triangle identities
-    monad                - Monads (Giry, Continuation, Writer) & Kleisli category
-    kan                  - Left/Right Kan extensions (categorical attention)
-    optics               - Lenses, Prisms, Traversals, Van Laarhoven representation
-    polynomial_functors  - Poly category: dynamical systems & wiring diagrams
+Several modules are intentionally experimental toy/proxy implementations.
+They should be read as differentiable research scaffolds unless their
+docstrings state a stricter mathematical contract.
 """
 
 import logging
 
-from . import (
-    adjoint,
-    cohomology,
-    distributed,
-    generation,
-    hott,
-    kan,
-    kernels,
-    logic,
-    math,
-    models,
-    monad,
-    nn,
-    optics,
-    optim,
-    polynomial_functors,
-    reasoning,
-    tokenization,
-    topology,
-    verification,
-    yoneda,
-)
+try:
+    from . import (
+        adjoint,
+        cohomology,
+        distributed,
+        elementary_topos,
+        formal_category,
+        generation,
+        hott,
+        infinity_categories,
+        kan,
+        kernels,
+        lawvere_tierney,
+        logic,
+        mamba,
+        math,
+        models,
+        monad,
+        motives,
+        nn,
+        optics,
+        optim,
+        polynomial_functors,
+        quantum_logic,
+        reasoning,
+        rl_killer,
+        sheaf_dataloader,
+        tame_geometry,
+        tokenization,
+        topology,
+        verification,
+        yoneda,
+    )
+except ImportError:
+    # Allow pure Python formal mathematics imports when neural dependencies (e.g. PyTorch) are not installed.
+    pass
 
 __version__ = "1.0.0"
 __license__ = "MIT"
@@ -56,19 +55,29 @@ __all__ = [
     "adjoint",
     "cohomology",
     "distributed",
+    "elementary_topos",
+    "formal_category",
     "generation",
     "hott",
+    "infinity_categories",
     "kan",
     "kernels",
+    "lawvere_tierney",
     "logic",
+    "mamba",
     "math",
-    "monad",
     "models",
+    "monad",
+    "motives",
     "nn",
     "optics",
     "optim",
     "polynomial_functors",
+    "quantum_logic",
     "reasoning",
+    "rl_killer",
+    "sheaf_dataloader",
+    "tame_geometry",
     "tokenization",
     "topology",
     "verification",
