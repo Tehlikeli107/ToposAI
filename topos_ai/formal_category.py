@@ -2654,7 +2654,9 @@ def whisker_transformation(
         d: dict(transformation.components[functor.map_object(d)])
         for d in D.objects
     }
-    return NaturalTransformation(source=fp, target=fq, components=components)
+    result = NaturalTransformation(source=fp, target=fq, components=components)
+    result.validate_naturality()
+    return result
 
 
 class GrothendieckTopology:
