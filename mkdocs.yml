@@ -1,5 +1,5 @@
 site_name: ToposAI
-site_description: Neuro-Symbolic AI via Category Theory — Toposes, Yoneda, Sheaves
+site_description: Neuro-Symbolic AI via Category-Theory-Inspired Operators
 site_url: https://tehlikeli107.github.io/ToposAI/
 repo_url: https://github.com/Tehlikeli107/ToposAI
 repo_name: Tehlikeli107/ToposAI
@@ -27,7 +27,17 @@ theme:
 
 nav:
   - Home: index.md
+  - Mathematical Contracts: docs/MATH_CONTRACTS.md
+  - Public API: docs/PUBLIC_API.md
+  - Tutorials:
+      - Yoneda Density: docs/tutorials/yoneda_density.md
+      - Sheafification: docs/tutorials/sheafification.md
+      - Internal Logic: docs/tutorials/internal_logic.md
+      - Quasi-Categories and HoTT: docs/tutorials/quasi_categories_and_hott.md
   - API Reference: api.md
+  - Project Status: PROJECT_STATUS.md
+  - Benchmarks: BENCHMARKS.md
+  - Release Guide: RELEASE_GUIDE.md
 
 plugins:
   - search

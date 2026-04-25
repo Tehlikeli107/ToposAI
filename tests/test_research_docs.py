@@ -49,3 +49,16 @@ def test_public_api_document_names_stable_research_surface():
 
     for symbol in required_symbols:
         assert symbol in text
+
+
+def test_tutorial_pages_are_linked_from_mkdocs():
+    mkdocs = (ROOT / "mkdocs.yml").read_text(encoding="utf-8")
+    required_pages = [
+        "docs/tutorials/yoneda_density.md",
+        "docs/tutorials/sheafification.md",
+        "docs/tutorials/internal_logic.md",
+        "docs/tutorials/quasi_categories_and_hott.md",
+    ]
+    for page in required_pages:
+        assert page in mkdocs
+        assert (ROOT / page).exists()
