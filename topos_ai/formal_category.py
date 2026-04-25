@@ -2608,6 +2608,55 @@ class PresheafTopos:
         return True
 
 
+def pullback_presheaf(functor: FiniteFunctor, presheaf: Presheaf) -> Presheaf:
+    """
+    Restriction of scalars (base change) along a functor F: D → C.
+
+    Given F: D → C and P: C^op → Set, returns F^*(P): D^op → Set defined by
+        F^*(P)(d) = P(F(d))
+        F^*(P)(g: d → d') = P(F(g)) : P(F(d')) → P(F(d))
+
+    This is the right adjoint to left Kan extension along F and is a key component
+    of the geometric morphism induced by F on presheaf toposes.
+    """
+    if functor.target is not presheaf.category:
+        raise ValueError("Functor target must equal the presheaf base category.")
+    D = functor.source
+    sets = {d: presheaf.sets[functor.map_object(d)] for d in D.objects}
+    restrictions = {
+        g: dict(presheaf.restrictions[functor.map_morphism(g)])
+        for g in D.morphisms
+    }
+    return Presheaf(category=D, sets=sets, restrictions=restrictions)
+
+
+def whisker_transformation(
+    functor: FiniteFunctor,
+    transformation: NaturalTransformation,
+) -> NaturalTransformation:
+    """
+    Whiskering (horizontal composition on the right) of a natural transformation along F.
+
+    Given F: D → C and α: P ⇒ Q (natural transformation between presheaves on C),
+    produces F^*(α): F^*(P) ⇒ F^*(Q) with components
+        (F^*(α))_d = α_{F(d)} : P(F(d)) → Q(F(d)).
+
+    This satisfies the interchange law: for composable α, β on C,
+        F^*(β ∘ α) = F^*(β) ∘ F^*(α),
+    which can be verified via compose_transformations in PresheafTopos.
+    """
+    if functor.target is not transformation.source.category:
+        raise ValueError("Functor target must equal the transformation base category.")
+    D = functor.source
+    fp = pullback_presheaf(functor, transformation.source)
+    fq = pullback_presheaf(functor, transformation.target)
+    components = {
+        d: dict(transformation.components[functor.map_object(d)])
+        for d in D.objects
+    }
+    return NaturalTransformation(source=fp, target=fq, components=components)
+
+
 class GrothendieckTopology:
     """Finite Grothendieck topology represented by covering sieves."""
 

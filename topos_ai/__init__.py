@@ -10,7 +10,14 @@ docstrings state a stricter mathematical contract.
 import logging
 from importlib import import_module
 
-from .formal_category import FiniteCategory, FiniteFunctor, Presheaf, PresheafTopos
+from .formal_category import (
+    FiniteCategory,
+    FiniteFunctor,
+    Presheaf,
+    PresheafTopos,
+    pullback_presheaf,
+    whisker_transformation,
+)
 from .lazy.free_category import FreeCategoryGenerator
 from .storage.cql_database import CategoricalDatabase
 from .topology.sheaf_computer import ToposSheafComputer
@@ -82,4 +89,6 @@ __all__ = [
     "Presheaf",
     "PresheafTopos",
     "ToposSheafComputer",
+    "pullback_presheaf",
+    "whisker_transformation",
 ]
