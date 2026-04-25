@@ -61,3 +61,13 @@ def test_tutorial_pages_are_linked_from_mkdocs():
     for page in required_pages:
         assert page in mkdocs
         assert (ROOT / page).exists()
+
+
+def test_readme_and_status_use_research_library_positioning():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    status = (ROOT / "docs" / "PROJECT_STATUS.md").read_text(encoding="utf-8")
+
+    assert "formal finite core" in readme
+    assert "neural/proxy components" in readme
+    assert "Maturity Matrix" in status
+    assert "Research-library readiness" in status
