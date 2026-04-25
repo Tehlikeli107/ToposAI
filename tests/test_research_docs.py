@@ -26,3 +26,26 @@ def test_math_contracts_document_exists_and_names_contract_classes():
 def test_api_links_to_math_contracts():
     text = (ROOT / "docs" / "api.md").read_text(encoding="utf-8")
     assert "MATH_CONTRACTS.md" in text
+
+
+def test_public_api_document_names_stable_research_surface():
+    text = (ROOT / "docs" / "PUBLIC_API.md").read_text(encoding="utf-8")
+
+    required_symbols = [
+        "FiniteCategory",
+        "FiniteFunctor",
+        "Presheaf",
+        "PresheafTopos",
+        "GrothendieckTopology",
+        "category_of_elements",
+        "yoneda_density_colimit",
+        "FiniteSimplicialSet",
+        "FiniteHorn",
+        "nerve_2_skeleton",
+        "nerve_3_skeleton",
+        "FinitePathGroupoid",
+        "PathFamily",
+    ]
+
+    for symbol in required_symbols:
+        assert symbol in text
