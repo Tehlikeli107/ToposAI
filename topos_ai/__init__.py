@@ -47,6 +47,23 @@ from .sites import (
     discrete_topology,
     omega_presheaf,
 )
+from .adjunction import FiniteAdjunction
+from .formal_yoneda import (
+    representable_functor,
+    yoneda_evaluate,
+    yoneda_inverse,
+    verify_yoneda,
+    verify_yoneda_naturality_in_A,
+)
+from .topos import (
+    finset_product,
+    finset_exponential,
+    curry,
+    uncurry,
+    verify_ccc,
+    SubobjectClassifier,
+    verify_subobject_classifier,
+)
 from .lean4_export import (
     category_to_lean4,
     functor_to_lean4,
@@ -59,14 +76,17 @@ from .storage.cql_database import CategoricalDatabase
 from .topology.sheaf_computer import ToposSheafComputer
 
 _FORMAL_MODULES = (
+    "adjunction",
     "enriched",
     "formal_category",
     "formal_kan",
+    "formal_yoneda",
     "hott",
     "infinity_categories",
     "lean4_export",
     "monoidal",
     "sites",
+    "topos",
 )
 
 _TORCH_BACKED_MODULES = (
@@ -125,6 +145,7 @@ __all__ = [
     *_FORMAL_MODULES,
     *(name for name in _TORCH_BACKED_MODULES if name in globals()),
     "CategoricalDatabase",
+    "FiniteAdjunction",
     "FiniteCategory",
     "FiniteFunctor",
     "FiniteMonoidalCategory",
@@ -132,17 +153,29 @@ __all__ = [
     "FreeCategoryGenerator",
     "Presheaf",
     "PresheafTopos",
+    "SubobjectClassifier",
     "ToposSheafComputer",
     "discrete_enriched_category",
     "FiniteEnrichedCategory",
     "category_to_lean4",
+    "curry",
     "export_to_file",
+    "finset_exponential",
+    "finset_product",
     "functor_to_lean4",
     "monoidal_to_lean4",
     "nat_trans_to_lean4",
     "pullback_presheaf",
+    "representable_functor",
     "strict_monoidal_from_monoid",
+    "uncurry",
+    "verify_ccc",
+    "verify_subobject_classifier",
+    "verify_yoneda",
+    "verify_yoneda_naturality_in_A",
     "whisker_transformation",
+    "yoneda_evaluate",
+    "yoneda_inverse",
     # formal_kan
     "FiniteSetFunctor",
     "left_kan_extension",
