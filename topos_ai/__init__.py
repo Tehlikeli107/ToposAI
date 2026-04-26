@@ -64,6 +64,17 @@ from .topos import (
     SubobjectClassifier,
     verify_subobject_classifier,
 )
+from .formal_lawvere_tierney import (
+    LawvereTierneyTopology,
+    all_lt_topologies,
+    j_closure,
+    j_closed_subobjects,
+    j_dense_monomorphism,
+    verify_lt_axioms,
+    subobject_lattice,
+    j_action_on_subobjects,
+    verify_closure_operator,
+)
 from .lean4_export import (
     category_to_lean4,
     functor_to_lean4,
@@ -80,6 +91,7 @@ _FORMAL_MODULES = (
     "enriched",
     "formal_category",
     "formal_kan",
+    "formal_lawvere_tierney",
     "formal_yoneda",
     "hott",
     "infinity_categories",
@@ -184,6 +196,16 @@ __all__ = [
     "verify_left_kan_universal_property",
     "verify_right_kan_universal_property",
     "left_kan_unit",
+    # formal_lawvere_tierney
+    "LawvereTierneyTopology",
+    "all_lt_topologies",
+    "j_closure",
+    "j_closed_subobjects",
+    "j_dense_monomorphism",
+    "verify_lt_axioms",
+    "subobject_lattice",
+    "j_action_on_subobjects",
+    "verify_closure_operator",
     # sites
     "Sieve",
     "GrothendieckTopology",
