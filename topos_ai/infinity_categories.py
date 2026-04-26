@@ -412,6 +412,49 @@ class HodgeLaplacianEngine:
         return L0, L1
 
 
+class InfinityCategoryLayer(_Module):
+    """
+    Hodge-diffusion message-passing layer for simplicial complexes.
+
+    Applies one step of diffusion through both the 0-Laplacian (vertex level)
+    and the 1-Laplacian (edge level), then projects to ``out_dim`` via a
+    shared linear transform.
+
+    Parameters
+    ----------
+    node_dim : int  — input feature dimension at each vertex
+    edge_dim : int  — input feature dimension at each edge
+    out_dim  : int  — output feature dimension for both vertex and edge signals
+    """
+
+    def __init__(self, node_dim: int, edge_dim: int, out_dim: int):
+        super().__init__()
+        if torch is None:
+            raise ImportError("InfinityCategoryLayer requires PyTorch.")
+        import torch.nn as _nn
+        self.node_proj = _nn.Linear(node_dim, out_dim)
+        self.edge_proj = _nn.Linear(edge_dim, out_dim)
+
+    def forward(self, H0, H1, L0, L1):
+        """
+        Parameters
+        ----------
+        H0 : Tensor (n_vertices, node_dim)
+        H1 : Tensor (n_edges,    edge_dim)
+        L0 : Tensor (n_vertices, n_vertices)  — 0-Laplacian
+        L1 : Tensor (n_edges,    n_edges)     — 1-Laplacian
+
+        Returns
+        -------
+        H0_new : Tensor (n_vertices, out_dim)
+        H1_new : Tensor (n_edges,    out_dim)
+        """
+        import torch.nn.functional as _F
+        H0_diff = _F.relu(self.node_proj(L0 @ H0))
+        H1_diff = _F.relu(self.edge_proj(L1 @ H1))
+        return H0_diff, H1_diff
+
+
 class FormalInfinityCategoryValidator:
     """
     Strict Formal Infinity-Category Engine (Quasi-Category inner horn filler).

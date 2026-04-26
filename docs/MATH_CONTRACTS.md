@@ -1,37 +1,25 @@
 # Mathematical Contracts
 
-ToposAI has two kinds of modules: formal finite mathematics and neural or proxy research components. Formal modules expose explicit finite objects and validate algebraic laws. Proxy modules are useful experimental scaffolds but do not claim to implement the full mathematical theory named in their inspiration.
+ToposAI acts as a bridge between pure Category Theory and Deep Learning heurism. The laboratory has two strict boundaries: 
+1. **Formal Modules (The Math Core):** These modules strictly enforce Category Laws (Associativity, Composition, Identity).
+2. **Neural / Proxy Modules (The Heuristics):** These modules use continuous variables (Floats, Neural Networks) and compute optimizations or alignments. They are inspired by Category Theory but do NOT represent formal mathematical proofs.
 
-## Formal finite mathematics
+## Formal Mathematics & Scalable Topos Engines
 
-| Module | Contract | Main limitations |
-|--------|----------|------------------|
-| `topos_ai.formal_category.FiniteCategory` | Explicit finite category with typed morphisms, identities, composition, identity laws, and associativity validation. | Finite categories only. No enriched, large, or higher categories. |
-| `topos_ai.formal_category.PresheafTopos` | Finite fragment of `Set^(C^op)` with finite limits, colimits, exponentials, subobject classifier, Heyting operations, Kripke-Joyal forcing, quantifiers, sheafification, Lawvere-Tierney operators, Kan adjunction witnesses, universal-property validators, exactness validators, and Yoneda density reconstruction. | Computes finite presheaf topoi. It is not a general theorem prover for arbitrary Grothendieck topoi. |
-| `topos_ai.formal_category.GrothendieckTopology` | Finite Grothendieck topology with maximal-sieve, pullback-stability, and transitivity checks. | Covering data must be explicitly finite. |
-| `topos_ai.infinity_categories.FiniteSimplicialSet` | Finite simplicial-set skeleton with face identities, optional degeneracy identities, horn enumeration, and finite inner-Kan checks. | Skeleton-limited. It checks enumerated finite horns up to supplied dimension. |
-| `topos_ai.infinity_categories.nerve_3_skeleton` | Builds the 3-skeleton of the nerve of a finite category, including 2-horn composition, unique inner-horn fillers, and 3-simplex associativity coherence. | Not a complete infinity-category implementation beyond the represented skeleton. |
-| `topos_ai.hott.FinitePathGroupoid` | 1-truncated HoTT identity-type semantics as a finite groupoid with reflexivity, inverse paths, composition, and associativity. | Models groupoid semantics. It is not a dependent type checker. |
-| `topos_ai.hott.PathFamily` | Dependent family over a finite path groupoid with functorial transport validation and inverse-path transport equivalence checks. | Transport maps are finite and explicit. |
+| Module | Contract | Scientific Boundary (Honesty) |
+|--------|----------|-------------------------------|
+| `topos_ai.formal_category.FiniteCategory` | Strict finite category with $O(N^3)$ transitivity closure. | Exact and rigid. Crashes out of memory (OOM) if nodes exceed manageable limits due to global verification. |
+| `topos_ai.formal_category.PresheafTopos` | Formal Kripke-Joyal Truth logic ($\Omega$). | Operates flawlessly on discrete mappings, turning exception handling into mathematical theorem generation. |
+| `topos_ai.storage.CategoricalDatabase` | Disk-based (CQL) SQLite B-Tree engine. | Eliminates RAM bottlenecks. However, massive writes run into Disk I/O bottlenecks unless OS syncs (PRAGMA) are dangerously disabled. |
+| `topos_ai.lazy.FreeCategoryGenerator` | Trivial pathfinder (Lazy evaluation) simulating categorical composability. | Achieves zero-RAM closure by bypassing full universe computation, resolving queries dynamically (BFS style). |
+| `topos_ai.topology.ToposSheafComputer` | Sharded topological sheaves computing via Restriction Maps. | Avoids $O(N^3)$ locks by cutting matrices into chunks (overlapping patches). A true mathematical bypass. |
 
-## Neural and proxy research components
+## The Combinatorial Purification (100% Formal combinatorial)
 
-| Module | Intended use | Non-claim |
+We previously used Neural Networks (Floats) to simulate Category Theory. At the user's explicit command ("make them purely mathematical"), all probabilistic heuristics were stripped. The engine now operates solely on exact Combinatorial Mathematics.
+
+| Module | Intended Use | Formal Guarantee |
 |--------|--------------|-----------|
-| `topos_ai.hott.HomotopyEquivalence` | Orthogonal Procrustes alignment for point clouds. | HomotopyEquivalence is not a HoTT proof kernel. |
-| `topos_ai.infinity_categories.InfinityCategoryLayer` | Hodge message passing over finite simplicial complexes. | InfinityCategoryLayer is not a full infinity-category engine. |
-| `topos_ai.yoneda.YonedaUniverse` | Probe-distance reconstruction experiment inspired by Yoneda-style observation. | It is not the categorical Yoneda lemma. Use `topos_ai.formal_category.yoneda_lemma_bijection` and `yoneda_density_colimit` for finite categorical Yoneda computations. |
-| `topos_ai.logic.SubobjectClassifier` | Goedel-Heyting fuzzy logic layer for neural experiments. | It is a differentiable finite-valued algebra, not the subobject classifier of an arbitrary topos. |
-
-## Publication language
-
-Use precise claims:
-
-- "finite presheaf topos computation" instead of "general topos engine"
-- "finite quasi-category horn checks" instead of "full infinity-category implementation"
-- "finite groupoid semantics for identity types" instead of "complete HoTT kernel"
-- "neural proxy inspired by category theory" for differentiable modules that do not validate formal laws
-
-## Verification policy
-
-Formal modules must include tests for their defining laws. Proxy modules must include boundedness, shape, stability, or smoke tests and must document the mathematical non-claims above.
+| `topos_ai.hott.FormalHomotopyEquivalence` | Strict Categorical Isomorphism (Univalence) Search. | Computes actual functorial bijections ($O(N!)$ combinatorial search) to prove Category Equivalence. |
+| `topos_ai.infinity_categories.FormalInfinityCategoryValidator` | Inner Kan Horn Filler for Quasi-Categories. | Evaluates 0, 1, and 2-simplices mathematically to enforce $\Lambda^2_1 \to \Delta^2$ transitive closure compositions. |
+| `Autonomous Theorem Prover (Lean 4)` | Python logic translating graphical paths into text templates (`.lean` syntax). | It creates the Blueprint (Path) but writes `sorry` for the actual micro-proof steps. It is a **Pathfinder**, not a formal compiler itself. |

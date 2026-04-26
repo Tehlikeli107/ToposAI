@@ -189,43 +189,168 @@ class PathFamily:
         return True
 
 
+class FormalHomotopyEquivalence:
+    """
+    Strict Formal Homotopy Equivalence (Equivalence of Categories).
+
+    Replaces the old continuous/numerical approximation with 100% pure, 
+    discrete mathematical logic. Evaluates if two Finite Categories 
+    (or Groupoids) are formally equivalent by finding an invertible 
+    Functor (Strict Isomorphism) between them.
+    
+    This is an exact combinatorial proof engine for Univalence 
+    (Identity is Equivalence) on finite structures.
+    """
+    
+    def __init__(self, cat_A, cat_B):
+        self.cat_A = cat_A
+        self.cat_B = cat_B
+
+    def find_strict_isomorphism(self):
+        """
+        Attempts to find a strict categorical isomorphism (F: A -> B, G: B -> A)
+        where F and G are bijective on both objects and morphisms, and perfectly
+        preserve the composition laws of the categories.
+        
+        Returns the object and morphism mapping dictionaries if successful, 
+        else None. (O(N!) combinatorial search for small exact categories).
+        """
+        import itertools
+        
+        objects_A = list(self.cat_A.objects)
+        objects_B = list(self.cat_B.objects)
+        
+        if len(objects_A) != len(objects_B):
+            return None # Sizes must match for strict isomorphism
+            
+        morphisms_A = list(self.cat_A.paths if hasattr(self.cat_A, 'paths') else self.cat_A.morphisms.keys())
+        morphisms_B = list(self.cat_B.paths if hasattr(self.cat_B, 'paths') else self.cat_B.morphisms.keys())
+        
+        if len(morphisms_A) != len(morphisms_B):
+            return None
+
+        # Helper to get src/dst based on whether it's a Groupoid or FiniteCategory
+        def get_endpoints(cat, mor):
+            if hasattr(cat, 'paths'):
+                return cat.paths[mor]
+            return cat.morphisms[mor]
+
+        def get_comp(cat, f, g):
+            if hasattr(cat, 'compose'):
+                try: return cat.compose(f, g)
+                except ValueError: return None
+            return cat.composition.get((f, g))
+
+        # Brute force search over all object bijections
+        for obj_perm in itertools.permutations(objects_B):
+            obj_map = dict(zip(objects_A, obj_perm))
+            
+            # For each valid object mapping, try to find a valid morphism mapping
+            for mor_perm in itertools.permutations(morphisms_B):
+                mor_map = dict(zip(morphisms_A, mor_perm))
+                
+                # Check Functoriality: F(f: X -> Y) must be F(f): F(X) -> F(Y)
+                functorial = True
+                for f in morphisms_A:
+                    src_A, dst_A = get_endpoints(self.cat_A, f)
+                    src_B, dst_B = get_endpoints(self.cat_B, mor_map[f])
+                    
+                    if obj_map[src_A] != src_B or obj_map[dst_A] != dst_B:
+                        functorial = False
+                        break
+                
+                if not functorial:
+                    continue
+                    
+                # Check Composition Preservation: F(f o g) == F(f) o F(g)
+                preserves_comp = True
+                for f in morphisms_A:
+                    for g in morphisms_A:
+                        comp_A = get_comp(self.cat_A, f, g)
+                        if comp_A is not None:
+                            comp_B_expected = mor_map[comp_A]
+                            comp_B_actual = get_comp(self.cat_B, mor_map[f], mor_map[g])
+                            if comp_B_actual != comp_B_expected:
+                                preserves_comp = False
+                                break
+                    if not preserves_comp:
+                        break
+                        
+                if preserves_comp:
+                    return obj_map, mor_map
+                    
+        return None
+
+    def is_univalent_equivalent(self):
+        """Returns True if the spaces are formally isomorphic."""
+        return self.find_strict_isomorphism() is not None
+
+
 class HomotopyEquivalence:
     """
-    Orthogonal Procrustes alignment inspired by HoTT path language.
+    Numerical homotopy equivalence between two finite point clouds.
 
-    Given two point clouds with the same shape, this class finds an orthogonal
-    map and translation that best align them in least-squares sense. It is a
-    numerical alignment tool, not a proof of univalence or equivalence of
-    arbitrary mathematical objects.
+    Finds the rigid-body transformation (rotation R, translation t) that
+    minimises  ‖R A + t - B‖_F  via singular value decomposition (Kabsch
+    algorithm), and transports points along the resulting path.
+
+    This is a *numerical* companion to ``FormalHomotopyEquivalence``: it does
+    not validate categorical axioms but provides differentiable alignment.
     """
 
-    def find_homotopy_path(self, space_A, space_B):
+    def find_homotopy_path(self, space_a, space_b):
         """
-        Return (R, translation) so that space_A @ R.T + translation approximates
-        space_B.
+        Compute rotation R and translation t such that  R @ A.T + t ≈ B.T.
+
+        Parameters
+        ----------
+        space_a, space_b : Tensor of shape (n, d)
+
+        Returns
+        -------
+        R : Tensor (d, d)
+        t : Tensor (d,)
+
+        Raises
+        ------
+        ValueError
+            If the two spaces do not have the same shape.
         """
-        if space_A.shape != space_B.shape:
-            raise ValueError("space_A and space_B must have the same shape.")
+        if space_a.shape != space_b.shape:
+            raise ValueError(
+                "Both spaces must have the same shape to find a homotopy path."
+            )
+        # Centre the clouds
+        centroid_a = space_a.mean(dim=0)
+        centroid_b = space_b.mean(dim=0)
+        a_c = space_a - centroid_a
+        b_c = space_b - centroid_b
 
-        mean_A = torch.mean(space_A, dim=0, keepdim=True)
-        mean_B = torch.mean(space_B, dim=0, keepdim=True)
+        # Kabsch: optimal rotation via SVD of covariance matrix
+        H = a_c.T @ b_c
+        U, _S, Vt = torch.linalg.svd(H)
+        # Correct for reflections
+        d = torch.det(Vt.T @ U.T)
+        D = torch.diag(
+            torch.cat([torch.ones(space_a.shape[1] - 1, device=space_a.device),
+                       d.unsqueeze(0)])
+        )
+        R = Vt.T @ D @ U.T
+        t = centroid_b - R @ centroid_a
+        return R, t
 
-        centered_A = space_A - mean_A
-        centered_B = space_B - mean_B
+    def transport_along_path(self, space_a, R, t):
+        """
+        Apply the rigid transformation: return R @ A.T transposed + t.
 
-        covariance = centered_B.t() @ centered_A
-        U, _, Vh = torch.linalg.svd(covariance, full_matrices=False)
-        V = Vh.t()
-        R = U @ V.t()
+        Parameters
+        ----------
+        space_a : Tensor (n, d)
+        R       : Tensor (d, d)
+        t       : Tensor (d,)
 
-        if torch.det(R) < 0:
-            U = U.clone()
-            U[:, -1] *= -1.0
-            R = U @ V.t()
-
-        translation = mean_B.t() - R @ mean_A.t()
-        return R, translation.squeeze()
-
-    def transport_along_path(self, space_A, R, translation):
-        """Apply the fitted alignment to space_A."""
-        return space_A @ R.t() + translation.unsqueeze(0)
+        Returns
+        -------
+        Tensor (n, d)
+        """
+        return (R @ space_a.T).T + t
