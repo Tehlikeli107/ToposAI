@@ -18,6 +18,18 @@ from .formal_category import (
     pullback_presheaf,
     whisker_transformation,
 )
+from .monoidal import (
+    FiniteMonoidalCategory,
+    FiniteSymmetricMonoidalCategory,
+    strict_monoidal_from_monoid,
+)
+from .lean4_export import (
+    category_to_lean4,
+    functor_to_lean4,
+    monoidal_to_lean4,
+    nat_trans_to_lean4,
+    export_to_file,
+)
 from .lazy.free_category import FreeCategoryGenerator
 from .storage.cql_database import CategoricalDatabase
 from .topology.sheaf_computer import ToposSheafComputer
@@ -26,12 +38,15 @@ _FORMAL_MODULES = (
     "formal_category",
     "hott",
     "infinity_categories",
+    "lean4_export",
+    "monoidal",
 )
 
 _TORCH_BACKED_MODULES = (
     "adjoint",
     "cohomology",
     "distributed",
+    "sheaf_nn",
     "elementary_topos",
     "generation",
     "kan",
@@ -85,10 +100,18 @@ __all__ = [
     "CategoricalDatabase",
     "FiniteCategory",
     "FiniteFunctor",
+    "FiniteMonoidalCategory",
+    "FiniteSymmetricMonoidalCategory",
     "FreeCategoryGenerator",
     "Presheaf",
     "PresheafTopos",
     "ToposSheafComputer",
+    "category_to_lean4",
+    "export_to_file",
+    "functor_to_lean4",
+    "monoidal_to_lean4",
+    "nat_trans_to_lean4",
     "pullback_presheaf",
+    "strict_monoidal_from_monoid",
     "whisker_transformation",
 ]
