@@ -24,6 +24,29 @@ from .monoidal import (
     strict_monoidal_from_monoid,
 )
 from .enriched import FiniteEnrichedCategory, discrete_enriched_category
+from .formal_kan import (
+    FiniteSetFunctor,
+    left_kan_extension,
+    right_kan_extension,
+    all_natural_transformations,
+    verify_left_kan_universal_property,
+    verify_right_kan_universal_property,
+    left_kan_unit,
+)
+from .sites import (
+    Sieve,
+    GrothendieckTopology,
+    GrothendieckSite,
+    FinitePresheaf,
+    is_sheaf,
+    sheaf_condition_failure,
+    matching_families,
+    amalgamations,
+    maximal_sieve,
+    trivial_topology,
+    discrete_topology,
+    omega_presheaf,
+)
 from .lean4_export import (
     category_to_lean4,
     functor_to_lean4,
@@ -38,10 +61,12 @@ from .topology.sheaf_computer import ToposSheafComputer
 _FORMAL_MODULES = (
     "enriched",
     "formal_category",
+    "formal_kan",
     "hott",
     "infinity_categories",
     "lean4_export",
     "monoidal",
+    "sites",
 )
 
 _TORCH_BACKED_MODULES = (
@@ -118,4 +143,25 @@ __all__ = [
     "pullback_presheaf",
     "strict_monoidal_from_monoid",
     "whisker_transformation",
+    # formal_kan
+    "FiniteSetFunctor",
+    "left_kan_extension",
+    "right_kan_extension",
+    "all_natural_transformations",
+    "verify_left_kan_universal_property",
+    "verify_right_kan_universal_property",
+    "left_kan_unit",
+    # sites
+    "Sieve",
+    "GrothendieckTopology",
+    "GrothendieckSite",
+    "FinitePresheaf",
+    "is_sheaf",
+    "sheaf_condition_failure",
+    "matching_families",
+    "amalgamations",
+    "maximal_sieve",
+    "trivial_topology",
+    "discrete_topology",
+    "omega_presheaf",
 ]
