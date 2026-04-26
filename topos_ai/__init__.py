@@ -23,6 +23,7 @@ from .monoidal import (
     FiniteSymmetricMonoidalCategory,
     strict_monoidal_from_monoid,
 )
+from .enriched import FiniteEnrichedCategory, discrete_enriched_category
 from .lean4_export import (
     category_to_lean4,
     functor_to_lean4,
@@ -35,6 +36,7 @@ from .storage.cql_database import CategoricalDatabase
 from .topology.sheaf_computer import ToposSheafComputer
 
 _FORMAL_MODULES = (
+    "enriched",
     "formal_category",
     "hott",
     "infinity_categories",
@@ -106,6 +108,8 @@ __all__ = [
     "Presheaf",
     "PresheafTopos",
     "ToposSheafComputer",
+    "discrete_enriched_category",
+    "FiniteEnrichedCategory",
     "category_to_lean4",
     "export_to_file",
     "functor_to_lean4",
