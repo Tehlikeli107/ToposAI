@@ -98,6 +98,21 @@ Benchmark claims should be treated as environment-specific until reproduced.
 Use [docs/BENCHMARKS.md](docs/BENCHMARKS.md) to record hardware, commands, and
 raw measurements before citing results.
 
+### Running Applications and Benchmarks (Package-Friendly)
+
+Scripts under `applications/` and `benchmarks/` can now be run without
+manually editing `sys.path`:
+
+```bash
+# CLI entrypoints (installed via pyproject scripts)
+topos-application real_world_solidity_auditor
+topos-benchmark benchmark_sota
+
+# Equivalent module execution
+python -m applications.real_world_solidity_auditor
+python -m benchmarks.benchmark_sota
+```
+
 ---
 
 ## Limitations
