@@ -57,6 +57,8 @@ Issues = "https://github.com/Tehlikeli107/ToposAI/issues"
 topos-train = "train_custom_llm:train"
 topos-chat = "chat_custom_llm:chat_with_topos"
 topos-showcase = "topos_showcase:run_showcase"
+topos-application = "topos_ai.cli:run_application"
+topos-benchmark = "topos_ai.cli:run_benchmark"
 
 [tool.ruff]
 line-length = 120
@@ -66,8 +68,8 @@ target-version = "py310"
 py-modules = ["chat_custom_llm", "topos_showcase", "train_custom_llm"]
 
 [tool.setuptools.packages.find]
-include = ["topos_ai*"]
-exclude = ["tests*", "experiments*", "applications*", "benchmarks*"]
+include = ["topos_ai*", "applications*", "benchmarks*"]
+exclude = ["tests*", "experiments*"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]

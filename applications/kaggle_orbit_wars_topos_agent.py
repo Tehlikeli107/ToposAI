@@ -1,10 +1,4 @@
-﻿import sys
-import os
-
-try:
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-except NameError:
-    pass
+import sys
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')

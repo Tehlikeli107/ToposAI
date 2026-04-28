@@ -1,12 +1,9 @@
-﻿import gradio as gr
+import gradio as gr
 import torch
-import sys
-import os
 
 # ToposAI Modüllerini İçeri Aktar
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from real_world_medical_fact_checker import MedicalToposEngine
-from real_world_solidity_auditor import SolidityToToposParser
+from applications.real_world_medical_fact_checker import MedicalToposEngine
+from applications.real_world_solidity_auditor import SolidityToToposParser
 from topos_ai.math import transitive_closure
 
 # =====================================================================
