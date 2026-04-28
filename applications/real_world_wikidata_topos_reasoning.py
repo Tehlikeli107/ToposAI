@@ -7,6 +7,8 @@ import torch
 import requests
 import time
 
+DEFAULT_HTTP_TIMEOUT = (5, 20)  # (connect_timeout, read_timeout)
+
 # =====================================================================
 # REAL-WORLD KNOWLEDGE DISCOVERY (WIKIDATA SPARQL & TOPOS AI)
 # İddia: Dağınık, eksik ve gerçek dünya verilerinden (Wikipedia), 
@@ -46,14 +48,26 @@ def fetch_wikidata_medical_knowledge():
     }
     
     try:
-        response = requests.get(url, params={'format': 'json', 'query': query}, headers=headers)
+        response = requests.get(
+            url,
+            params={'format': 'json', 'query': query},
+            headers=headers,
+            timeout=DEFAULT_HTTP_TIMEOUT,
+        )
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        return {"ok": False, "error": f"Wikidata HTTP hatası: {e}", "data": None}
+
+    try:
         data = response.json()
-    except Exception as e:
-        print(f"API Bağlantı Hatası: {e}")
-        return None
+    except ValueError as e:
+        return {"ok": False, "error": f"Wikidata JSON ayrıştırma hatası: {e}", "data": None}
+
+    try:
+        results = data['results']['bindings']
+    except (TypeError, KeyError) as e:
+        return {"ok": False, "error": f"Wikidata yanıt formatı hatalı: {e}", "data": None}
         
-    results = data['results']['bindings']
-    
     # Verileri ayrıştır (Parsing)
     treats_relations = set()  # (Drug, Disease)
     symptom_relations = set() # (Disease, Symptom)
@@ -68,7 +82,14 @@ def fetch_wikidata_medical_knowledge():
             symptom_relations.add((disease, symptom))
             
     print(f"[BAŞARILI]: Wikidata'dan {len(treats_relations)} İlaç-Hastalık bağı ve {len(symptom_relations)} Hastalık-Semptom bağı canlı olarak çekildi.\n")
-    return treats_relations, symptom_relations
+    return {
+        "ok": True,
+        "error": None,
+        "data": {
+            "treats_relations": treats_relations,
+            "symptom_relations": symptom_relations,
+        },
+    }
 
 def run_wikidata_knowledge_discovery():
     print("=========================================================================")
@@ -78,11 +99,13 @@ def run_wikidata_knowledge_discovery():
     print(" A'nın C'ye iyi geldiğini Matematiksel olarak Topolojik Bir Sentez (Heuristic) şeklinde İCAT EDER.")
     print("=========================================================================\n")
 
-    fetched_data = fetch_wikidata_medical_knowledge()
-    if not fetched_data:
+    fetched_result = fetch_wikidata_medical_knowledge()
+    if not fetched_result["ok"]:
+        print(f"[HATA] Wikidata verisi alınamadı: {fetched_result['error']}")
         return
-        
-    treats_relations, symptom_relations = fetched_data
+
+    treats_relations = fetched_result["data"]["treats_relations"]
+    symptom_relations = fetched_result["data"]["symptom_relations"]
     
     # 1. ONTOLOJİ (Varlık Sözlüğü) OLUŞTURMA
     vocab = set()
