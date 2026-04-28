@@ -7,7 +7,9 @@ from topos_ai.formal_category import (
     Subpresheaf,
     category_of_elements,
     natural_transformations,
+    pullback_presheaf,
     representable_presheaf,
+    whisker_transformation,
     yoneda_density_colimit,
     yoneda_element_to_transformation,
     yoneda_lemma_bijection,
@@ -916,3 +918,98 @@ def test_finite_kan_extensions_expose_adjunction_witnesses():
     assert terminal_topos.right_kan_unit(functor, colors).source is colors
     assert terminal_topos.right_kan_counit(functor, presheaf).target is presheaf
     assert terminal_topos.validate_right_kan_adjunction(functor, colors, presheaf) is True
+
+
+def test_whisker_transformation_and_interchange_law():
+    """
+    Verify pullback_presheaf and whisker_transformation satisfy the interchange law:
+        F^*(beta o alpha) == F^*(beta) o F^*(alpha)
+    where o denotes vertical composition of natural transformations and
+    F^* denotes whiskering (restriction of scalars) along a functor F: D -> C.
+
+    Setup:
+      C = walking arrow category  0 --f--> 1
+      D = terminal category       *
+      F: D -> C  maps * -> 0  (constant functor at 0)
+      P, Q, R: presheaves on C with two elements at 0, one at 1
+      alpha: P => Q,  beta: Q => R   (vertical composable pair)
+    """
+    C = FiniteCategory(
+        objects=("0", "1"),
+        morphisms={"id0": ("0", "0"), "id1": ("1", "1"), "f": ("0", "1")},
+        identities={"0": "id0", "1": "id1"},
+        composition={
+            ("id0", "id0"): "id0",
+            ("id1", "id1"): "id1",
+            ("f", "id0"): "f",
+            ("id1", "f"): "f",
+        },
+    )
+    D = FiniteCategory(
+        objects=("*",),
+        morphisms={"id": ("*", "*")},
+        identities={"*": "id"},
+        composition={("id", "id"): "id"},
+    )
+    F = FiniteFunctor(
+        source=D,
+        target=C,
+        object_map={"*": "0"},
+        morphism_map={"id": "id0"},
+    )
+
+    # Presheaves on C: sets at objects, restrictions along f go 1 -> 0
+    P = Presheaf(
+        category=C,
+        sets={"0": {"p1", "p2"}, "1": {"q"}},
+        restrictions={"id0": {"p1": "p1", "p2": "p2"}, "id1": {"q": "q"}, "f": {"q": "p1"}},
+    )
+    Q = Presheaf(
+        category=C,
+        sets={"0": {"a", "b"}, "1": {"c"}},
+        restrictions={"id0": {"a": "a", "b": "b"}, "id1": {"c": "c"}, "f": {"c": "a"}},
+    )
+    R = Presheaf(
+        category=C,
+        sets={"0": {"x"}, "1": {"y"}},
+        restrictions={"id0": {"x": "x"}, "id1": {"y": "y"}, "f": {"y": "x"}},
+    )
+
+    topos_C = PresheafTopos(C)
+    topos_D = PresheafTopos(D)
+
+    alpha = topos_C.natural_transformation(
+        source=P,
+        target=Q,
+        components={"0": {"p1": "a", "p2": "b"}, "1": {"q": "c"}},
+    )
+    beta = topos_C.natural_transformation(
+        source=Q,
+        target=R,
+        components={"0": {"a": "x", "b": "x"}, "1": {"c": "y"}},
+    )
+
+    # Vertical composite beta o alpha: P => R
+    beta_o_alpha = topos_C.compose_transformations(beta, alpha)
+
+    # LHS: F^*(beta o alpha)
+    lhs = whisker_transformation(F, beta_o_alpha)
+
+    # RHS: F^*(beta) o F^*(alpha) — verified component-wise to avoid the
+    # identity check in compose_transformations (whiskering creates fresh Presheaf
+    # objects for the shared middle even when structurally identical).
+    f_alpha = whisker_transformation(F, alpha)
+    f_beta = whisker_transformation(F, beta)
+    rhs_components = {
+        d: {elem: f_beta.apply(d, f_alpha.apply(d, elem)) for elem in f_alpha.source.sets[d]}
+        for d in D.objects
+    }
+
+    assert lhs.components == rhs_components, (
+        "Interchange law violated: F^*(beta o alpha) != F^*(beta) o F^*(alpha)"
+    )
+
+    # Also verify pullback_presheaf gives F^*(P)(d) = P(F(d)) for d = *
+    fp = pullback_presheaf(F, P)
+    assert fp.sets["*"] == P.sets["0"]
+    assert fp.restrictions["id"] == P.restrictions["id0"]

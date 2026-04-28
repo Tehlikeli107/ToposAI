@@ -2,7 +2,6 @@ import sys
 import os
 import time
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from topos_ai.formal_category import (
     FiniteCategory,

@@ -1,12 +1,13 @@
 ﻿import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
 
 import torch
 import requests
 import json
+
+DEFAULT_HTTP_TIMEOUT = (5, 20)  # (connect_timeout, read_timeout)
 
 # =====================================================================
 # REAL-WORLD BIOINFORMATICS: PROTEIN INTERACTION & DRUG DISCOVERY
@@ -40,15 +41,21 @@ def fetch_string_db_cancer_network():
     url = f"https://string-db.org/api/json/network?identifiers={proteins_str}&species=9606"
     
     try:
-        response = requests.get(url, timeout=15)
+        response = requests.get(url, timeout=DEFAULT_HTTP_TIMEOUT)
         response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        return {"ok": False, "error": f"STRING-DB HTTP hatası: {e}", "data": None}
+
+    try:
         data = response.json()
-    except Exception as e:
-        print(f"STRING-DB API Bağlantı Hatası: {e}")
-        return None, None
+    except ValueError as e:
+        return {"ok": False, "error": f"STRING-DB JSON ayrıştırma hatası: {e}", "data": None}
 
     # Verileri Topos formatına çevir
-    vocab = list(set([item['preferredName_A'] for item in data] + [item['preferredName_B'] for item in data]))
+    try:
+        vocab = list(set([item['preferredName_A'] for item in data] + [item['preferredName_B'] for item in data]))
+    except (TypeError, KeyError) as e:
+        return {"ok": False, "error": f"STRING-DB yanıt formatı hatalı: {e}", "data": None}
     v_idx = {p: i for i, p in enumerate(vocab)}
     
     N = len(vocab)
@@ -66,7 +73,7 @@ def fetch_string_db_cancer_network():
             edge_count += 1
             
     print(f"[BAŞARILI] {N} eşsiz protein ve {edge_count} adet biyolojik bağ (Morfizma) haritalandı.\n")
-    return R, vocab
+    return {"ok": True, "error": None, "data": {"R": R, "vocab": vocab}}
 
 def run_bioinformatics_experiment():
     print("=========================================================================")
@@ -77,8 +84,12 @@ def run_bioinformatics_experiment():
     print(" (Optimal Drug Target) matematiksel olarak tespit eder.")
     print("=========================================================================\n")
 
-    R, proteins = fetch_string_db_cancer_network()
-    if R is None: return
+    fetch_result = fetch_string_db_cancer_network()
+    if not fetch_result["ok"]:
+        print(f"[HATA] STRING-DB verisi alınamadı: {fetch_result['error']}")
+        return
+    R = fetch_result["data"]["R"]
+    proteins = fetch_result["data"]["vocab"]
     N = len(proteins)
 
     # 1. HÜCRENİN DERİN TOPOLOJİSİ (TRANSITIVE CLOSURE)

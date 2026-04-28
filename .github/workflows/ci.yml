@@ -59,7 +59,12 @@ jobs:
           pip install -e .
 
       - name: Compile source tree
-        run: python -m compileall -q topos_ai tests experiments benchmarks
+        run: python -m compileall -q topos_ai tests experiments applications benchmarks
+
+      - name: Module execution smoke test
+        run: |
+          python -m applications.real_world_solidity_auditor >/dev/null
+          topos-application real_world_solidity_auditor >/dev/null
 
       - name: Run unit and hygiene tests
         run: |

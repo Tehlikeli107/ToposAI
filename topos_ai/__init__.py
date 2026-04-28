@@ -10,21 +10,102 @@ docstrings state a stricter mathematical contract.
 import logging
 from importlib import import_module
 
-from .formal_category import FiniteCategory, FiniteFunctor, Presheaf, PresheafTopos
+from .formal_category import (
+    FiniteCategory,
+    FiniteFunctor,
+    Presheaf,
+    PresheafTopos,
+    pullback_presheaf,
+    whisker_transformation,
+)
+from .monoidal import (
+    FiniteMonoidalCategory,
+    FiniteSymmetricMonoidalCategory,
+    strict_monoidal_from_monoid,
+)
+from .enriched import FiniteEnrichedCategory, discrete_enriched_category
+from .formal_kan import (
+    FiniteSetFunctor,
+    left_kan_extension,
+    right_kan_extension,
+    all_natural_transformations,
+    verify_left_kan_universal_property,
+    verify_right_kan_universal_property,
+    left_kan_unit,
+)
+from .sites import (
+    Sieve,
+    GrothendieckTopology,
+    GrothendieckSite,
+    FinitePresheaf,
+    is_sheaf,
+    sheaf_condition_failure,
+    matching_families,
+    amalgamations,
+    maximal_sieve,
+    trivial_topology,
+    discrete_topology,
+    omega_presheaf,
+)
+from .adjunction import FiniteAdjunction
+from .formal_yoneda import (
+    representable_functor,
+    yoneda_evaluate,
+    yoneda_inverse,
+    verify_yoneda,
+    verify_yoneda_naturality_in_A,
+)
+from .topos import (
+    finset_product,
+    finset_exponential,
+    curry,
+    uncurry,
+    verify_ccc,
+    SubobjectClassifier,
+    verify_subobject_classifier,
+)
+from .formal_lawvere_tierney import (
+    LawvereTierneyTopology,
+    all_lt_topologies,
+    j_closure,
+    j_closed_subobjects,
+    j_dense_monomorphism,
+    verify_lt_axioms,
+    subobject_lattice,
+    j_action_on_subobjects,
+    verify_closure_operator,
+)
+from .lean4_export import (
+    category_to_lean4,
+    functor_to_lean4,
+    monoidal_to_lean4,
+    nat_trans_to_lean4,
+    export_to_file,
+)
 from .lazy.free_category import FreeCategoryGenerator
 from .storage.cql_database import CategoricalDatabase
 from .topology.sheaf_computer import ToposSheafComputer
 
 _FORMAL_MODULES = (
+    "adjunction",
+    "enriched",
     "formal_category",
+    "formal_kan",
+    "formal_lawvere_tierney",
+    "formal_yoneda",
     "hott",
     "infinity_categories",
+    "lean4_export",
+    "monoidal",
+    "sites",
+    "topos",
 )
 
 _TORCH_BACKED_MODULES = (
     "adjoint",
     "cohomology",
     "distributed",
+    "sheaf_nn",
     "elementary_topos",
     "generation",
     "kan",
@@ -76,10 +157,66 @@ __all__ = [
     *_FORMAL_MODULES,
     *(name for name in _TORCH_BACKED_MODULES if name in globals()),
     "CategoricalDatabase",
+    "FiniteAdjunction",
     "FiniteCategory",
     "FiniteFunctor",
+    "FiniteMonoidalCategory",
+    "FiniteSymmetricMonoidalCategory",
     "FreeCategoryGenerator",
     "Presheaf",
     "PresheafTopos",
+    "SubobjectClassifier",
     "ToposSheafComputer",
+    "discrete_enriched_category",
+    "FiniteEnrichedCategory",
+    "category_to_lean4",
+    "curry",
+    "export_to_file",
+    "finset_exponential",
+    "finset_product",
+    "functor_to_lean4",
+    "monoidal_to_lean4",
+    "nat_trans_to_lean4",
+    "pullback_presheaf",
+    "representable_functor",
+    "strict_monoidal_from_monoid",
+    "uncurry",
+    "verify_ccc",
+    "verify_subobject_classifier",
+    "verify_yoneda",
+    "verify_yoneda_naturality_in_A",
+    "whisker_transformation",
+    "yoneda_evaluate",
+    "yoneda_inverse",
+    # formal_kan
+    "FiniteSetFunctor",
+    "left_kan_extension",
+    "right_kan_extension",
+    "all_natural_transformations",
+    "verify_left_kan_universal_property",
+    "verify_right_kan_universal_property",
+    "left_kan_unit",
+    # formal_lawvere_tierney
+    "LawvereTierneyTopology",
+    "all_lt_topologies",
+    "j_closure",
+    "j_closed_subobjects",
+    "j_dense_monomorphism",
+    "verify_lt_axioms",
+    "subobject_lattice",
+    "j_action_on_subobjects",
+    "verify_closure_operator",
+    # sites
+    "Sieve",
+    "GrothendieckTopology",
+    "GrothendieckSite",
+    "FinitePresheaf",
+    "is_sheaf",
+    "sheaf_condition_failure",
+    "matching_families",
+    "amalgamations",
+    "maximal_sieve",
+    "trivial_topology",
+    "discrete_topology",
+    "omega_presheaf",
 ]

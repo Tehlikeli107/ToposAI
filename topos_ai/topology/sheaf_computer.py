@@ -45,7 +45,6 @@ class ToposSheafComputer:
         changed = True
         while changed:
             changed = False
-            new_comps = {}
             current_morphisms = list(morphisms.items())
             for name1, (src1, dst1) in current_morphisms:
                 for name2, (src2, dst2) in current_morphisms:
@@ -57,7 +56,6 @@ class ToposSheafComputer:
                             composition[(identities[dst2], dummy_name)] = dummy_name
                         composition[(name2, name1)] = dummy_name
                         changed = True
-            composition.update(new_comps)
 
         # 100% Formal Validation (O(N^3) runs in milliseconds because N is tiny!)
         return FiniteCategory(objects, morphisms, identities, composition)

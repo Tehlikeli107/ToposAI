@@ -3,15 +3,17 @@ from typing import Dict, List, Optional, Set, Tuple
 
 class FreeCategoryGenerator:
     """
-    A Zero-RAM footprint Category Theory Engine utilizing Lazy Evaluation.
+    Lazy shortest-path finder on a simple directed graph.
 
-    Instead of computing and storing every possible transitive closure (Combinatorial Explosion),
-    this engine only stores the 'Generator' morphisms (base rules).
-    When queried (e.g., 'Is there a path from A to Z?'), it constructs the categorical
-    path on-the-fly using Depth-First/Breadth-First principles while strictly adhering
-    to Exception Sieves.
+    Stores only the generator morphisms (base edges) and computes reachability
+    on demand via BFS, returning composition strings in right-to-left order
+    (e.g., ``"h o g o f"`` for a path f;g;h).
 
-    CERTIFIED: Proven in Experiment 31 to evaluate a 100,000-node graph in seconds with 0 memory loss.
+    Note: parallel edges between the same pair of objects are collapsed to one
+    representative, so this models a *simple* directed graph rather than a
+    genuine free category over a quiver (which would allow multiple generators
+    between the same objects). Exception sieves can block specific (src, dst)
+    pairs at query time.
     """
 
     def __init__(self):
@@ -27,7 +29,7 @@ class FreeCategoryGenerator:
         if src not in self.generators:
             self.generators[src] = []
 
-        # Prevent parallel edges (Multigraph avoidance) for basic free paths
+        # Keep at most one edge per (src, dst) pair; first writer wins.
         for ex_name, ex_dst in self.generators[src]:
             if ex_dst == dst:
                 return
