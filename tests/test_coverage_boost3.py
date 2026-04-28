@@ -339,6 +339,31 @@ def _valid_path_family(base):
 
 
 class TestPathFamilyTransportEquivalences:
+    @staticmethod
+    def _first_transport_equivalence_guard(pf):
+        """
+        Return which guard fails first in validate_transport_equivalences.
+        Mirrors guard order to make tests assert the exact failure point.
+        """
+        for path in pf.base.paths:
+            forward, backward = pf.transport_equivalence(path)
+            src = pf.base.source(path)
+            dst = pf.base.target(path)
+
+            if set(forward) != set(pf.fibers[src]) or set(backward) != set(pf.fibers[dst]):
+                return "domain_mismatch"
+            if set(forward.values()) != set(pf.fibers[dst]):
+                return "forward_not_surjective"
+            if set(backward.values()) != set(pf.fibers[src]):
+                return "backward_not_surjective"
+            for value in pf.fibers[src]:
+                if backward[forward[value]] != value:
+                    return "backward_after_forward_not_identity"
+            for value in pf.fibers[dst]:
+                if forward[backward[value]] != value:
+                    return "forward_after_backward_not_identity"
+        return "ok"
+
     def test_forward_not_surjective_returns_false_line178(self):
         """Line 178: forward range ≠ fibers[dst] → return False."""
         base = _two_point_groupoid()
@@ -373,53 +398,28 @@ class TestPathFamilyTransportEquivalences:
         # backward(forward(v1)) = backward(u1) = v2 ≠ v1 → False
         assert result is False
 
-    def test_forward_backward_not_identity_returns_false_line187(self):
-        """Line 187: forward(backward(u)) ≠ u → return False."""
+    def test_line187_unreachable_under_current_invariants(self):
+        """
+        Under current guard order/invariants, line 187 is unreachable.
+        If line 184 passes, forward is injective; with line 178 this makes forward bijective.
+        Then any backward satisfying line 184 must be forward inverse on dst too.
+        So a crafted non-identity on dst is caught by an earlier guard.
+        """
         base = _two_point_groupoid()
         pf = _valid_path_family(base)
         with patch.object(pf, "validate_functorial_transport", return_value=True):
-            # forward: v1→u2, v2→u1 (swap); backward: u1→v1, u2→v2 (identity-like)
-            pf.transports["p"] = {"v1":"u2","v2":"u1"}   # forward swaps
-            pf.transports["p_inv"] = {"u1":"v1","u2":"v2"}  # backward identity
-            # backward(forward(v1)) = backward(u2) = v2 ≠ v1 → line 184 triggers first
-            # Need line 184 to pass, only 187 to fail.
-            # forward(backward(u1)) = forward(v1) = u2 ≠ u1 → line 187
-            # But line 184 check: backward(forward(v1)) = v2 ≠ v1 → fires first
-            # To get to line 187: need line 184 to pass
-            # Make forward/backward pseudo-inverse on src but not tgt:
-            # forward: v1→u1, v2→u2; backward: u1→v1, u2→v1  (backward non-surjective → line 180)
-            # Try: forward bijective, backward bijective but forward(backward) fails:
-            # forward: v1→u1, v2→u2; backward: u1→v2, u2→v1
-            # backward(forward(v1)) = backward(u1) = v2 ≠ v1 → line 184 fires
-            # So to ONLY hit 187, need backward(forward(v)) = v for ALL v in fibers[src]
-            # but forward(backward(u)) ≠ u for some u in fibers[dst]
-            # This requires a non-bijective transport...
-            # The only way: fibers have different sizes (impossible in valid groupoid)
-            # OR the transport is corrupted so that:
-            # backward(forward(v1))=v1, backward(forward(v2))=v2 (line 184 passes)
-            # forward(backward(u1))=u2 ≠ u1 (line 187 fires)
-            # backward(forward(v)) = v means backward is left-inverse of forward
-            # forward(backward(u)) ≠ u means forward is NOT right-inverse of backward
-            # Example: forward: v1→u1, v2→u1; backward: u1→v1, u2→v2
-            # backward(forward(v1)) = v1 ✓, backward(forward(v2)) = v1 ≠ v2 → line 184 fires
-            # To get ONLY line 187: fibers must be same size with bijective transport
-            # but forward(backward(u)) ≠ u...
-            # Actually this requires |fibers[src]| ≠ |fibers[dst]|
-            # Let me use fibers: A={v1,v2,v3}, B={u1,u2} - different sizes
-            pf.fibers["A"] = frozenset(["v1","v2","v3"])
-            pf.fibers["B"] = frozenset(["u1","u2"])
-            # forward: v1→u1, v2→u2, v3→u1 (surjective but not injective)
-            # backward: u1→v1, u2→v2 (maps into fibers[src])
-            pf.transports["p"] = {"v1":"u1","v2":"u2","v3":"u1"}
-            pf.transports["p_inv"] = {"u1":"v1","u2":"v2"}
-            pf.transports["refl_A"] = {"v1":"v1","v2":"v2","v3":"v3"}
+            # Candidate that *tries* to break only forward(backward(.)) on dst.
+            pf.fibers["A"] = frozenset(["v1", "v2", "v3"])
+            pf.fibers["B"] = frozenset(["u1", "u2"])
+            pf.transports["p"] = {"v1": "u1", "v2": "u2", "v3": "u1"}
+            pf.transports["p_inv"] = {"u1": "v1", "u2": "v2"}
+            pf.transports["refl_A"] = {"v1": "v1", "v2": "v2", "v3": "v3"}
+
+            guard = self._first_transport_equivalence_guard(pf)
             result = pf.validate_transport_equivalences()
-        # set(forward) = {v1,v2,v3} == fibers[A] ✓ (line 176 ok)
-        # set(forward.values()) = {u1,u2} == fibers[B] ✓ (line 178 ok)
-        # set(backward.values()) = {v1,v2} ≠ {v1,v2,v3} = fibers[A] → line 180 fires!
-        # Still fires 180 before 187. Hard to avoid with different sizes.
-        # Let's accept line 187 as unreachable through normal means.
-        assert result is False  # at least one false-return triggered
+
+        assert guard == "backward_not_surjective"
+        assert result is False
 
 
 class TestFormalHomotopyEquivalence:
